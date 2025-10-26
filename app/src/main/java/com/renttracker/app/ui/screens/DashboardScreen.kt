@@ -85,7 +85,7 @@ fun DashboardScreen(
                     modifier = Modifier.weight(1f),
                     title = "Total Payments",
                     value = "$currencySymbol${decimalFormat.format(totalPayments)}",
-                    icon = Icons.Filled.AttachMoney,
+                    icon = Icons.Filled.Payments,
                     color = MaterialTheme.colorScheme.secondaryContainer
                 )
             }

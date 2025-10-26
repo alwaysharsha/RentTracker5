@@ -205,7 +205,7 @@ fun TenantDetailScreen(
                 onCountryCodeChange = { countryCode = it },
                 phoneNumber = mobile,
                 onPhoneNumberChange = {
-                    mobile = it
+                    mobile = it.filter { char -> char.isDigit() }
                     mobileError = false
                 },
                 label = "Mobile",
@@ -223,7 +223,7 @@ fun TenantDetailScreen(
                 countryCode = countryCode2,
                 onCountryCodeChange = { countryCode2 = it },
                 phoneNumber = mobile2,
-                onPhoneNumberChange = { mobile2 = it },
+                onPhoneNumberChange = { mobile2 = it.filter { char -> char.isDigit() } },
                 label = "Mobile 2"
             )
 

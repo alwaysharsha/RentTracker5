@@ -5,6 +5,43 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2024-10-26
+
+### Fixed - Final UserInput.md Issues Resolution
+
+#### Dashboard
+- **Fixed Total Payments icon** - Replaced hardcoded $ icon (Icons.Filled.AttachMoney) with generic Payments icon (Icons.Filled.Payments)
+- Icon now works properly with all currency types (USD, EUR, GBP, INR, JPY, CNY, AUD, CAD)
+- No longer shows misleading dollar symbol for non-USD currencies
+
+#### Tenant Screen
+- **Fixed phone number input validation consistency**
+- Added digit-only filter to mobile and mobile2 fields (matching Owner screen behavior)
+- Phone numbers now automatically filter out non-numeric characters during input
+- Ensures data integrity and consistency across all phone number fields
+
+#### Settings - App Lock
+- **Fully implemented biometric authentication for App Lock feature**
+- Integrated BiometricPrompt API for fingerprint/face authentication
+- App Lock toggle in Settings now functional
+- Authentication prompt shows on app launch when App Lock is enabled
+- Authentication re-triggered when app resumes from background
+- Graceful fallback if biometric hardware unavailable
+- User can cancel authentication (closes app for security)
+- Changed MainActivity parent class from ComponentActivity to FragmentActivity for BiometricPrompt support
+
+### Technical Changes
+- Updated MainActivity with biometric authentication lifecycle management
+- Added authentication state tracking (isAuthenticated flag)
+- Implemented onResume() override for background authentication
+- Added BiometricManager for hardware capability checks
+- Supports BIOMETRIC_WEAK authentication level for broader device compatibility
+
+### Testing
+- All unit tests passing successfully
+- Build successful with no warnings
+- Verified compatibility with existing codebase
+
 ## [1.0.4] - 2024-10-25
 
 ### Fixed - UserInput.md Issues Resolution
