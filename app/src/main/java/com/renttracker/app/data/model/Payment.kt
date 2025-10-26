@@ -1,0 +1,49 @@
+package com.renttracker.app.data.model
+
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
+
+@Entity(
+    tableName = "payments",
+    foreignKeys = [
+        ForeignKey(
+            entity = Tenant::class,
+            parentColumns = ["id"],
+            childColumns = ["tenantId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("tenantId")]
+)
+data class Payment(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val date: Long,
+    val amount: Double,
+    val paymentMethod: PaymentMethod,
+    val bankType: BankType? = null,
+    val transactionDetails: String? = null,
+    val paymentType: PaymentStatus,
+    val pendingAmount: Double? = null, // Amount still pending for partial payments
+    val notes: String? = null,
+    val tenantId: Long
+)
+
+enum class PaymentMethod {
+    UPI,
+    CASH,
+    BANK_TRANSFER
+}
+
+enum class BankType {
+    PERSONAL,
+    HUF,
+    OTHERS
+}
+
+enum class PaymentStatus {
+    PARTIAL,
+    FULL
+}

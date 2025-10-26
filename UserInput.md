@@ -1,0 +1,192 @@
+# Rent Tracker
+
+Rent Tracker andriod app.
+
+## Softwares
+- Gradle : C:\tools\Gradle\bin
+- Android Studio : C:\Program Files\Android\Android Studio
+
+## Features
+
+### About
+- License: MIT
+- Author: no28.iot@gmail.com
+
+### Version
+Use gitversion to generate the version and build number.
+
+Major Version: 1
+Minor Version: 0
+
+### Phase 1 
+
+#### Fields
+
+- Owner
+    - Name (Mandatory)
+    - Email (Mandatory)
+    - Phone (Validate format, Country code, Mobile number)
+        - Mobile (Mandatory)
+        - Mobile2
+    - Address
+
+- Buildings
+    - Name (Mandatory)
+    - Owner (Mandatory)
+    - Address
+    - Property Type
+        - Commercial
+        - Residential
+        - Mixed
+        - Industrial
+    - Notes
+
+- Tenant
+    - Name (Mandatory)
+    - Email
+    - Phone (Validate format, Country code, Mobile number)
+        - Mobile (Mandatory)
+        - Mobile2
+    - Family members Name (Large Text box)
+    - Checkout (Checkout box)
+    - Notes
+    - Rent Increase Date (Optional)
+    - End Date (Optional)
+    - Rent (Mandatory)
+        - In number format
+    - Security Deposit (Mandatory)
+        - In number format
+
+- Payment
+    - Date (Mandatory, Auto select current date from calendar)
+    - Amount (Mandatory)
+        - Fetch the Rent from the active lease
+    - Type of Payments
+        - UPI
+        - Cash
+        - Bank Transfer
+            - Personal
+            - HUF
+            - Others
+        - Transaction Details
+    - Payment Type
+        - Partial
+        - Full
+    - Notes
+
+- Reports
+    - Tenant Reports
+        - Active Tenant
+        - Checkout Tenant
+    - Lease Reports
+        - Active Lease
+        - Checkout Lease
+    - Payment Reports
+    - Tenant Payment Reports (including active and checkout payments)
+
+- Settings
+    - Currency selection
+    - App Lock
+    - About
+        - App Version
+        - App Build
+        - Author
+        - License
+
+#### Basic Rules
+- Mark with * are mandatory fields
+- Tenant screen should show 2 Tabs for Active and Checkout Tenants.
+    - Validate there is no active Lease for Tenant.
+- Lease screen should show 2 Tabs for Active and Checkout Leases.
+    - End date should be greater than Start date.
+    - Rent Increase Date should be greater than Start date.
+    - Rent Increase Date should be less than End date.
+    - Active Lease where the End date is Empty
+    - Checkout Lease where the End date is not Empty
+
+### Payment screen
+- List all Active Lease Tenants
+- When Selected, Show the Payment history of the Tenant in reverse chronological order.
+- Show the payment record in Red color if the payment is partial.
+- Button (+) to add new payment
+
+#### Settings Screen
+- Currency selection should be saved in preferences. 
+- Selected currency should be used throughout the app including reports.
+
+### Issues
+On Main screen show all Icons for Owner, Building, Tenant, etc as per the image.
+Show widget to show the count of active leases and total payment
+
+- Owner screen
+-- Email id should not be mandatory
+-- Phone should be validated
+-- Country code should be selected based on currency as default
+
+- Tenant screen
+-- Family members should be multi line text box
+-- Unable to edit the tenant added
+-- Add Rent increase date into the Tenant screen
+-- Add Security deposit into the Tenant screen
+-- Add checkout date
+-- Phone country code should be selected based on currency as default
+
+- Remove Lease screen and its associated functionality
+- Date fields in all screens should be editable
+- Widget should be in sync with currency selected.
+- All phone numbers should be validated to numbers only.
+
+- Payment Screen
+-- List the active Tenant name (instead of dropdown)
+-- Selected tenant name it should show the payment history based on Month-Year
+-- Add payment record should be in this page
+-- Double click on the payment should open the payment details screen
+-- Add multiple transaction entries to the payment record to make it more flexible to mark it as full payment or partial payment.
+
+- Settings
+-- App Lock is not working
+
+- Dashboard
+-- 3 Icons in a row
+
+-- With 3 icons the text is not visible, alignment needs to be adjusted.
+
+- The labels of the icons should be visible clearly.
+- The widget of Total payment should be in sync with currency selected.
+
+- Date fields should be editable.
+- Payments screen : When clicked on the Tenant name it should open the Payment record screen for that tenant and show the payment history of that tenant.
+
+- Payment record of the tenant the widget shows total payments, total amount, partial payments, total partial payments.
+
+
+
+- Partial Payments and Total Partial Payments are not showing in the widget.
+- The widget of Total payment should be in sync with currency selected.
+
+- [x] Payment record the Notes field should be multiple line text box.
+- [x] Payment record entry have a field to track pending partial payments to be paid to that the value is shown in the widget.
+
+- [x] There is no partial amount field in the payment record entry.
+- [ ] When we click on the payments screen the tenant entry will flicker to calculate the amounts.
+- [ ] In the Payment screen, along with Tenant name and phone number, show the current rent amount towards right
+
+
+## Phase 2 (Don't start the development yet, until the phase 1 is completed)
+
+### Fields
+
+- Expense Report
+- Vendors
+- Document Upload
+- GoogleDrive sync
+- Export and Import
+
+
+## Status of Phase development
+- [ ] Phase 1
+- [ ] Phase 2
+
+## Icons
+
+Use appropriate icons for each screen.
