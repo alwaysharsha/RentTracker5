@@ -5,6 +5,32 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.7] - 2024-10-26
+
+### Added - Drag-to-Reorder Payment Methods
+
+#### Payment Methods Reordering
+- **Added drag-to-reorder functionality for payment methods in Settings**
+- Long press any payment method and drag to reorder
+- Visual feedback during drag (item becomes semi-transparent)
+- Real-time reordering as you drag
+- Changes saved automatically when dialog is dismissed
+- Drag handle icon indicates draggable items
+- Instruction text: "Long press and drag to reorder"
+- Order is preserved across app sessions (stored in DataStore)
+
+### Technical Implementation
+- Added `detectDragGesturesAfterLongPress` gesture detection
+- Implemented `graphicsLayer` for visual drag feedback
+- State management for `draggedItem` and reordering logic
+- Real-time list mutation during drag operations
+- Auto-save on dialog dismiss
+- Added `DragHandle` icon to indicate draggable items
+
+### Fixed
+- **Payment screen flickering** - Already resolved using `remember` with `initial = emptyList()`
+- Confirmed all payment calculations don't cause UI flicker
+
 ## [1.0.6] - 2024-10-26
 
 ### Added - New Features from UserInput.md

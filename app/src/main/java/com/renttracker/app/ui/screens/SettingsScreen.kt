@@ -1,5 +1,6 @@
 package com.renttracker.app.ui.screens
 
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -8,10 +9,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
@@ -161,34 +165,111 @@ fun SettingsScreen(
         }
     }
     
-    // Payment Methods Management Dialog
+    // Payment Methods Management Dialog with Reordering
     if (showPaymentMethodsDialog) {
+        var reorderableList by remember(paymentMethods) { mutableStateOf(paymentMethods.toMutableList()) }
+        var draggedItem by remember { mutableStateOf<String?>(null) }
+        var draggedOverItem by remember { mutableStateOf<String?>(null) }
+        
         AlertDialog(
-            onDismissRequest = { showPaymentMethodsDialog = false },
-            title = { Text("Manage Payment Methods") },
+            onDismissRequest = { 
+                // Save reordered list
+                if (reorderableList != paymentMethods) {
+                    viewModel.setPaymentMethods(reorderableList)
+                }
+                showPaymentMethodsDialog = false 
+            },
+            title = { 
+                Column {
+                    Text("Manage Payment Methods")
+                    Text(
+                        "Long press and drag to reorder",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
             text = {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    paymentMethods.forEachIndexed { index, method ->
-                        Row(
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 400.dp)
+                ) {
+                    reorderableList.forEachIndexed { index, method ->
+                        var offsetY by remember { mutableStateOf(0f) }
+                        
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = method,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.weight(1f)
-                            )
-                            IconButton(
-                                onClick = {
-                                    val updated = paymentMethods.toMutableList()
-                                    updated.removeAt(index)
-                                    viewModel.setPaymentMethods(updated)
+                                .padding(vertical = 4.dp)
+                                .graphicsLayer {
+                                    translationY = if (method == draggedItem) offsetY else 0f
+                                    alpha = if (method == draggedItem) 0.7f else 1f
                                 }
+                                .pointerInput(method) {
+                                    detectDragGesturesAfterLongPress(
+                                        onDragStart = {
+                                            draggedItem = method
+                                        },
+                                        onDrag = { change, dragAmount ->
+                                            change.consume()
+                                            offsetY += dragAmount.y
+                                            
+                                            // Determine which item we're over
+                                            val itemHeight = 60f // approximate
+                                            val newIndex = ((index * itemHeight + offsetY) / itemHeight).toInt()
+                                                .coerceIn(0, reorderableList.size - 1)
+                                            
+                                            if (newIndex != index && newIndex in reorderableList.indices) {
+                                                val temp = reorderableList.toMutableList()
+                                                temp.removeAt(index)
+                                                temp.add(newIndex, method)
+                                                reorderableList = temp
+                                            }
+                                        },
+                                        onDragEnd = {
+                                            draggedItem = null
+                                            offsetY = 0f
+                                        },
+                                        onDragCancel = {
+                                            draggedItem = null
+                                            offsetY = 0f
+                                        }
+                                    )
+                                },
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (method == draggedOverItem) 
+                                    MaterialTheme.colorScheme.surfaceVariant 
+                                else MaterialTheme.colorScheme.surface
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(Icons.Filled.Delete, "Delete")
+                                Icon(
+                                    Icons.Filled.DragHandle,
+                                    "Drag to reorder",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = method,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
+                                )
+                                IconButton(
+                                    onClick = {
+                                        reorderableList = reorderableList.toMutableList().apply {
+                                            removeAt(index)
+                                        }
+                                        viewModel.setPaymentMethods(reorderableList)
+                                    }
+                                ) {
+                                    Icon(Icons.Filled.Delete, "Delete")
+                                }
                             }
                         }
                     }
@@ -196,6 +277,10 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = {
+                    // Save any pending reorder
+                    if (reorderableList != paymentMethods) {
+                        viewModel.setPaymentMethods(reorderableList)
+                    }
                     showPaymentMethodsDialog = false
                     showAddMethodDialog = true
                 }) {
@@ -203,7 +288,13 @@ fun SettingsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showPaymentMethodsDialog = false }) {
+                TextButton(onClick = { 
+                    // Save reordered list
+                    if (reorderableList != paymentMethods) {
+                        viewModel.setPaymentMethods(reorderableList)
+                    }
+                    showPaymentMethodsDialog = false 
+                }) {
                     Text("Done")
                 }
             }

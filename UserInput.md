@@ -171,8 +171,9 @@ Show widget to show the count of active leases and total payment
 - [ ] When we click on the payments screen the tenant entry will flicker to calculate the amounts, still exists.
 - [x] In the Payment screen, along with Tenant name and phone number, show the current rent amount towards right.
 - [x] In the dashboard screen the Total payments the default $ icon should be replaced with currency icon based on the currency selected.
-- [ ] The date field edit should pop up the calendar to select the date.
-- [ ] Change the payment method to be customized in settings, in payment record screen in a single dropdown.
+- [x] The date field edit should pop up the calendar to select the date.
+- [x] Change the payment method to be customized in settings, in payment record screen in a single dropdown.
+- [ ] In settings the payment methods order should be adjustable.
 
 
 ## Phase 2 (Don't start the development yet, until the phase 1 is completed)
