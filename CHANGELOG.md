@@ -5,6 +5,56 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2024-10-26
+
+### Added - New Features from UserInput.md
+
+#### Date Picker Calendar
+- **Added Material Design 3 DatePickerDialog to all date fields**
+- Calendar icon button now opens a visual date picker dialog
+- Users can select dates from calendar view instead of typing
+- Retains manual date entry capability for flexibility
+- Supports OK/Cancel actions with proper state management
+- Applied to all screens: TenantDetailScreen, AddPaymentScreen, PaymentEditScreen
+
+#### Customizable Payment Methods
+- **Added payment methods management in Settings**
+- Users can now customize payment methods instead of fixed enums
+- New "Payment Methods" card in Settings with "Manage" button
+- Management dialog shows all configured methods with delete option
+- Add new payment methods with custom names
+- Default methods: UPI, Cash, Bank Transfer - Personal, Bank Transfer - HUF, Bank Transfer - Others
+- Payment methods stored in DataStore preferences
+- Single dropdown selection in payment screens (simplified from previous multi-dropdown)
+- Methods sync across all payment screens (Add/Edit)
+
+### Changed - Architecture Updates
+
+#### Payment Model Refactoring
+- Changed `paymentMethod` from enum to String for flexibility
+- Removed `PaymentMethod` and `BankType` enums
+- Database version upgraded from 4 to 5
+- Removed obsolete type converters from Converters.kt
+- Updated all payment screens to use dynamic payment methods from settings
+- Updated PaymentScreen to display String payment method directly
+
+#### Settings Enhancement
+- Added `PreferencesManager.paymentMethodsFlow` for reactive method list
+- Added `SettingsViewModel.paymentMethods` StateFlow
+- Added `setPaymentMethods()` function to persist user choices
+- Payment methods default to comma-separated string in DataStore
+
+#### Navigation Updates
+- Added `settingsViewModel` parameter to AddPaymentScreen navigation
+- Added `settingsViewModel` parameter to PaymentEditScreen navigation
+- Ensures payment methods are accessible throughout payment flow
+
+### Testing
+- Updated PaymentDaoTest to use string payment methods
+- Updated PaymentViewModelTest to use string payment methods
+- All unit tests passing successfully
+- Build successful with no errors
+
 ## [1.0.5] - 2024-10-26
 
 ### Fixed - Final UserInput.md Issues Resolution

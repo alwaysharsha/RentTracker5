@@ -22,26 +22,13 @@ data class Payment(
     val id: Long = 0,
     val date: Long,
     val amount: Double,
-    val paymentMethod: PaymentMethod,
-    val bankType: BankType? = null,
+    val paymentMethod: String, // Changed from enum to String for customization
     val transactionDetails: String? = null,
     val paymentType: PaymentStatus,
     val pendingAmount: Double? = null, // Amount still pending for partial payments
     val notes: String? = null,
     val tenantId: Long
 )
-
-enum class PaymentMethod {
-    UPI,
-    CASH,
-    BANK_TRANSFER
-}
-
-enum class BankType {
-    PERSONAL,
-    HUF,
-    OTHERS
-}
 
 enum class PaymentStatus {
     PARTIAL,

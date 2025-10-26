@@ -15,26 +15,6 @@ class Converters {
     }
 
     @TypeConverter
-    fun fromPaymentMethod(value: PaymentMethod): String {
-        return value.name
-    }
-
-    @TypeConverter
-    fun toPaymentMethod(value: String): PaymentMethod {
-        return PaymentMethod.valueOf(value)
-    }
-
-    @TypeConverter
-    fun fromBankType(value: BankType?): String? {
-        return value?.name
-    }
-
-    @TypeConverter
-    fun toBankType(value: String?): BankType? {
-        return value?.let { BankType.valueOf(it) }
-    }
-
-    @TypeConverter
     fun fromPaymentStatus(value: PaymentStatus): String {
         return value.name
     }

@@ -16,6 +16,7 @@ import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.components.ValidationTextField
 import com.renttracker.app.ui.viewmodel.TenantViewModel
 import com.renttracker.app.ui.viewmodel.PaymentViewModel
+import com.renttracker.app.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -25,13 +26,17 @@ import java.util.*
 fun AddPaymentScreen(
     viewModel: PaymentViewModel,
     tenantViewModel: TenantViewModel,
+    settingsViewModel: SettingsViewModel,
     tenantId: Long,
     onNavigateBack: () -> Unit
 ) {
+    val paymentMethods by settingsViewModel.paymentMethods.collectAsState()
+    
     var date by remember { mutableStateOf(System.currentTimeMillis()) }
     var amount by remember { mutableStateOf("") }
-    var selectedPaymentMethod by remember { mutableStateOf(PaymentMethod.UPI) }
-    var selectedBankType by remember { mutableStateOf<BankType?>(null) }
+    var selectedPaymentMethod by remember(paymentMethods) { 
+        mutableStateOf(paymentMethods.firstOrNull() ?: "UPI") 
+    }
     var transactionDetails by remember { mutableStateOf("") }
     var selectedPaymentType by remember { mutableStateOf(PaymentStatus.FULL) }
     var pendingAmount by remember { mutableStateOf("") }
@@ -42,7 +47,6 @@ fun AddPaymentScreen(
     var pendingAmountError by remember { mutableStateOf(false) }
     
     var expandedPaymentMethod by remember { mutableStateOf(false) }
-    var expandedBankType by remember { mutableStateOf(false) }
     var expandedPaymentType by remember { mutableStateOf(false) }
 
     LaunchedEffect(tenantId) {
@@ -70,7 +74,6 @@ fun AddPaymentScreen(
                                 date = date,
                                 amount = amount.toDouble(),
                                 paymentMethod = selectedPaymentMethod,
-                                bankType = selectedBankType,
                                 transactionDetails = transactionDetails.ifBlank { null },
                                 paymentType = selectedPaymentType,
                                 pendingAmount = if (selectedPaymentType == PaymentStatus.PARTIAL && pendingAmount.isNotBlank()) 
@@ -121,7 +124,7 @@ fun AddPaymentScreen(
                 onExpandedChange = { expandedPaymentMethod = !expandedPaymentMethod }
             ) {
                 OutlinedTextField(
-                    value = selectedPaymentMethod.name,
+                    value = selectedPaymentMethod,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Payment Method *") },
@@ -134,47 +137,14 @@ fun AddPaymentScreen(
                     expanded = expandedPaymentMethod,
                     onDismissRequest = { expandedPaymentMethod = false }
                 ) {
-                    PaymentMethod.values().forEach { method ->
+                    paymentMethods.forEach { method ->
                         DropdownMenuItem(
-                            text = { Text(method.name) },
+                            text = { Text(method) },
                             onClick = {
                                 selectedPaymentMethod = method
                                 expandedPaymentMethod = false
                             }
                         )
-                    }
-                }
-            }
-
-            // Bank Type Dropdown (only if Bank Transfer selected)
-            if (selectedPaymentMethod == PaymentMethod.BANK_TRANSFER) {
-                ExposedDropdownMenuBox(
-                    expanded = expandedBankType,
-                    onExpandedChange = { expandedBankType = !expandedBankType }
-                ) {
-                    OutlinedTextField(
-                        value = selectedBankType?.name ?: "Select Bank Type",
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Bank Type") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedBankType) },
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = expandedBankType,
-                        onDismissRequest = { expandedBankType = false }
-                    ) {
-                        BankType.values().forEach { type ->
-                            DropdownMenuItem(
-                                text = { Text(type.name) },
-                                onClick = {
-                                    selectedBankType = type
-                                    expandedBankType = false
-                                }
-                            )
-                        }
                     }
                 }
             }

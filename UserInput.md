@@ -144,7 +144,7 @@ Show widget to show the count of active leases and total payment
 -- [x] Add multiple transaction entries to the payment record to make it more flexible to mark it as full payment or partial payment.
 
 - Settings
--- [ ] App Lock is not working
+-- [x] App Lock is not working
 
 - Dashboard
 -- [x] 3 Icons in a row
@@ -168,10 +168,11 @@ Show widget to show the count of active leases and total payment
 - [x] Payment record entry have a field to track pending partial payments to be paid to that the value is shown in the widget.
 
 - [x] There is no partial amount field in the payment record entry.
-- [ ] When we click on the payments screen the tenant entry will flicker to calculate the amounts.
+- [ ] When we click on the payments screen the tenant entry will flicker to calculate the amounts, still exists.
 - [x] In the Payment screen, along with Tenant name and phone number, show the current rent amount towards right.
-- [ ] In the dashboard screen the Total payments the default $ icon should be replaced with currency icon based on the currency selected.
-- [ ] The date field edit should pop up the calendar.
+- [x] In the dashboard screen the Total payments the default $ icon should be replaced with currency icon based on the currency selected.
+- [ ] The date field edit should pop up the calendar to select the date.
+- [ ] Change the payment method to be customized in settings, in payment record screen in a single dropdown.
 
 
 ## Phase 2 (Don't start the development yet, until the phase 1 is completed)

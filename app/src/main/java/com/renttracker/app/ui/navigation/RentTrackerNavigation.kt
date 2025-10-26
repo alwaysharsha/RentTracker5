@@ -168,6 +168,7 @@ fun RentTrackerApp(
                 AddPaymentScreen(
                     viewModel = paymentViewModel,
                     tenantViewModel = tenantViewModel,
+                    settingsViewModel = settingsViewModel,
                     tenantId = tenantId,
                     onNavigateBack = { navController.popBackStack() }
                 )
@@ -179,6 +180,7 @@ fun RentTrackerApp(
                 val paymentId = backStackEntry.arguments?.getLong("paymentId") ?: 0L
                 PaymentEditScreen(
                     viewModel = paymentViewModel,
+                    settingsViewModel = settingsViewModel,
                     paymentId = paymentId,
                     onNavigateBack = { navController.popBackStack() }
                 )

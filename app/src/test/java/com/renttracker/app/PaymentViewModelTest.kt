@@ -2,7 +2,6 @@ package com.renttracker.app
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.renttracker.app.data.model.Payment
-import com.renttracker.app.data.model.PaymentMethod
 import com.renttracker.app.data.model.PaymentStatus
 import com.renttracker.app.data.repository.RentTrackerRepository
 import com.renttracker.app.ui.viewmodel.PaymentViewModel
@@ -53,7 +52,7 @@ class PaymentViewModelTest {
             id = 0L,
             date = System.currentTimeMillis(),
             amount = 1000.0,
-            paymentMethod = PaymentMethod.UPI,
+            paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
             tenantId = 1L
         )
@@ -76,7 +75,7 @@ class PaymentViewModelTest {
             id = 1L,
             date = System.currentTimeMillis(),
             amount = 1500.0,
-            paymentMethod = PaymentMethod.CASH,
+            paymentMethod = "Cash",
             paymentType = PaymentStatus.FULL,
             tenantId = 1L
         )
@@ -97,7 +96,7 @@ class PaymentViewModelTest {
             id = 1L,
             date = System.currentTimeMillis(),
             amount = 1000.0,
-            paymentMethod = PaymentMethod.UPI,
+            paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
             tenantId = 1L
         )
@@ -118,7 +117,7 @@ class PaymentViewModelTest {
             id = 1L,
             date = System.currentTimeMillis(),
             amount = 1000.0,
-            paymentMethod = PaymentMethod.UPI,
+            paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
             tenantId = 1L
         )

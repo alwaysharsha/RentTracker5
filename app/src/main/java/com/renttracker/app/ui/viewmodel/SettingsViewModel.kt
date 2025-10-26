@@ -15,6 +15,13 @@ class SettingsViewModel(private val preferencesManager: PreferencesManager) : Vi
     val appLock: StateFlow<Boolean> = preferencesManager.appLockFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    val paymentMethods: StateFlow<List<String>> = preferencesManager.paymentMethodsFlow
+        .stateIn(
+            viewModelScope, 
+            SharingStarted.WhileSubscribed(5000), 
+            PreferencesManager.DEFAULT_PAYMENT_METHODS.split(",").map { it.trim() }
+        )
+
     fun setCurrency(currency: String) {
         viewModelScope.launch {
             preferencesManager.setCurrency(currency)
@@ -24,6 +31,12 @@ class SettingsViewModel(private val preferencesManager: PreferencesManager) : Vi
     fun setAppLock(enabled: Boolean) {
         viewModelScope.launch {
             preferencesManager.setAppLock(enabled)
+        }
+    }
+
+    fun setPaymentMethods(methods: List<String>) {
+        viewModelScope.launch {
+            preferencesManager.setPaymentMethods(methods)
         }
     }
 }

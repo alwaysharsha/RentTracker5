@@ -47,7 +47,7 @@ class PaymentDaoTest {
         val payment = Payment(
             date = System.currentTimeMillis(),
             amount = 1000.0,
-            paymentMethod = PaymentMethod.UPI,
+            paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
             tenantId = tenantId
         )
@@ -57,7 +57,7 @@ class PaymentDaoTest {
         
         assertNotNull(retrieved)
         assertEquals(1000.0, retrieved?.amount ?: 0.0, 0.01)
-        assertEquals(PaymentMethod.UPI, retrieved?.paymentMethod)
+        assertEquals("UPI", retrieved?.paymentMethod)
     }
 
     @Test
@@ -65,14 +65,14 @@ class PaymentDaoTest {
         val payment1 = Payment(
             date = System.currentTimeMillis(),
             amount = 1000.0,
-            paymentMethod = PaymentMethod.UPI,
+            paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
             tenantId = tenantId
         )
         val payment2 = Payment(
             date = System.currentTimeMillis(),
             amount = 500.0,
-            paymentMethod = PaymentMethod.CASH,
+            paymentMethod = "Cash",
             paymentType = PaymentStatus.PARTIAL,
             tenantId = tenantId
         )
@@ -90,7 +90,7 @@ class PaymentDaoTest {
         val payment = Payment(
             date = System.currentTimeMillis(),
             amount = 1000.0,
-            paymentMethod = PaymentMethod.UPI,
+            paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
             tenantId = tenantId
         )
@@ -107,7 +107,7 @@ class PaymentDaoTest {
         val payment = Payment(
             date = System.currentTimeMillis(),
             amount = 1000.0,
-            paymentMethod = PaymentMethod.UPI,
+            paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
             tenantId = tenantId
         )
@@ -125,7 +125,7 @@ class PaymentDaoTest {
         val payment = Payment(
             date = System.currentTimeMillis(),
             amount = 1000.0,
-            paymentMethod = PaymentMethod.UPI,
+            paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
             tenantId = tenantId
         )

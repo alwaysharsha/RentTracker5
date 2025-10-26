@@ -13,7 +13,7 @@ import com.renttracker.app.data.model.*
         Tenant::class,
         Payment::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

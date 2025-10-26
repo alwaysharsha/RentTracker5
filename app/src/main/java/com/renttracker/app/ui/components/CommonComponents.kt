@@ -122,6 +122,7 @@ fun formatCurrency(amount: Double, currency: String): String {
     return "$currencySymbol${decimalFormat.format(amount)}"
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditableDateField(
     value: Long?,
@@ -133,6 +134,7 @@ fun EditableDateField(
     var textValue by remember(value) { 
         mutableStateOf(if (value != null) formatSimpleDate(value) else "") 
     }
+    var showDatePicker by remember { mutableStateOf(false) }
     
     OutlinedTextField(
         value = textValue,
@@ -172,14 +174,37 @@ fun EditableDateField(
                         Icon(Icons.Filled.Clear, "Clear Date")
                     }
                 }
-                IconButton(onClick = { 
-                    val newValue = System.currentTimeMillis()
-                    onValueChange(newValue)
-                    textValue = formatSimpleDate(newValue)
-                }) {
+                IconButton(onClick = { showDatePicker = true }) {
                     Icon(Icons.Filled.CalendarToday, "Select Date")
                 }
             }
         }
     )
+    
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = value ?: System.currentTimeMillis()
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { selectedDate ->
+                        onValueChange(selectedDate)
+                        textValue = formatSimpleDate(selectedDate)
+                    }
+                    showDatePicker = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
 }
