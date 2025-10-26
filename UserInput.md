@@ -119,73 +119,83 @@ On Main screen show all Icons for Owner, Building, Tenant, etc as per the image.
 Show widget to show the count of active leases and total payment
 
 - Owner screen
--- Email id should not be mandatory
--- Phone should be validated
--- Country code should be selected based on currency as default
+-- [x] Email id should not be mandatory
+-- [x]Phone should be validated
+-- [x]Country code should be selected based on currency as default
 
 - Tenant screen
--- Family members should be multi line text box
--- Unable to edit the tenant added
--- Add Rent increase date into the Tenant screen
--- Add Security deposit into the Tenant screen
--- Add checkout date
--- Phone country code should be selected based on currency as default
+-- [x] Family members should be multi line text box
+-- [x] Unable to edit the tenant added
+-- [x] Add Rent increase date into the Tenant screen
+-- [x] Add Security deposit into the Tenant screen
+-- [x] Add checkout date
+-- [x] Phone country code should be selected based on currency as default
 
-- Remove Lease screen and its associated functionality
-- Date fields in all screens should be editable
-- Widget should be in sync with currency selected.
-- All phone numbers should be validated to numbers only.
+- [x] Remove Lease screen and its associated functionality
+- [x] Date fields in all screens should be editable
+- [x] Widget should be in sync with currency selected.
+- [x] All phone numbers should be validated to numbers only.
 
 - Payment Screen
--- List the active Tenant name (instead of dropdown)
--- Selected tenant name it should show the payment history based on Month-Year
--- Add payment record should be in this page
--- Double click on the payment should open the payment details screen
--- Add multiple transaction entries to the payment record to make it more flexible to mark it as full payment or partial payment.
+-- [x] List the active Tenant name (instead of dropdown)
+-- [x] Selected tenant name it should show the payment history based on Month-Year
+-- [x] Add payment record should be in this page
+-- [x] Double click on the payment should open the payment details screen
+-- [x] Add multiple transaction entries to the payment record to make it more flexible to mark it as full payment or partial payment.
 
 - Settings
--- App Lock is not working
+-- [ ] App Lock is not working
 
 - Dashboard
--- 3 Icons in a row
+-- [x] 3 Icons in a row
 
--- With 3 icons the text is not visible, alignment needs to be adjusted.
+-- [x] With 3 icons the text is not visible, alignment needs to be adjusted.
 
-- The labels of the icons should be visible clearly.
-- The widget of Total payment should be in sync with currency selected.
+-- [x] The labels of the icons should be visible clearly.
+-- [x] The widget of Total payment should be in sync with currency selected.
 
-- Date fields should be editable.
-- Payments screen : When clicked on the Tenant name it should open the Payment record screen for that tenant and show the payment history of that tenant.
+- [x] Date fields should be editable.
+- [x] Payments screen : When clicked on the Tenant name it should open the Payment record screen for that tenant and show the payment history of that tenant.
 
-- Payment record of the tenant the widget shows total payments, total amount, partial payments, total partial payments.
+- [x] Payment record of the tenant the widget shows total payments, total amount, partial payments, total partial payments.
 
 
 
-- Partial Payments and Total Partial Payments are not showing in the widget.
-- The widget of Total payment should be in sync with currency selected.
+- [x] Partial Payments and Total Partial Payments are not showing in the widget.
+- [x] The widget of Total payment should be in sync with currency selected.
 
 - [x] Payment record the Notes field should be multiple line text box.
 - [x] Payment record entry have a field to track pending partial payments to be paid to that the value is shown in the widget.
 
 - [x] There is no partial amount field in the payment record entry.
 - [ ] When we click on the payments screen the tenant entry will flicker to calculate the amounts.
-- [ ] In the Payment screen, along with Tenant name and phone number, show the current rent amount towards right
+- [x] In the Payment screen, along with Tenant name and phone number, show the current rent amount towards right.
+- [ ] In the dashboard screen the Total payments the default $ icon should be replaced with currency icon based on the currency selected.
+- [ ] The date field edit should pop up the calendar.
 
 
 ## Phase 2 (Don't start the development yet, until the phase 1 is completed)
 
 ### Fields
 
-- Expense Report
-- Vendors
 - Document Upload
 - GoogleDrive sync
 - Export and Import
 
 
+## Phase 3 (Don't start the development yet, until the phase 1 is completed)
+
+### Fields
+
+- Expense Report
+- Vendors
+
+
+
 ## Status of Phase development
 - [ ] Phase 1
 - [ ] Phase 2
+- [ ] Phase 3
 
 ## Icons
 
