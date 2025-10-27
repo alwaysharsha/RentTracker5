@@ -180,10 +180,11 @@ Show widget to show the count of active leases and total payment
 
 ### Fields
 
-- Document Upload
-- GoogleDrive sync
+- Document Upload to capture the rental documents
 - Export and Import
 
+### Issues
+- [ ] Update version number in app\build.gradle.kts in versionName each time you fix an issue or release.
 
 ## Phase 3 (Don't start the development yet, until the phase 1 is completed)
 
@@ -191,11 +192,12 @@ Show widget to show the count of active leases and total payment
 
 - Expense Report
 - Vendors
+- GoogleDrive integration to back up the data
 
 
 
 ## Status of Phase development
-- [ ] Phase 1
+- [x] Phase 1
 - [ ] Phase 2
 - [ ] Phase 3
 

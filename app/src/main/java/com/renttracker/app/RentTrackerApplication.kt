@@ -22,7 +22,8 @@ class RentTrackerApplication : Application() {
             ownerDao = database.ownerDao(),
             buildingDao = database.buildingDao(),
             tenantDao = database.tenantDao(),
-            paymentDao = database.paymentDao()
+            paymentDao = database.paymentDao(),
+            documentDao = database.documentDao()
         )
     }
 

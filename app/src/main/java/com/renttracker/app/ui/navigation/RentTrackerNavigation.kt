@@ -26,7 +26,9 @@ fun RentTrackerApp(
     buildingViewModel: BuildingViewModel,
     tenantViewModel: TenantViewModel,
     paymentViewModel: PaymentViewModel,
-    settingsViewModel: SettingsViewModel
+    settingsViewModel: SettingsViewModel,
+    documentViewModel: DocumentViewModel,
+    exportImportViewModel: ExportImportViewModel
 ) {
     val navController = rememberNavController()
 
@@ -197,7 +199,10 @@ fun RentTrackerApp(
 
             // Settings screen
             composable(Screen.Settings.route) {
-                SettingsScreen(viewModel = settingsViewModel)
+                SettingsScreen(
+                    viewModel = settingsViewModel,
+                    exportImportViewModel = exportImportViewModel
+                )
             }
         }
     }

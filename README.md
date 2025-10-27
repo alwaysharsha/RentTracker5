@@ -257,10 +257,22 @@ SOFTWARE.
 
 Email: no28.iot@gmail.com
 
-## Future Enhancements (Phase 2)
+## Phase 2 Features (Implemented)
+
+- **Document Upload & Management**
+  - Upload and store documents for Owners, Buildings, Tenants, and Payments
+  - Multiple file type support (PDF, images, etc.)
+  - Document metadata tracking
+  - File size management and storage statistics
+  
+- **Data Export & Import**
+  - Complete backup functionality to JSON format
+  - Restore data from backup files
+  - Share exported backup files
+  - Version-aware import/export
+
+## Future Enhancements (Phase 3)
 
 - Expense tracking
 - Vendor management
-- Document upload functionality
-- Google Drive sync
-- Data export/import functionality
+- Google Drive integration for cloud backup

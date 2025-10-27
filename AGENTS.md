@@ -16,3 +16,5 @@ Create the Test cases with each feature and validate with build and test cases e
 Don't update UserInput.md it is for reference only. Create only readme.md, changelog.md to track all feature development changes.
 
 Each feature development commit to git with meaning full commit message along with description.
+
+Update version number in app\build.gradle.kts in versionName each time you fix an issue or release.

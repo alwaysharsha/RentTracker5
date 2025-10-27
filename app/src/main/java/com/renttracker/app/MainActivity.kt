@@ -24,19 +24,23 @@ class MainActivity : FragmentActivity() {
     private lateinit var tenantViewModel: TenantViewModel
     private lateinit var paymentViewModel: PaymentViewModel
     private lateinit var settingsViewModel: SettingsViewModel
+    private lateinit var documentViewModel: DocumentViewModel
+    private lateinit var exportImportViewModel: ExportImportViewModel
     private var isAuthenticated = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         val app = application as RentTrackerApplication
-        val viewModelFactory = ViewModelFactory(app.repository, app.preferencesManager)
+        val viewModelFactory = ViewModelFactory(app.repository, app.preferencesManager, applicationContext)
 
         ownerViewModel = ViewModelProvider(this, viewModelFactory)[OwnerViewModel::class.java]
         buildingViewModel = ViewModelProvider(this, viewModelFactory)[BuildingViewModel::class.java]
         tenantViewModel = ViewModelProvider(this, viewModelFactory)[TenantViewModel::class.java]
         paymentViewModel = ViewModelProvider(this, viewModelFactory)[PaymentViewModel::class.java]
         settingsViewModel = ViewModelProvider(this, viewModelFactory)[SettingsViewModel::class.java]
+        documentViewModel = ViewModelProvider(this, viewModelFactory)[DocumentViewModel::class.java]
+        exportImportViewModel = ViewModelProvider(this, viewModelFactory)[ExportImportViewModel::class.java]
 
         // Check if app lock is enabled
         lifecycleScope.launch {
@@ -116,7 +120,9 @@ class MainActivity : FragmentActivity() {
                         buildingViewModel = buildingViewModel,
                         tenantViewModel = tenantViewModel,
                         paymentViewModel = paymentViewModel,
-                        settingsViewModel = settingsViewModel
+                        settingsViewModel = settingsViewModel,
+                        documentViewModel = documentViewModel,
+                        exportImportViewModel = exportImportViewModel
                     )
                 }
             }

@@ -8,7 +8,8 @@ class RentTrackerRepository(
     private val ownerDao: OwnerDao,
     private val buildingDao: BuildingDao,
     private val tenantDao: TenantDao,
-    private val paymentDao: PaymentDao
+    private val paymentDao: PaymentDao,
+    private val documentDao: DocumentDao
 ) {
     // Owner operations
     fun getAllOwners(): Flow<List<Owner>> = ownerDao.getAllOwners()
@@ -42,4 +43,20 @@ class RentTrackerRepository(
     suspend fun insertPayment(payment: Payment): Long = paymentDao.insertPayment(payment)
     suspend fun updatePayment(payment: Payment) = paymentDao.updatePayment(payment)
     suspend fun deletePayment(payment: Payment) = paymentDao.deletePayment(payment)
+
+    // Document operations
+    fun getAllDocuments(): Flow<List<Document>> = documentDao.getAllDocuments()
+    suspend fun getDocumentById(id: Long): Document? = documentDao.getDocumentById(id)
+    fun getDocumentByIdFlow(id: Long): Flow<Document?> = documentDao.getDocumentByIdFlow(id)
+    fun getDocumentsByEntity(entityType: EntityType, entityId: Long): Flow<List<Document>> = 
+        documentDao.getDocumentsByEntity(entityType, entityId)
+    suspend fun getDocumentsByEntitySync(entityType: EntityType, entityId: Long): List<Document> = 
+        documentDao.getDocumentsByEntitySync(entityType, entityId)
+    fun getDocumentCountByEntity(entityType: EntityType, entityId: Long): Flow<Int> = 
+        documentDao.getDocumentCountByEntity(entityType, entityId)
+    suspend fun insertDocument(document: Document): Long = documentDao.insertDocument(document)
+    suspend fun updateDocument(document: Document) = documentDao.updateDocument(document)
+    suspend fun deleteDocument(document: Document) = documentDao.deleteDocument(document)
+    suspend fun deleteDocumentsByEntity(entityType: EntityType, entityId: Long) = 
+        documentDao.deleteDocumentsByEntity(entityType, entityId)
 }

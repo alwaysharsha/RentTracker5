@@ -11,9 +11,10 @@ import com.renttracker.app.data.model.*
         Owner::class,
         Building::class,
         Tenant::class,
-        Payment::class
+        Payment::class,
+        Document::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -22,4 +23,5 @@ abstract class RentTrackerDatabase : RoomDatabase() {
     abstract fun buildingDao(): BuildingDao
     abstract fun tenantDao(): TenantDao
     abstract fun paymentDao(): PaymentDao
+    abstract fun documentDao(): DocumentDao
 }

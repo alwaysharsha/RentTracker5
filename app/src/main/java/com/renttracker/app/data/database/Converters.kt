@@ -23,4 +23,14 @@ class Converters {
     fun toPaymentStatus(value: String): PaymentStatus {
         return PaymentStatus.valueOf(value)
     }
+
+    @TypeConverter
+    fun fromEntityType(value: EntityType): String {
+        return value.name
+    }
+
+    @TypeConverter
+    fun toEntityType(value: String): EntityType {
+        return EntityType.valueOf(value)
+    }
 }

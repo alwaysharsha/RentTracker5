@@ -5,6 +5,110 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2024-10-27
+
+### Added - Phase 2 Implementation: Document Management & Data Backup
+
+#### Document Upload System
+- **Added Document entity with full database support**
+- Document model with support for multiple file types (PDF, images, etc.)
+- Entity-based document storage (Owner, Building, Tenant, Payment)
+- Document metadata tracking (name, type, size, upload date, MIME type)
+- DocumentDao with CRUD operations and entity-based queries
+- Document count tracking per entity
+
+#### File Storage Management
+- **FileStorageManager utility for local file operations**
+- Save files from URIs to app-specific storage
+- Unique filename generation to prevent conflicts
+- File deletion and existence checking
+- File size calculation and formatting
+- MIME type detection and extension handling
+- Total storage usage calculation
+- Human-readable file size formatting (B, KB, MB, GB)
+
+#### Data Export & Import
+- **Complete backup and restore functionality**
+- Export all app data to JSON format
+- Timestamped backup files with structured naming
+- Export includes: Owners, Buildings, Tenants, Payments, Documents
+- Import data from JSON backup files
+- Version-aware import/export (currently v1)
+- File picker integration for import
+- Share functionality for exported backups
+
+#### Export/Import UI
+- **Backup & Restore section in Settings screen**
+- Export button with progress indicator
+- Import button with file picker
+- Success/failure dialogs with detailed messages
+- Share exported file option
+- Loading states during export/import operations
+
+#### ViewModels
+- **DocumentViewModel** for document operations
+- Upload status tracking (Idle, Uploading, Success, Error)
+- Document CRUD operations
+- Storage usage tracking
+- **ExportImportViewModel** for backup/restore
+- Export status tracking
+- Import status tracking
+- Async operation handling
+
+#### Database Changes
+- Database version upgraded to 6
+- Added Document table with foreign key relationships
+- Type converters for EntityType enum
+- Fallback to destructive migration for database updates
+
+#### Testing
+- **Comprehensive test suite for Phase 2 features**
+- DocumentDaoTest: 10 test cases for document operations
+- FileStorageManagerTest: 10 test cases for file management
+- DataExportImportManagerTest: 9 test cases for export/import
+- All tests using Robolectric for Android context
+- Test coverage for edge cases and error scenarios
+
+### Technical Implementation
+
+#### Architecture Updates
+- Updated ViewModelFactory to accept Context parameter
+- MainActivity initialization of new ViewModels
+- Navigation integration with new ViewModels
+- Repository layer extended with document operations
+
+#### Data Models
+- Document entity with comprehensive metadata
+- EntityType enum (OWNER, BUILDING, TENANT, PAYMENT)
+- JSON serialization/deserialization for all entities
+
+#### Utilities
+- FileStorageManager: Local file operations
+- DataExportImportManager: JSON export/import with validation
+
+### Updated
+- Version number: 1.0 → 2.0
+- Build number: 1 → 2
+- Database version: 5 → 6
+- Settings screen with version 2.0 display
+
+### Dependencies
+- No new dependencies required
+- Uses existing AndroidX libraries
+- File operations use standard Android APIs
+
+### Security & Storage
+- Files stored in app-specific private storage
+- No external storage permissions required
+- Automatic cleanup on app uninstall
+- Secure file access patterns
+
+### Notes
+- Phase 2 completes as per UserInput.md requirements
+- Ready for Phase 3: Expense Reports, Vendors, Google Drive integration
+- All Phase 1 features remain functional and tested
+- Backward compatibility maintained with database migration
+
 ## [1.0.7] - 2024-10-26
 
 ### Added - Drag-to-Reorder Payment Methods
