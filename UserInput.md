@@ -183,10 +183,10 @@ Show widget to show the count of active leases and total payment
 - Export and Import
 
 ### Issues
-- [ ] Update version number in app\build.gradle.kts in versionName each time you fix an issue or release.
-- [ ] The export didn't save the file in downloads folder.
-- [ ] The share button is not working.
-- [ ] When we click on the payments screen the tenant entry will flicker to calculate the amounts, still exists.
+- [x] Update version number in app\build.gradle.kts in versionName each time you fix an issue or release.
+- [x] The export didn't save the file in downloads folder.
+- [x] The share button is not working.
+- [x] When we click on the payments screen the tenant entry will flicker to calculate the amounts, still exists.
 
 
 ## Phase 3 (Don't start the development yet, until the phase 1 is completed)

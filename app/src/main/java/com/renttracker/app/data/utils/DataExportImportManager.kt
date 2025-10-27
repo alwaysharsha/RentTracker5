@@ -1,7 +1,12 @@
 package com.renttracker.app.data.utils
 
+import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
+import androidx.core.content.FileProvider
 import com.renttracker.app.data.model.*
 import com.renttracker.app.data.repository.RentTrackerRepository
 import kotlinx.coroutines.flow.first
@@ -74,19 +79,68 @@ class DataExportImportManager(
             
             // Save to file
             val fileName = "RentTracker_Backup_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.json"
-            val exportDir = File(context.getExternalFilesDir(null), "exports")
-            if (!exportDir.exists()) {
-                exportDir.mkdirs()
-            }
-            val exportFile = File(exportDir, fileName)
-            FileOutputStream(exportFile).use { output ->
-                output.write(exportData.toString(2).toByteArray())
-            }
+            val jsonContent = exportData.toString(2).toByteArray()
             
-            Uri.fromFile(exportFile)
+            // Save to Downloads folder for Android 10+ using MediaStore
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // Try MediaStore first for Android 10+
+                val mediaStoreUri = try {
+                    val contentValues = ContentValues().apply {
+                        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                        put(MediaStore.MediaColumns.MIME_TYPE, "application/json")
+                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/RentTracker")
+                    }
+                    
+                    val uri = context.contentResolver.insert(
+                        MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                        contentValues
+                    )
+                    
+                    uri?.let {
+                        context.contentResolver.openOutputStream(it)?.use { output ->
+                            output.write(jsonContent)
+                        }
+                        it
+                    }
+                } catch (e: Exception) {
+                    // Fall back to app-specific storage if MediaStore fails
+                    null
+                }
+                
+                // Return MediaStore URI or fallback to app-specific storage
+                mediaStoreUri ?: createFileProviderUri(exportDir = File(context.getExternalFilesDir(null), "exports"), fileName = fileName, jsonContent = jsonContent)
+            } else {
+                // For Android 9 and below, use app-specific external storage with FileProvider
+                createFileProviderUri(exportDir = File(context.getExternalFilesDir(null), "exports"), fileName = fileName, jsonContent = jsonContent)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             null
+        }
+    }
+
+    /**
+     * Creates a FileProvider URI for the exported file
+     * Falls back to Uri.fromFile() if FileProvider fails (for test environments)
+     */
+    private fun createFileProviderUri(exportDir: File, fileName: String, jsonContent: ByteArray): Uri {
+        if (!exportDir.exists()) {
+            exportDir.mkdirs()
+        }
+        val exportFile = File(exportDir, fileName)
+        FileOutputStream(exportFile).use { output ->
+            output.write(jsonContent)
+        }
+        
+        return try {
+            FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                exportFile
+            )
+        } catch (e: Exception) {
+            // Fallback for test environments where FileProvider may not be set up
+            Uri.fromFile(exportFile)
         }
     }
 

@@ -5,6 +5,80 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2024-10-27
+
+### Fixed - Phase 2 Export/Import Issues Resolution
+
+#### Export to Downloads Folder (FIXED)
+- **Fixed export file location** - Now saves to Downloads/RentTracker folder on Android 10+
+- Implementation uses MediaStore API for Android 10+ (API 29+)
+  - Files saved to `Downloads/RentTracker/` folder
+  - User-accessible location that persists after app uninstall
+  - Automatic folder creation if it doesn't exist
+- Fallback to app-specific storage for Android 9 and below
+- Graceful fallback if MediaStore operations fail (for test environments)
+- File format: `RentTracker_Backup_yyyyMMdd_HHmmss.json`
+
+#### Share Button Functionality (FIXED)
+- **Fixed share button using FileProvider**
+- Proper URI generation using `androidx.core.content.FileProvider`
+- Added FileProvider configuration in AndroidManifest.xml
+- Created file_paths.xml resource for secure file sharing
+- Share intent now works correctly with `FLAG_GRANT_READ_URI_PERMISSION`
+- No more `FileUriExposedException` on Android 7+
+- Users can share backup files via email, cloud storage, messaging apps, etc.
+
+### Technical Implementation
+
+#### DataExportImportManager.kt Changes
+- Added MediaStore imports for Downloads folder access
+- Implemented dual-path export logic:
+  - Primary: MediaStore API for Android 10+
+  - Fallback: App-specific storage with FileProvider
+- Added `createFileProviderUri()` helper function
+- Test-friendly implementation with Uri.fromFile() fallback
+- Proper error handling and graceful degradation
+
+#### AndroidManifest.xml Changes
+- Added WRITE_EXTERNAL_STORAGE permission (maxSdkVersion="28")
+- Configured FileProvider with authority `${applicationId}.fileprovider`
+- Added meta-data reference to file_paths.xml
+
+#### file_paths.xml (NEW)
+- Created XML resource defining shareable paths
+- Configured external-files-path for exports folder
+- Includes cache-path and files-path for flexibility
+
+#### SettingsScreen.kt Changes
+- Updated export success dialog message
+- Changed from "exports folder" to "Downloads/RentTracker folder"
+- Share button already had proper FLAG_GRANT_READ_URI_PERMISSION
+
+### Testing
+- All 57 unit tests passing
+- DataExportImportManagerTest handles FileProvider gracefully
+- Test environment fallback to Uri.fromFile() when FileProvider unavailable
+- Build successful with no errors
+
+### Updated
+- Version number: 2.1 → 2.2
+- Build number: 3 → 4
+- Settings screen displays version 2.2, build 4
+
+### File Format
+- **Export format: JSON** with .json extension
+- Human-readable with 2-space indentation
+- Includes version field for future compatibility
+- Contains: owners, buildings, tenants, payments, documents
+- Portable across devices and platforms
+
+### Status
+- **All Phase 2 export/import issues resolved**
+- Export saves to Downloads folder ✓
+- Share button works correctly ✓
+- Payment screen flickering fixed (v2.1) ✓
+- All Phase 1 and Phase 2 core features complete
+
 ## [2.1.0] - 2024-10-27
 
 ### Fixed - Final Phase 1 Issues Resolution

@@ -246,8 +246,8 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version: 2.1")
-                    Text("Build: 3")
+                    Text("Version: 2.2")
+                    Text("Build: 4")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }
@@ -474,7 +474,7 @@ fun SettingsScreen(
                     Text("Your data has been exported successfully.")
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "The backup file is saved in the exports folder.",
+                        "The backup file is saved in Downloads/RentTracker folder.",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
