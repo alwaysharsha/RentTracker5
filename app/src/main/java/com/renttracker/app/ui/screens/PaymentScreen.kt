@@ -92,13 +92,19 @@ private fun TenantPaymentCard(
     currency: String,
     onClick: () -> Unit
 ) {
-    val payments by paymentViewModel.getPaymentsByTenant(tenant.id).collectAsState(initial = emptyList())
+    // Use remember with key to avoid recalculating on every recomposition
+    val payments by remember(tenant.id) {
+        paymentViewModel.getPaymentsByTenant(tenant.id)
+    }.collectAsState(initial = emptyList())
     
-    val paymentStats = remember(payments) {
-        PaymentStats(
-            count = payments.size,
-            total = payments.sumOf { it.amount }
-        )
+    // Use derivedStateOf to avoid unnecessary recompositions when stats don't change
+    val paymentStats by remember {
+        derivedStateOf {
+            PaymentStats(
+                count = payments.size,
+                total = payments.sumOf { it.amount }
+            )
+        }
     }
 
     Card(

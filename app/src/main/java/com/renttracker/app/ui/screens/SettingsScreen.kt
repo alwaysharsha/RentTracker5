@@ -3,6 +3,7 @@ package com.renttracker.app.ui.screens
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,7 +25,7 @@ import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.viewmodel.ExportImportViewModel
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
@@ -245,8 +246,8 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version: 2.0")
-                    Text("Build: 2")
+                    Text("Version: 2.1")
+                    Text("Build: 3")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }
@@ -257,8 +258,8 @@ fun SettingsScreen(
     // Payment Methods Management Dialog with Reordering
     if (showPaymentMethodsDialog) {
         var reorderableList by remember(paymentMethods) { mutableStateOf(paymentMethods.toMutableList()) }
-        var draggedItem by remember { mutableStateOf<String?>(null) }
-        var draggedOverItem by remember { mutableStateOf<String?>(null) }
+        var draggedItemIndex by remember { mutableStateOf<Int?>(null) }
+        var targetIndex by remember { mutableStateOf<Int?>(null) }
         
         AlertDialog(
             onDismissRequest = { 
@@ -266,7 +267,9 @@ fun SettingsScreen(
                 if (reorderableList != paymentMethods) {
                     viewModel.setPaymentMethods(reorderableList)
                 }
-                showPaymentMethodsDialog = false 
+                showPaymentMethodsDialog = false
+                draggedItemIndex = null
+                targetIndex = null
             },
             title = { 
                 Column {
@@ -279,63 +282,84 @@ fun SettingsScreen(
                 }
             },
             text = {
-                Column(
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 400.dp)
+                        .heightIn(max = 400.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    reorderableList.forEachIndexed { index, method ->
-                        var offsetY by remember { mutableStateOf(0f) }
+                    itemsIndexed(
+                        items = reorderableList,
+                        key = { _, method -> method }
+                    ) { index, method ->
+                        var totalDragOffset by remember { mutableStateOf(0f) }
                         
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 4.dp)
                                 .graphicsLayer {
-                                    translationY = if (method == draggedItem) offsetY else 0f
-                                    alpha = if (method == draggedItem) 0.7f else 1f
+                                    translationY = if (index == draggedItemIndex) totalDragOffset else 0f
+                                    alpha = if (index == draggedItemIndex) 0.7f else 1f
+                                    scaleX = if (index == draggedItemIndex) 1.05f else 1f
+                                    scaleY = if (index == draggedItemIndex) 1.05f else 1f
                                 }
-                                .pointerInput(method) {
+                                .pointerInput(reorderableList.size) {
                                     detectDragGesturesAfterLongPress(
                                         onDragStart = {
-                                            draggedItem = method
+                                            draggedItemIndex = index
+                                            totalDragOffset = 0f
                                         },
                                         onDrag = { change, dragAmount ->
                                             change.consume()
-                                            offsetY += dragAmount.y
+                                            totalDragOffset += dragAmount.y
                                             
-                                            // Determine which item we're over
-                                            val itemHeight = 60f // approximate
-                                            val newIndex = ((index * itemHeight + offsetY) / itemHeight).toInt()
+                                            // Calculate approximate item height (card + spacing)
+                                            val itemHeight = 64f
+                                            val currentDraggedIndex = draggedItemIndex ?: return@detectDragGesturesAfterLongPress
+                                            
+                                            // Calculate new target index based on drag offset
+                                            val offsetInItems = (totalDragOffset / itemHeight).toInt()
+                                            val newTargetIndex = (currentDraggedIndex + offsetInItems)
                                                 .coerceIn(0, reorderableList.size - 1)
                                             
-                                            if (newIndex != index && newIndex in reorderableList.indices) {
-                                                val temp = reorderableList.toMutableList()
-                                                temp.removeAt(index)
-                                                temp.add(newIndex, method)
-                                                reorderableList = temp
+                                            // Swap items if target changed
+                                            if (newTargetIndex != currentDraggedIndex) {
+                                                val mutableList = reorderableList.toMutableList()
+                                                val item = mutableList.removeAt(currentDraggedIndex)
+                                                mutableList.add(newTargetIndex, item)
+                                                reorderableList = mutableList
+                                                draggedItemIndex = newTargetIndex
+                                                totalDragOffset = 0f
                                             }
                                         },
                                         onDragEnd = {
-                                            draggedItem = null
-                                            offsetY = 0f
+                                            draggedItemIndex = null
+                                            totalDragOffset = 0f
+                                            targetIndex = null
+                                            // Save the reordered list
+                                            viewModel.setPaymentMethods(reorderableList)
                                         },
                                         onDragCancel = {
-                                            draggedItem = null
-                                            offsetY = 0f
+                                            draggedItemIndex = null
+                                            totalDragOffset = 0f
+                                            targetIndex = null
                                         }
                                     )
-                                },
+                                }
+                                .animateItemPlacement(),
                             colors = CardDefaults.cardColors(
-                                containerColor = if (method == draggedOverItem) 
+                                containerColor = if (index == targetIndex) 
                                     MaterialTheme.colorScheme.surfaceVariant 
                                 else MaterialTheme.colorScheme.surface
+                            ),
+                            elevation = CardDefaults.cardElevation(
+                                defaultElevation = if (index == draggedItemIndex) 8.dp else 1.dp
                             )
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    .padding(horizontal = 12.dp, vertical = 12.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -347,13 +371,15 @@ fun SettingsScreen(
                                 Text(
                                     text = method,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(horizontal = 12.dp)
                                 )
                                 IconButton(
                                     onClick = {
-                                        reorderableList = reorderableList.toMutableList().apply {
-                                            removeAt(index)
-                                        }
+                                        val mutableList = reorderableList.toMutableList()
+                                        mutableList.removeAt(index)
+                                        reorderableList = mutableList
                                         viewModel.setPaymentMethods(reorderableList)
                                     }
                                 ) {
