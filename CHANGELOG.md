@@ -5,6 +5,37 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2024-10-27
+
+### Changed - App Icon and Theme Colors
+
+#### App Icon Redesign
+- **Updated app icon with new design**
+- Blue background (#2196F3 - Material Blue)
+- White home icon as primary element
+- Green currency icon (#4CAF50) positioned at bottom right
+- Professional and modern appearance
+- Reflects app's purpose: rent tracking and property management
+
+#### Theme Color Update
+- **Changed tertiary color from Pink to Blue**
+- Replaced Pink80 (#FFEFB8C8) with Blue80 (#FF90CAF9) for dark theme
+- Replaced Pink40 (#FF7D5260) with Blue40 (#FF2196F3) for light theme
+- More professional and business-oriented color scheme
+- Better visual consistency with app icon
+
+### Technical Implementation
+- Updated `Color.kt` with new Blue color definitions
+- Updated `Theme.kt` to use Blue as tertiary color
+- Modified `ic_launcher_foreground.xml` with dual-icon design
+- Updated `ic_launcher.xml` and `ic_launcher_round.xml` to use custom background color
+- Maintains Material Design 3 guidelines
+
+### Updated
+- Version number: 2.2 → 2.3
+- Build number: 4 → 5
+- Settings screen displays version 2.3, build 5
+
 ## [2.2.0] - 2024-10-27
 
 ### Fixed - Phase 2 Export/Import Issues Resolution
