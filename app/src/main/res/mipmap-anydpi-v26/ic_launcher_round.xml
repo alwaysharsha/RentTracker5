@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- For PNG images, comment out this file or delete it -->
+    <!-- The PNG files in mipmap folders will be used instead -->
+    
+    <!-- If you want to use adaptive icons with PNG (API 26+): -->
+    <!-- <background android:drawable="@color/ic_launcher_background"/> -->
+    <!-- <foreground android:drawable="@mipmap/ic_launcher_foreground"/> -->
+    
+    <!-- For now, using color background with vector foreground -->
+    <!-- Replace with PNG when available -->
     <background android:drawable="@color/ic_launcher_background"/>
     <foreground android:drawable="@drawable/ic_launcher_foreground"/>
 </adaptive-icon>

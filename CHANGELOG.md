@@ -5,6 +5,38 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2024-10-28
+
+### Changed - Icon Format Update
+
+#### App Icon Conversion to PNG
+- **Converted app icon from vector drawable to PNG images**
+- Created PNG icon files for all density buckets:
+  - mipmap-mdpi: 48×48 px
+  - mipmap-hdpi: 72×72 px
+  - mipmap-xhdpi: 96×96 px
+  - mipmap-xxhdpi: 144×144 px
+  - mipmap-xxxhdpi: 192×192 px
+- Maintains same icon design: green circle background with white house and yellow/orange calculator
+- Better compatibility across different Android launchers
+- Improved rendering performance on older devices
+
+#### Technical Implementation
+- Added PNG icon files to all mipmap density folders (ic_launcher.png and ic_launcher_round.png)
+- Updated adaptive icon configuration files with instructions for PNG usage
+- Created ICON_REQUIREMENTS.md documentation for icon specifications
+- Created setup_png_icons.bat helper script for file structure setup
+- Vector drawable (ic_launcher_foreground.xml) retained for reference and adaptive icon support on API 26+
+
+### Documentation
+- Added ICON_REQUIREMENTS.md with comprehensive PNG size requirements
+- Documented icon generation methods (Android Asset Studio, manual creation, online converters)
+- Added setup script for placeholder file structure
+
+### Updated
+- Version number: 2.3 → 2.4
+- Build number: 5 → 6
+
 ## [2.3.0] - 2024-10-27
 
 ### Changed - App Icon and Theme Colors
