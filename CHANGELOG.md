@@ -5,6 +5,48 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.0] - 2024-10-28
+
+### Improved - Month-Year Picker UX
+
+#### Custom Month-Year Picker
+- **Replaced full calendar DatePicker with simplified month-year picker**
+- Created custom MonthYearPickerDialog component
+- Shows dropdown menus for:
+  - Month selection (January - December)
+  - Year selection (10 years back to 5 years forward)
+- Much simpler and faster user experience
+- No need to navigate through calendar dates
+
+#### Better User Experience
+- Cleaner UI focused only on month and year
+- Faster selection with dropdowns instead of calendar navigation
+- More intuitive for rent month selection
+- Consistent with "MMM yyyy" format display
+- Applies to both Add Payment and Edit Payment screens
+
+#### Chronological Ordering Verified
+- Confirmed payments display in correct chronological order
+- Sorted by: Rent Month (descending) → Payment Date (descending)
+- Works correctly in tenant payment history screen
+- Backend query already implements proper ordering
+
+### Technical Implementation
+- Created `MonthYearPicker.kt` component with ExposedDropdownMenuBox
+- Updated AddPaymentScreen to use new picker
+- Updated PaymentEditScreen to use new picker
+- Removed dependency on Material DatePicker for rent month selection
+
+### Updated
+- Version number: 2.8 → 2.9
+- Build number: 10 → 11
+
+### Benefits
+- Simplified UI reduces user confusion
+- Faster month selection process
+- Better aligned with the purpose (selecting rent month, not specific date)
+- Improved overall user experience for payment entry
+
 ## [2.8.0] - 2024-10-28
 
 ### Added - Rent Month Tracking

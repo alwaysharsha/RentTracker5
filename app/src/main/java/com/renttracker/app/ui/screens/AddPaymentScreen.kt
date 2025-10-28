@@ -243,37 +243,14 @@ fun AddPaymentScreen(
     
     // Month Picker Dialog
     if (showMonthPicker) {
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = rentMonth
-        )
-        DatePickerDialog(
-            onDismissRequest = { showMonthPicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { selectedDate ->
-                        // Set to first day of selected month
-                        val cal = Calendar.getInstance()
-                        cal.timeInMillis = selectedDate
-                        cal.set(Calendar.DAY_OF_MONTH, 1)
-                        cal.set(Calendar.HOUR_OF_DAY, 0)
-                        cal.set(Calendar.MINUTE, 0)
-                        cal.set(Calendar.SECOND, 0)
-                        cal.set(Calendar.MILLISECOND, 0)
-                        rentMonth = cal.timeInMillis
-                    }
-                    showMonthPicker = false
-                }) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showMonthPicker = false }) {
-                    Text("Cancel")
-                }
+        com.renttracker.app.ui.components.MonthYearPickerDialog(
+            currentMonth = rentMonth,
+            onDismiss = { showMonthPicker = false },
+            onConfirm = { selectedMonth ->
+                rentMonth = selectedMonth
+                showMonthPicker = false
             }
-        ) {
-            DatePicker(state = datePickerState)
-        }
+        )
     }
 }
 
