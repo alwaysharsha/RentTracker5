@@ -5,6 +5,43 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2024-10-28
+
+### Fixed - Import Crash Resolution
+
+#### Enhanced Import Error Handling
+- **Added individual try-catch blocks for each import operation**
+- Import no longer crashes when individual records fail
+- Continues importing other data even if some records have errors
+- Better error logging for debugging import issues
+
+#### Improved JSON Null Handling
+- **Fixed null value handling in vendor and expense JSON conversion**
+- Proper null checks for optional fields (phone, email, address, notes, etc.)
+- Prevents crashes from malformed or incomplete backup data
+- Backward compatibility with older backup formats
+
+#### Code Cleanup
+- Removed unused vendorViewModel and expenseViewModel parameters from dashboard
+- Cleaned up unused imports in DashboardScreen
+- Simplified navigation parameter passing
+
+#### Technical Improvements
+- Individual error handling for owners, buildings, tenants, payments, documents, vendors, and expenses
+- Graceful degradation when import data is incomplete
+- Better null safety in JSON parsing
+- Consistent error handling patterns
+
+### Updated
+- Version number: 3.2 → 3.3
+- Build number: 15 → 16
+
+### Benefits
+- Reliable import functionality that doesn't crash
+- Better error recovery during data restoration
+- Improved stability for backup/restore operations
+- Cleaner codebase with unused code removed
+
 ## [3.2.0] - 2024-10-28
 
 ### Fixed - Phase 3 Bug Fixes

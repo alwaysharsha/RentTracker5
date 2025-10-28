@@ -17,8 +17,6 @@ import androidx.compose.ui.unit.dp
 import com.renttracker.app.data.model.PaymentStatus
 import com.renttracker.app.ui.viewmodel.TenantViewModel
 import com.renttracker.app.ui.viewmodel.PaymentViewModel
-import com.renttracker.app.ui.viewmodel.VendorViewModel
-import com.renttracker.app.ui.viewmodel.ExpenseViewModel
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
 import java.text.DecimalFormat
 import java.util.Calendar
@@ -28,8 +26,6 @@ import java.util.Calendar
 fun DashboardScreen(
     tenantViewModel: TenantViewModel,
     paymentViewModel: PaymentViewModel,
-    vendorViewModel: VendorViewModel,
-    expenseViewModel: ExpenseViewModel,
     settingsViewModel: SettingsViewModel,
     onNavigateToScreen: (String) -> Unit
 ) {

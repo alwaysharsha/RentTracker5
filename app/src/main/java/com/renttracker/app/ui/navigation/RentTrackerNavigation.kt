@@ -45,8 +45,6 @@ fun RentTrackerApp(
                 DashboardScreen(
                     tenantViewModel = tenantViewModel,
                     paymentViewModel = paymentViewModel,
-                    vendorViewModel = vendorViewModel,
-                    expenseViewModel = expenseViewModel,
                     settingsViewModel = settingsViewModel,
                     onNavigateToScreen = { route ->
                         navController.navigate(route) {

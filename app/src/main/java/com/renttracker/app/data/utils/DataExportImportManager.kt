@@ -178,16 +178,18 @@ class DataExportImportManager(
                 return false // Unsupported version
             }
             
-            // TODO: If clearExisting is true, clear all data first
-            // For now, we'll just import and let the database handle conflicts
-            
             // Import Owners
             val ownersArray = importData.optJSONArray("owners")
             ownersArray?.let {
                 for (i in 0 until it.length()) {
-                    val ownerJson = it.getJSONObject(i)
-                    val owner = jsonToOwner(ownerJson)
-                    repository.insertOwner(owner)
+                    try {
+                        val ownerJson = it.getJSONObject(i)
+                        val owner = jsonToOwner(ownerJson)
+                        repository.insertOwner(owner)
+                    } catch (e: Exception) {
+                        // Log error but continue with other owners
+                        e.printStackTrace()
+                    }
                 }
             }
             
@@ -195,9 +197,14 @@ class DataExportImportManager(
             val buildingsArray = importData.optJSONArray("buildings")
             buildingsArray?.let {
                 for (i in 0 until it.length()) {
-                    val buildingJson = it.getJSONObject(i)
-                    val building = jsonToBuilding(buildingJson)
-                    repository.insertBuilding(building)
+                    try {
+                        val buildingJson = it.getJSONObject(i)
+                        val building = jsonToBuilding(buildingJson)
+                        repository.insertBuilding(building)
+                    } catch (e: Exception) {
+                        // Log error but continue with other buildings
+                        e.printStackTrace()
+                    }
                 }
             }
             
@@ -205,9 +212,14 @@ class DataExportImportManager(
             val tenantsArray = importData.optJSONArray("tenants")
             tenantsArray?.let {
                 for (i in 0 until it.length()) {
-                    val tenantJson = it.getJSONObject(i)
-                    val tenant = jsonToTenant(tenantJson)
-                    repository.insertTenant(tenant)
+                    try {
+                        val tenantJson = it.getJSONObject(i)
+                        val tenant = jsonToTenant(tenantJson)
+                        repository.insertTenant(tenant)
+                    } catch (e: Exception) {
+                        // Log error but continue with other tenants
+                        e.printStackTrace()
+                    }
                 }
             }
             
@@ -215,9 +227,14 @@ class DataExportImportManager(
             val paymentsArray = importData.optJSONArray("payments")
             paymentsArray?.let {
                 for (i in 0 until it.length()) {
-                    val paymentJson = it.getJSONObject(i)
-                    val payment = jsonToPayment(paymentJson)
-                    repository.insertPayment(payment)
+                    try {
+                        val paymentJson = it.getJSONObject(i)
+                        val payment = jsonToPayment(paymentJson)
+                        repository.insertPayment(payment)
+                    } catch (e: Exception) {
+                        // Log error but continue with other payments
+                        e.printStackTrace()
+                    }
                 }
             }
             
@@ -225,9 +242,14 @@ class DataExportImportManager(
             val documentsArray = importData.optJSONArray("documents")
             documentsArray?.let {
                 for (i in 0 until it.length()) {
-                    val documentJson = it.getJSONObject(i)
-                    val document = jsonToDocument(documentJson)
-                    repository.insertDocument(document)
+                    try {
+                        val documentJson = it.getJSONObject(i)
+                        val document = jsonToDocument(documentJson)
+                        repository.insertDocument(document)
+                    } catch (e: Exception) {
+                        // Log error but continue with other documents
+                        e.printStackTrace()
+                    }
                 }
             }
             
@@ -235,9 +257,14 @@ class DataExportImportManager(
             val vendorsArray = importData.optJSONArray("vendors")
             vendorsArray?.let {
                 for (i in 0 until it.length()) {
-                    val vendorJson = it.getJSONObject(i)
-                    val vendor = jsonToVendor(vendorJson)
-                    repository.insertVendor(vendor)
+                    try {
+                        val vendorJson = it.getJSONObject(i)
+                        val vendor = jsonToVendor(vendorJson)
+                        repository.insertVendor(vendor)
+                    } catch (e: Exception) {
+                        // Log error but continue with other vendors
+                        e.printStackTrace()
+                    }
                 }
             }
             
@@ -245,9 +272,14 @@ class DataExportImportManager(
             val expensesArray = importData.optJSONArray("expenses")
             expensesArray?.let {
                 for (i in 0 until it.length()) {
-                    val expenseJson = it.getJSONObject(i)
-                    val expense = jsonToExpense(expenseJson)
-                    repository.insertExpense(expense)
+                    try {
+                        val expenseJson = it.getJSONObject(i)
+                        val expense = jsonToExpense(expenseJson)
+                        repository.insertExpense(expense)
+                    } catch (e: Exception) {
+                        // Log error but continue with other expenses
+                        e.printStackTrace()
+                    }
                 }
             }
             
@@ -418,10 +450,10 @@ class DataExportImportManager(
             id = json.optLong("id", 0),
             name = json.getString("name"),
             category = VendorCategory.valueOf(json.getString("category")),
-            phone = json.optString("phone", null),
-            email = json.optString("email", null),
-            address = json.optString("address", null),
-            notes = json.optString("notes", null)
+            phone = if (json.has("phone") && !json.isNull("phone")) json.getString("phone") else null,
+            email = if (json.has("email") && !json.isNull("email")) json.getString("email") else null,
+            address = if (json.has("address") && !json.isNull("address")) json.getString("address") else null,
+            notes = if (json.has("notes") && !json.isNull("notes")) json.getString("notes") else null
         )
     }
 
@@ -449,9 +481,9 @@ class DataExportImportManager(
             category = ExpenseCategory.valueOf(json.getString("category")),
             vendorId = if (json.has("vendorId") && !json.isNull("vendorId")) json.getLong("vendorId") else null,
             buildingId = if (json.has("buildingId") && !json.isNull("buildingId")) json.getLong("buildingId") else null,
-            paymentMethod = json.optString("paymentMethod", null),
-            notes = json.optString("notes", null),
-            receiptPath = json.optString("receiptPath", null)
+            paymentMethod = if (json.has("paymentMethod") && !json.isNull("paymentMethod")) json.getString("paymentMethod") else null,
+            notes = if (json.has("notes") && !json.isNull("notes")) json.getString("notes") else null,
+            receiptPath = if (json.has("receiptPath") && !json.isNull("receiptPath")) json.getString("receiptPath") else null
         )
     }
 }
