@@ -187,6 +187,7 @@ Show widget to show the count of active leases and total payment
 - [x] The export didn't save the file in downloads folder.
 - [x] The share button is not working.
 - [x] When we click on the payments screen the tenant entry will flicker to calculate the amounts, still exists.
+- [ ] Documents icon is not visible in dashboard, also verify that is working as expected.
 
 
 ## Phase 3 (Don't start the development yet, until the phase 1 is completed)
