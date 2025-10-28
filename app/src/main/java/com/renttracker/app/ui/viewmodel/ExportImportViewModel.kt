@@ -46,7 +46,9 @@ class ExportImportViewModel(
         viewModelScope.launch {
             try {
                 _importStatus.value = ImportStatus.Importing
-                val success = dataManager.importData(uri, clearExisting)
+                val success = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    dataManager.importData(uri, clearExisting)
+                }
                 if (success) {
                     _importStatus.value = ImportStatus.Success
                     onComplete(true)
@@ -55,6 +57,7 @@ class ExportImportViewModel(
                     onComplete(false)
                 }
             } catch (e: Exception) {
+                e.printStackTrace() // Add logging
                 _importStatus.value = ImportStatus.Error(e.message ?: "Unknown error")
                 onComplete(false)
             }

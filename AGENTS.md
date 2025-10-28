@@ -14,7 +14,8 @@ Create Test cases for all the features
 Create the Test cases with each feature and validate with build and test cases each time you compile.
 
 Don't update UserInput.md it is for reference only. Create only readme.md, changelog.md to track all feature development changes.
+Don't create new .md files in random, put details in changelog.md.
 
 Each feature development commit to git with meaning full commit message along with description.
 
-Update version number in app\build.gradle.kts in versionName each time you fix an issue or release.
+Update version and Build in app\src\main\java\com\renttracker\app\ui\screens\SettingsScreen.kt in Version and Build each time you fix an issue or release.

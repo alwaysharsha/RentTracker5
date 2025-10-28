@@ -5,6 +5,83 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0] - 2024-10-28
+
+### Fixed - Import Button Click Crash
+
+#### Thread Safety Enhancement
+- **Fixed crash when clicking Import button**
+- Added proper IO dispatcher for import operations
+- Prevents main thread blocking during database operations
+- Enhanced error logging for better debugging
+
+#### Coroutine Context Management
+- **Wrapped import operation in Dispatchers.IO context**
+- Ensures all database operations run on background thread
+- Prevents ANR (Application Not Responding) errors
+- Proper exception handling and propagation
+
+#### Technical Improvements
+- Import button now safely handles file selection
+- Database operations properly dispatched to IO thread
+- Better error handling in import flow
+- Stack trace logging for debugging crashes
+
+### Updated
+- Version number: 3.4 → 3.5
+- Build number: 17 → 18
+
+### Benefits
+- ✅ Import button works without crashing
+- ✅ No more main thread blocking
+- ✅ Better user experience during import
+- ✅ Proper error messages displayed
+- ✅ Enhanced debugging capability
+
+## [3.4.0] - 2024-10-28
+
+### Fixed - Import Crash with ID Conflicts
+
+#### Enhanced Import System with ID Remapping
+- **Fixed import crash caused by primary key conflicts**
+- Implemented automatic ID remapping during import
+- Resets all entity IDs to 0 for auto-generation by Room
+- Maintains foreign key relationships through ID mapping tables
+- Prevents database constraint violations
+
+#### Clear Existing Data Feature
+- **Implemented clearExisting parameter functionality**
+- Properly clears all existing data before import when requested
+- Deletes data in correct order to respect foreign key constraints
+- Graceful error handling during data clearing
+
+#### ID Mapping for Relationships
+- Owner ID mapping for buildings
+- Building ID mapping for tenants and expenses
+- Tenant ID mapping for payments
+- Vendor ID mapping for expenses
+- Document entity ID mapping based on entity type
+- Preserves all relationships during import
+
+#### Technical Improvements
+- Individual ID maps for each entity type
+- Proper null handling for optional foreign keys (buildingId, vendorId)
+- Enhanced error recovery during import process
+- Better foreign key constraint handling
+- Prevents duplicate key errors
+
+### Updated
+- Version number: 3.3 → 3.4
+- Build number: 16 → 17
+
+### Benefits
+- ✅ Import works reliably without crashes
+- ✅ No more primary key conflict errors
+- ✅ All relationships maintained correctly
+- ✅ Can import multiple times without issues
+- ✅ ClearExisting parameter now functional
+- ✅ Better data integrity during import/restore
+
 ## [3.3.0] - 2024-10-28
 
 ### Fixed - Import Crash Resolution

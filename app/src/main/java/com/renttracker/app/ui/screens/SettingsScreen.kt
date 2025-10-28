@@ -52,7 +52,7 @@ fun SettingsScreen(
     
     // File picker for import
     val importLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let {
             exportImportViewModel.importData(it) { success ->
@@ -216,7 +216,13 @@ fun SettingsScreen(
                         }
                         
                         OutlinedButton(
-                            onClick = { importLauncher.launch("application/json") },
+                            onClick = { 
+                                try {
+                                    importLauncher.launch(arrayOf("application/json", "*/*"))
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            },
                             modifier = Modifier.weight(1f),
                             enabled = importStatus !is ExportImportViewModel.ImportStatus.Importing
                         ) {
@@ -246,8 +252,8 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version: 2.3")
-                    Text("Build: 5")
+                    Text("Version: 3.7")
+                    Text("Build: 20")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }

@@ -183,7 +183,6 @@ Show widget to show the count of active leases and total payment
 - Export and Import
 
 ### Issues
-- [x] Update version number in app\build.gradle.kts in versionName each time you fix an issue or release.
 - [x] The export didn't save the file in downloads folder.
 - [x] The share button is not working.
 - [x] When we click on the payments screen the tenant entry will flicker to calculate the amounts, still exists.
@@ -209,8 +208,9 @@ Show widget to show the count of active leases and total payment
 ### Issues
 - [x] Show the Vendor and expenses on the dashboard screen
 - [x] Vendor phone number should be validated to numbers only similar to other phone numbers.
-- [x] Import is crashing the app.
+- [x] Import is crashing the app again.
 - [x] Remove Vendors and Total expenses widgets from the dashboard.
+- [x] Crash happens when I click on Import link/button
 
 ## Phase 4 (Don't start the development yet, until the phase 1 is completed)
 

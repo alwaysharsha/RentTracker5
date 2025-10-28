@@ -178,14 +178,42 @@ class DataExportImportManager(
                 return false // Unsupported version
             }
             
+            // Clear existing data if requested
+            if (clearExisting) {
+                try {
+                    // Delete all data in reverse order to respect foreign key constraints
+                    repository.getAllPayments().first().forEach { repository.deletePayment(it) }
+                    repository.getAllDocuments().first().forEach { repository.deleteDocument(it) }
+                    repository.getAllExpenses().first().forEach { repository.deleteExpense(it) }
+                    repository.getActiveTenants().first().forEach { repository.deleteTenant(it) }
+                    repository.getCheckedOutTenants().first().forEach { repository.deleteTenant(it) }
+                    repository.getAllBuildings().first().forEach { repository.deleteBuilding(it) }
+                    repository.getAllVendors().first().forEach { repository.deleteVendor(it) }
+                    repository.getAllOwners().first().forEach { repository.deleteOwner(it) }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    // Continue with import even if clear fails
+                }
+            }
+            
+            // Map old IDs to new IDs for maintaining relationships
+            val ownerIdMap = mutableMapOf<Long, Long>()
+            val buildingIdMap = mutableMapOf<Long, Long>()
+            val tenantIdMap = mutableMapOf<Long, Long>()
+            val vendorIdMap = mutableMapOf<Long, Long>()
+            
             // Import Owners
             val ownersArray = importData.optJSONArray("owners")
             ownersArray?.let {
                 for (i in 0 until it.length()) {
                     try {
                         val ownerJson = it.getJSONObject(i)
-                        val owner = jsonToOwner(ownerJson)
-                        repository.insertOwner(owner)
+                        val oldId = ownerJson.optLong("id", 0)
+                        val owner = jsonToOwner(ownerJson).copy(id = 0) // Reset ID for auto-generation
+                        val newId = repository.insertOwner(owner)
+                        if (oldId > 0) {
+                            ownerIdMap[oldId] = newId
+                        }
                     } catch (e: Exception) {
                         // Log error but continue with other owners
                         e.printStackTrace()
@@ -199,8 +227,16 @@ class DataExportImportManager(
                 for (i in 0 until it.length()) {
                     try {
                         val buildingJson = it.getJSONObject(i)
-                        val building = jsonToBuilding(buildingJson)
-                        repository.insertBuilding(building)
+                        val oldId = buildingJson.optLong("id", 0)
+                        val oldOwnerId = buildingJson.getLong("ownerId")
+                        val building = jsonToBuilding(buildingJson).copy(
+                            id = 0, // Reset ID for auto-generation
+                            ownerId = ownerIdMap[oldOwnerId] ?: oldOwnerId // Map to new owner ID
+                        )
+                        val newId = repository.insertBuilding(building)
+                        if (oldId > 0) {
+                            buildingIdMap[oldId] = newId
+                        }
                     } catch (e: Exception) {
                         // Log error but continue with other buildings
                         e.printStackTrace()
@@ -214,8 +250,16 @@ class DataExportImportManager(
                 for (i in 0 until it.length()) {
                     try {
                         val tenantJson = it.getJSONObject(i)
-                        val tenant = jsonToTenant(tenantJson)
-                        repository.insertTenant(tenant)
+                        val oldId = tenantJson.optLong("id", 0)
+                        val oldBuildingId = if (tenantJson.isNull("buildingId")) null else tenantJson.optLong("buildingId")
+                        val tenant = jsonToTenant(tenantJson).copy(
+                            id = 0, // Reset ID for auto-generation
+                            buildingId = oldBuildingId?.let { buildingIdMap[it] ?: it } // Map to new building ID
+                        )
+                        val newId = repository.insertTenant(tenant)
+                        if (oldId > 0) {
+                            tenantIdMap[oldId] = newId
+                        }
                     } catch (e: Exception) {
                         // Log error but continue with other tenants
                         e.printStackTrace()
@@ -229,7 +273,11 @@ class DataExportImportManager(
                 for (i in 0 until it.length()) {
                     try {
                         val paymentJson = it.getJSONObject(i)
-                        val payment = jsonToPayment(paymentJson)
+                        val oldTenantId = paymentJson.getLong("tenantId")
+                        val payment = jsonToPayment(paymentJson).copy(
+                            id = 0, // Reset ID for auto-generation
+                            tenantId = tenantIdMap[oldTenantId] ?: oldTenantId // Map to new tenant ID
+                        )
                         repository.insertPayment(payment)
                     } catch (e: Exception) {
                         // Log error but continue with other payments
@@ -244,7 +292,21 @@ class DataExportImportManager(
                 for (i in 0 until it.length()) {
                     try {
                         val documentJson = it.getJSONObject(i)
-                        val document = jsonToDocument(documentJson)
+                        val entityType = EntityType.valueOf(documentJson.getString("entityType"))
+                        val oldEntityId = documentJson.getLong("entityId")
+                        
+                        // Map entity ID based on entity type
+                        val newEntityId = when (entityType) {
+                            EntityType.OWNER -> ownerIdMap[oldEntityId] ?: oldEntityId
+                            EntityType.BUILDING -> buildingIdMap[oldEntityId] ?: oldEntityId
+                            EntityType.TENANT -> tenantIdMap[oldEntityId] ?: oldEntityId
+                            EntityType.PAYMENT -> oldEntityId // Payments are inserted without ID mapping
+                        }
+                        
+                        val document = jsonToDocument(documentJson).copy(
+                            id = 0, // Reset ID for auto-generation
+                            entityId = newEntityId
+                        )
                         repository.insertDocument(document)
                     } catch (e: Exception) {
                         // Log error but continue with other documents
@@ -259,8 +321,12 @@ class DataExportImportManager(
                 for (i in 0 until it.length()) {
                     try {
                         val vendorJson = it.getJSONObject(i)
-                        val vendor = jsonToVendor(vendorJson)
-                        repository.insertVendor(vendor)
+                        val oldId = vendorJson.optLong("id", 0)
+                        val vendor = jsonToVendor(vendorJson).copy(id = 0) // Reset ID for auto-generation
+                        val newId = repository.insertVendor(vendor)
+                        if (oldId > 0) {
+                            vendorIdMap[oldId] = newId
+                        }
                     } catch (e: Exception) {
                         // Log error but continue with other vendors
                         e.printStackTrace()
@@ -274,7 +340,16 @@ class DataExportImportManager(
                 for (i in 0 until it.length()) {
                     try {
                         val expenseJson = it.getJSONObject(i)
-                        val expense = jsonToExpense(expenseJson)
+                        val oldVendorId = if (expenseJson.has("vendorId") && !expenseJson.isNull("vendorId")) 
+                            expenseJson.getLong("vendorId") else null
+                        val oldBuildingId = if (expenseJson.has("buildingId") && !expenseJson.isNull("buildingId")) 
+                            expenseJson.getLong("buildingId") else null
+                        
+                        val expense = jsonToExpense(expenseJson).copy(
+                            id = 0, // Reset ID for auto-generation
+                            vendorId = oldVendorId?.let { vendorIdMap[it] ?: it },
+                            buildingId = oldBuildingId?.let { buildingIdMap[it] ?: it }
+                        )
                         repository.insertExpense(expense)
                     } catch (e: Exception) {
                         // Log error but continue with other expenses
