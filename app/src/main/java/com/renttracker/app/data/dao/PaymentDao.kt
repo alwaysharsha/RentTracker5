@@ -6,13 +6,13 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PaymentDao {
-    @Query("SELECT * FROM payments WHERE tenantId = :tenantId ORDER BY date DESC")
+    @Query("SELECT * FROM payments WHERE tenantId = :tenantId ORDER BY rentMonth DESC, date DESC")
     fun getPaymentsByTenant(tenantId: Long): Flow<List<Payment>>
 
     @Query("SELECT * FROM payments WHERE id = :id")
     suspend fun getPaymentById(id: Long): Payment?
 
-    @Query("SELECT * FROM payments ORDER BY date DESC")
+    @Query("SELECT * FROM payments ORDER BY rentMonth DESC, date DESC")
     fun getAllPayments(): Flow<List<Payment>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

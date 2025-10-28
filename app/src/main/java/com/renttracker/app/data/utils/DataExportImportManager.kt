@@ -316,6 +316,7 @@ class DataExportImportManager(
             put("paymentType", payment.paymentType.name)
             put("pendingAmount", payment.pendingAmount)
             put("notes", payment.notes)
+            put("rentMonth", payment.rentMonth)
         }
     }
 
@@ -329,7 +330,8 @@ class DataExportImportManager(
             transactionDetails = json.optString("transactionDetails", null),
             paymentType = PaymentStatus.valueOf(json.getString("paymentType")),
             pendingAmount = if (json.isNull("pendingAmount")) null else json.optDouble("pendingAmount"),
-            notes = json.optString("notes", null)
+            notes = json.optString("notes", null),
+            rentMonth = json.optLong("rentMonth", System.currentTimeMillis())
         )
     }
 

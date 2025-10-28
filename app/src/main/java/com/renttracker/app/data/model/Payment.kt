@@ -27,7 +27,8 @@ data class Payment(
     val paymentType: PaymentStatus,
     val pendingAmount: Double? = null, // Amount still pending for partial payments
     val notes: String? = null,
-    val tenantId: Long
+    val tenantId: Long,
+    val rentMonth: Long // Rent month timestamp (MMM yyyy format - stored as first day of month)
 )
 
 enum class PaymentStatus {

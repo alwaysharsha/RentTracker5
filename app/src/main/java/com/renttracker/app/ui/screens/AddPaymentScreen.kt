@@ -32,6 +32,16 @@ fun AddPaymentScreen(
 ) {
     val paymentMethods by settingsViewModel.paymentMethods.collectAsState()
     
+    // Initialize rent month to current month (first day of month)
+    val calendar = Calendar.getInstance()
+    calendar.set(Calendar.DAY_OF_MONTH, 1)
+    calendar.set(Calendar.HOUR_OF_DAY, 0)
+    calendar.set(Calendar.MINUTE, 0)
+    calendar.set(Calendar.SECOND, 0)
+    calendar.set(Calendar.MILLISECOND, 0)
+    
+    var rentMonth by remember { mutableStateOf(calendar.timeInMillis) }
+    var showMonthPicker by remember { mutableStateOf(false) }
     var date by remember { mutableStateOf(System.currentTimeMillis()) }
     var amount by remember { mutableStateOf("") }
     var selectedPaymentMethod by remember(paymentMethods) { 
@@ -45,6 +55,7 @@ fun AddPaymentScreen(
     
     var amountError by remember { mutableStateOf(false) }
     var pendingAmountError by remember { mutableStateOf(false) }
+    var rentMonthError by remember { mutableStateOf(false) }
     
     var expandedPaymentMethod by remember { mutableStateOf(false) }
     var expandedPaymentType by remember { mutableStateOf(false) }
@@ -68,6 +79,7 @@ fun AddPaymentScreen(
                         amountError = amount.isBlank() || amount.toDoubleOrNull() == null
                         pendingAmountError = selectedPaymentType == PaymentStatus.PARTIAL && 
                             pendingAmount.isNotBlank() && pendingAmount.toDoubleOrNull() == null
+                        rentMonthError = false // rentMonth always has value
 
                         if (!amountError && !pendingAmountError) {
                             val payment = Payment(
@@ -79,7 +91,8 @@ fun AddPaymentScreen(
                                 pendingAmount = if (selectedPaymentType == PaymentStatus.PARTIAL && pendingAmount.isNotBlank()) 
                                     pendingAmount.toDoubleOrNull() else null,
                                 notes = notes.ifBlank { null },
-                                tenantId = tenantId
+                                tenantId = tenantId,
+                                rentMonth = rentMonth
                             )
                             viewModel.insertPayment(payment) { onNavigateBack() }
                         }
@@ -98,6 +111,21 @@ fun AddPaymentScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Rent Month field (at top as mandatory)
+            OutlinedTextField(
+                value = SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(Date(rentMonth)),
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Rent Month *") },
+                trailingIcon = {
+                    IconButton(onClick = { showMonthPicker = true }) {
+                        Icon(Icons.Filled.CalendarToday, "Select Month")
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                isError = rentMonthError
+            )
+            
             // Date field
             EditableDateField(
                 value = date,
@@ -210,6 +238,41 @@ fun AddPaymentScreen(
                 singleLine = false,
                 maxLines = 5
             )
+        }
+    }
+    
+    // Month Picker Dialog
+    if (showMonthPicker) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = rentMonth
+        )
+        DatePickerDialog(
+            onDismissRequest = { showMonthPicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { selectedDate ->
+                        // Set to first day of selected month
+                        val cal = Calendar.getInstance()
+                        cal.timeInMillis = selectedDate
+                        cal.set(Calendar.DAY_OF_MONTH, 1)
+                        cal.set(Calendar.HOUR_OF_DAY, 0)
+                        cal.set(Calendar.MINUTE, 0)
+                        cal.set(Calendar.SECOND, 0)
+                        cal.set(Calendar.MILLISECOND, 0)
+                        rentMonth = cal.timeInMillis
+                    }
+                    showMonthPicker = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showMonthPicker = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 }

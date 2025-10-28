@@ -195,6 +195,8 @@ Show widget to show the count of active leases and total payment
 - [x] Report - Add payment pending report.
 - [x] Dashboard widget - total payments change for the current month payments.
 - [x] Dashboard widget - Show total pending payments.
+- [x] In the Payment record add a Rent Month mandatory field at top of the screen with Month and year (MMM yyyy) format and select the current month as default.
+- [x] In payment screen chronological order of payments based on this Rent Month field.
 
 ## Phase 3 (Don't start the development yet, until the phase 1 is completed)
 

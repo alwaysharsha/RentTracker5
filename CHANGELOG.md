@@ -5,6 +5,47 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2024-10-28
+
+### Added - Rent Month Tracking
+
+#### Payment Rent Month Field
+- **Added mandatory Rent Month field to payment records**
+- Displays at the top of Add/Edit Payment screens
+- Format: MMM yyyy (e.g., "Oct 2024")
+- Defaults to current month when adding new payments
+- Month picker dialog for easy selection
+
+#### Chronological Payment Ordering
+- **Updated payment lists to order by rent month chronologically**
+- Primary sort: Rent month (descending)
+- Secondary sort: Payment date (descending)
+- Applies to:
+  - Tenant payment history
+  - All payments view
+  - Payment reports
+
+#### Database Updates
+- Added `rentMonth` field to Payment entity (stored as Long timestamp)
+- Database version incremented: 6 → 7
+- Export/Import includes rent month data
+
+### Technical Implementation
+- Updated PaymentDao queries with `ORDER BY rentMonth DESC, date DESC`
+- Enhanced AddPaymentScreen with rent month picker and validation
+- Enhanced PaymentEditScreen with rent month display and editing
+- Updated DataExportImportManager to include rentMonth in JSON
+
+### Updated
+- Version number: 2.7 → 2.8
+- Build number: 9 → 10
+
+### Benefits
+- Better tracking of which month each payment is for
+- Clearer payment history organization
+- Improved financial reporting by rent period
+- Handles cases where payment date differs from rent month
+
 ## [2.7.0] - 2024-10-28
 
 ### Fixed - Phase 2 Critical Issues

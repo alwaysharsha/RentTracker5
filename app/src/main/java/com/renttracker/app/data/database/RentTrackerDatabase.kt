@@ -14,7 +14,7 @@ import com.renttracker.app.data.model.*
         Payment::class,
         Document::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

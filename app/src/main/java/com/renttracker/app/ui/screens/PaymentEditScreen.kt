@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
@@ -17,6 +18,8 @@ import com.renttracker.app.ui.components.ValidationTextField
 import com.renttracker.app.ui.viewmodel.PaymentViewModel
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,6 +32,8 @@ fun PaymentEditScreen(
     val paymentMethods by settingsViewModel.paymentMethods.collectAsState()
     
     var payment by remember { mutableStateOf<Payment?>(null) }
+    var rentMonth by remember { mutableStateOf<Long?>(null) }
+    var showMonthPicker by remember { mutableStateOf(false) }
     var date by remember { mutableStateOf<Long?>(null) }
     var amount by remember { mutableStateOf("") }
     var selectedPaymentMethod by remember { mutableStateOf("") }
@@ -40,6 +45,7 @@ fun PaymentEditScreen(
     
     var amountError by remember { mutableStateOf(false) }
     var pendingAmountError by remember { mutableStateOf(false) }
+    var rentMonthError by remember { mutableStateOf(false) }
     
     var expandedPaymentMethod by remember { mutableStateOf(false) }
     var expandedPaymentType by remember { mutableStateOf(false) }
@@ -49,6 +55,7 @@ fun PaymentEditScreen(
         val loadedPayment = viewModel.getPaymentById(paymentId)
         loadedPayment?.let {
             payment = it
+            rentMonth = it.rentMonth
             date = it.date
             amount = it.amount.toString()
             selectedPaymentMethod = it.paymentMethod
@@ -73,7 +80,9 @@ fun PaymentEditScreen(
                         pendingAmountError = selectedPaymentType == PaymentStatus.PARTIAL && 
                             pendingAmount.isNotBlank() && pendingAmount.toDoubleOrNull() == null
 
-                        if (!amountError && !pendingAmountError && payment != null && date != null) {
+                        rentMonthError = rentMonth == null
+                        
+                        if (!amountError && !pendingAmountError && !rentMonthError && payment != null && date != null) {
                             val updatedPayment = payment!!.copy(
                                 date = date!!,
                                 amount = amount.toDouble(),
@@ -82,7 +91,8 @@ fun PaymentEditScreen(
                                 paymentType = selectedPaymentType,
                                 pendingAmount = if (selectedPaymentType == PaymentStatus.PARTIAL && pendingAmount.isNotBlank()) 
                                     pendingAmount.toDoubleOrNull() else null,
-                                notes = notes.ifBlank { null }
+                                notes = notes.ifBlank { null },
+                                rentMonth = rentMonth!!
                             )
                             viewModel.updatePayment(updatedPayment) { onNavigateBack() }
                         }
@@ -111,6 +121,24 @@ fun PaymentEditScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Rent Month field (at top as mandatory)
+                rentMonth?.let { month ->
+                    OutlinedTextField(
+                        value = SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(Date(month)),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Rent Month *") },
+                        trailingIcon = {
+                            IconButton(onClick = { showMonthPicker = true }) {
+                                Icon(Icons.Filled.CalendarToday, "Select Month")
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        isError = rentMonthError,
+                        supportingText = if (rentMonthError) { { Text("Rent Month is required") } } else null
+                    )
+                }
+                
                 // Date field
                 EditableDateField(
                     value = date,
@@ -244,6 +272,42 @@ fun PaymentEditScreen(
                     }
                 }
             )
+        }
+        
+        // Month Picker Dialog
+        if (showMonthPicker && rentMonth != null) {
+            val datePickerState = rememberDatePickerState(
+                initialSelectedDateMillis = rentMonth
+            )
+            DatePickerDialog(
+                onDismissRequest = { showMonthPicker = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        datePickerState.selectedDateMillis?.let { selectedDate ->
+                            // Set to first day of selected month
+                            val cal = Calendar.getInstance()
+                            cal.timeInMillis = selectedDate
+                            cal.set(Calendar.DAY_OF_MONTH, 1)
+                            cal.set(Calendar.HOUR_OF_DAY, 0)
+                            cal.set(Calendar.MINUTE, 0)
+                            cal.set(Calendar.SECOND, 0)
+                            cal.set(Calendar.MILLISECOND, 0)
+                            rentMonth = cal.timeInMillis
+                            rentMonthError = false
+                        }
+                        showMonthPicker = false
+                    }) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showMonthPicker = false }) {
+                        Text("Cancel")
+                    }
+                }
+            ) {
+                DatePicker(state = datePickerState)
+            }
         }
     }
 }
