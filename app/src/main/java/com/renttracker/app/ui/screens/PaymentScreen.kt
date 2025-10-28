@@ -183,12 +183,21 @@ internal fun PaymentCard(
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
             ) {
-                Text(
-                    text = formatDate(payment.date),
-                    style = MaterialTheme.typography.titleMedium
-                )
+                Column {
+                    Text(
+                        text = "Rent: ${SimpleDateFormat("MMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(payment.rentMonth))}",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "Paid: ${formatDate(payment.date)}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 Text(
                     text = formatCurrency(payment.amount, currency),
                     style = MaterialTheme.typography.titleLarge,

@@ -5,6 +5,44 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.10.0] - 2024-10-28
+
+### Fixed - Payment Chronological Ordering by Rent Month
+
+#### Tenant Payment History Screen
+- **Fixed payment grouping to use rent month instead of payment date**
+- Payments now properly grouped and sorted by the month they're for, not when paid
+- Group headers show rent month (e.g., "Oct 2024")
+- Critical fix for proper financial tracking
+
+#### Payment Card Display Enhancement
+- **Updated PaymentCard to clearly show both rent month and payment date**
+- Primary display: "Rent: Oct 2024" (in primary color)
+- Secondary display: "Paid: 28 Oct 2024" (smaller, lighter text)
+- Makes it crystal clear which month each payment is for
+- Helps distinguish between rent month and payment date
+
+#### User Experience Improvements
+- Payments organized by which month they're for (rent month)
+- Easy to see all payments for a specific rent period
+- Clear visual distinction between rent month and payment date
+- Chronological ordering now accurately reflects rent periods
+
+### Technical Implementation
+- Changed `TenantPaymentHistoryScreen` grouping from `payment.date` to `payment.rentMonth`
+- Updated `PaymentCard` to display both rent month and payment date
+- Backend query ordering (rentMonth DESC, date DESC) now fully utilized
+
+### Updated
+- Version number: 2.9 → 2.10
+- Build number: 11 → 12
+
+### Impact
+- Users can now accurately track payments by rent period
+- Handles scenarios like "October rent paid in November"
+- Better alignment with real-world rental payment scenarios
+- Improved financial reporting accuracy
+
 ## [2.9.0] - 2024-10-28
 
 ### Improved - Month-Year Picker UX

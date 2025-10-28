@@ -213,10 +213,10 @@ fun TenantPaymentHistoryScreen(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                // Group payments by Month-Year
+                // Group payments by Rent Month
                 val dateFormatter = SimpleDateFormat("MMM yyyy", Locale.getDefault())
                 val groupedPayments = payments.groupBy { payment ->
-                    dateFormatter.format(Date(payment.date))
+                    dateFormatter.format(Date(payment.rentMonth))
                 }.toSortedMap(compareByDescending { 
                     SimpleDateFormat("MMM yyyy", Locale.getDefault()).parse(it)
                 })
