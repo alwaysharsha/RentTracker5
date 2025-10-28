@@ -138,7 +138,12 @@ fun VendorDetailScreen(
 
             ValidationTextField(
                 value = phone,
-                onValueChange = { phone = it },
+                onValueChange = { newValue ->
+                    // Only allow digits, spaces, hyphens, parentheses, and plus sign
+                    if (newValue.all { it.isDigit() || it in " -()+" }) {
+                        phone = newValue
+                    }
+                },
                 label = "Phone"
             )
 

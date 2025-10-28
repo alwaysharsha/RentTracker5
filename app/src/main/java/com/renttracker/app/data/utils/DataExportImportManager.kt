@@ -77,6 +77,22 @@ class DataExportImportManager(
             }
             exportData.put("documents", documentsArray)
             
+            // Export Vendors
+            val vendors = repository.getAllVendors().first()
+            val vendorsArray = JSONArray()
+            vendors.forEach { vendor ->
+                vendorsArray.put(vendorToJson(vendor))
+            }
+            exportData.put("vendors", vendorsArray)
+            
+            // Export Expenses
+            val expenses = repository.getAllExpenses().first()
+            val expensesArray = JSONArray()
+            expenses.forEach { expense ->
+                expensesArray.put(expenseToJson(expense))
+            }
+            exportData.put("expenses", expensesArray)
+            
             // Save to file
             val fileName = "RentTracker_Backup_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.json"
             val jsonContent = exportData.toString(2).toByteArray()
@@ -212,6 +228,26 @@ class DataExportImportManager(
                     val documentJson = it.getJSONObject(i)
                     val document = jsonToDocument(documentJson)
                     repository.insertDocument(document)
+                }
+            }
+            
+            // Import Vendors (optional - may not exist in older backups)
+            val vendorsArray = importData.optJSONArray("vendors")
+            vendorsArray?.let {
+                for (i in 0 until it.length()) {
+                    val vendorJson = it.getJSONObject(i)
+                    val vendor = jsonToVendor(vendorJson)
+                    repository.insertVendor(vendor)
+                }
+            }
+            
+            // Import Expenses (optional - may not exist in older backups)
+            val expensesArray = importData.optJSONArray("expenses")
+            expensesArray?.let {
+                for (i in 0 until it.length()) {
+                    val expenseJson = it.getJSONObject(i)
+                    val expense = jsonToExpense(expenseJson)
+                    repository.insertExpense(expense)
                 }
             }
             
@@ -362,6 +398,60 @@ class DataExportImportManager(
             fileSize = json.getLong("fileSize"),
             mimeType = json.optString("mimeType", null),
             notes = json.optString("notes", null)
+        )
+    }
+
+    private fun vendorToJson(vendor: Vendor): JSONObject {
+        return JSONObject().apply {
+            put("id", vendor.id)
+            put("name", vendor.name)
+            put("category", vendor.category.name)
+            put("phone", vendor.phone)
+            put("email", vendor.email)
+            put("address", vendor.address)
+            put("notes", vendor.notes)
+        }
+    }
+
+    private fun jsonToVendor(json: JSONObject): Vendor {
+        return Vendor(
+            id = json.optLong("id", 0),
+            name = json.getString("name"),
+            category = VendorCategory.valueOf(json.getString("category")),
+            phone = json.optString("phone", null),
+            email = json.optString("email", null),
+            address = json.optString("address", null),
+            notes = json.optString("notes", null)
+        )
+    }
+
+    private fun expenseToJson(expense: Expense): JSONObject {
+        return JSONObject().apply {
+            put("id", expense.id)
+            put("description", expense.description)
+            put("amount", expense.amount)
+            put("date", expense.date)
+            put("category", expense.category.name)
+            put("vendorId", expense.vendorId)
+            put("buildingId", expense.buildingId)
+            put("paymentMethod", expense.paymentMethod)
+            put("notes", expense.notes)
+            put("receiptPath", expense.receiptPath)
+        }
+    }
+
+    private fun jsonToExpense(json: JSONObject): Expense {
+        return Expense(
+            id = json.optLong("id", 0),
+            description = json.getString("description"),
+            amount = json.getDouble("amount"),
+            date = json.getLong("date"),
+            category = ExpenseCategory.valueOf(json.getString("category")),
+            vendorId = if (json.has("vendorId") && !json.isNull("vendorId")) json.getLong("vendorId") else null,
+            buildingId = if (json.has("buildingId") && !json.isNull("buildingId")) json.getLong("buildingId") else null,
+            paymentMethod = json.optString("paymentMethod", null),
+            notes = json.optString("notes", null),
+            receiptPath = json.optString("receiptPath", null)
         )
     }
 }

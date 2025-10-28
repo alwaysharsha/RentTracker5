@@ -208,6 +208,9 @@ Show widget to show the count of active leases and total payment
 
 ### Issues
 - [x] Show the Vendor and expenses on the dashboard screen
+- [x] Vendor phone number should be validated to numbers only similar to other phone numbers.
+- [x] Import is crashing the app.
+- [x] Remove Vendors and Total expenses widgets from the dashboard.
 
 ## Phase 4 (Don't start the development yet, until the phase 1 is completed)
 

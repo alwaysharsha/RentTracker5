@@ -35,8 +35,6 @@ fun DashboardScreen(
 ) {
     val activeTenants by tenantViewModel.activeTenants.collectAsState()
     val allPayments by paymentViewModel.allPayments.collectAsState()
-    val vendors by vendorViewModel.vendors.collectAsState()
-    val expenses by expenseViewModel.expenses.collectAsState()
     val currency by settingsViewModel.currency.collectAsState()
     
     val currencySymbol = when (currency) {
@@ -117,27 +115,6 @@ fun DashboardScreen(
                 )
             }
             
-            // Stats Cards Row 2 - Vendors and Expenses
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                StatsCard(
-                    modifier = Modifier.weight(1f),
-                    title = "Vendors",
-                    value = vendors.size.toString(),
-                    icon = Icons.Filled.Build,
-                    color = MaterialTheme.colorScheme.tertiaryContainer
-                )
-                
-                StatsCard(
-                    modifier = Modifier.weight(1f),
-                    title = "Total Expenses",
-                    value = "$currencySymbol${decimalFormat.format(expenses.sumOf { it.amount })}",
-                    icon = Icons.Filled.MoneyOff,
-                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f)
-                )
-            }
             
             // Pending Payments Card
             if (totalPendingAmount > 0) {

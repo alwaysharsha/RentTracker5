@@ -5,6 +5,46 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2024-10-28
+
+### Fixed - Phase 3 Bug Fixes
+
+#### Vendor Phone Validation
+- **Added phone number validation for vendor input**
+- Only allows digits, spaces, hyphens, parentheses, and plus sign
+- Consistent with other phone number fields in the app
+- Prevents invalid characters during vendor creation/editing
+
+#### Import/Export System Enhancement
+- **Fixed import crashing when vendor/expense data missing**
+- Added vendor and expense support to DataExportImportManager
+- Export now includes vendors and expenses in backup files
+- Import handles optional vendor/expense data (backward compatible)
+- Prevents crashes when importing older backup files
+
+#### Dashboard Widget Removal
+- **Removed Vendor and Total Expenses widgets from dashboard**
+- Reverted to original 3-widget layout as requested
+- Dashboard now shows: Active Tenants, This Month, Total Pending
+- Cleaner, focused dashboard experience
+
+#### Technical Improvements
+- Added vendorToJson/jsonToVendor conversion methods
+- Added expenseToJson/jsonToExpense conversion methods
+- Optional import handling for backward compatibility
+- Proper null handling in JSON conversion
+- Removed unused variables from dashboard
+
+### Updated
+- Version number: 3.1 → 3.2
+- Build number: 14 → 15
+
+### Benefits
+- Improved data integrity with phone validation
+- Reliable import/export for all data types
+- Cleaner dashboard as requested
+- Better error handling and stability
+
 ## [3.1.0] - 2024-10-28
 
 ### Added - Dashboard Vendor & Expense Widgets
