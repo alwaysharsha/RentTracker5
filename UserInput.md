@@ -189,7 +189,7 @@ Show widget to show the count of active leases and total payment
 - [x] When we click on the payments screen the tenant entry will flicker to calculate the amounts, still exists.
 - [x] Documents icon is not visible in dashboard, also verify that is working as expected.
 - [ ] There is no option to upload documents.
-- [ ] Ensure documents are handled clearly in backup and restore process.
+- [x] Ensure documents are handled clearly in backup and restore process.
 
 ## Phase 3 (Don't start the development yet, until the phase 1 is completed)
 
