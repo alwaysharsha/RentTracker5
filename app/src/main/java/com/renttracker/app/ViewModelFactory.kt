@@ -33,6 +33,12 @@ class ViewModelFactory(
             modelClass.isAssignableFrom(DocumentViewModel::class.java) -> {
                 DocumentViewModel(repository, context) as T
             }
+            modelClass.isAssignableFrom(VendorViewModel::class.java) -> {
+                VendorViewModel(repository) as T
+            }
+            modelClass.isAssignableFrom(ExpenseViewModel::class.java) -> {
+                ExpenseViewModel(repository) as T
+            }
             modelClass.isAssignableFrom(ExportImportViewModel::class.java) -> {
                 ExportImportViewModel(repository, context) as T
             }

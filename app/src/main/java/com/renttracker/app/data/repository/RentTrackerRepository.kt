@@ -9,7 +9,9 @@ class RentTrackerRepository(
     private val buildingDao: BuildingDao,
     private val tenantDao: TenantDao,
     private val paymentDao: PaymentDao,
-    private val documentDao: DocumentDao
+    private val documentDao: DocumentDao,
+    private val vendorDao: VendorDao,
+    private val expenseDao: ExpenseDao
 ) {
     // Owner operations
     fun getAllOwners(): Flow<List<Owner>> = ownerDao.getAllOwners()
@@ -59,4 +61,25 @@ class RentTrackerRepository(
     suspend fun deleteDocument(document: Document) = documentDao.deleteDocument(document)
     suspend fun deleteDocumentsByEntity(entityType: EntityType, entityId: Long) = 
         documentDao.deleteDocumentsByEntity(entityType, entityId)
+
+    // Vendor operations
+    fun getAllVendors(): Flow<List<Vendor>> = vendorDao.getAllVendors()
+    suspend fun getVendorById(id: Long): Vendor? = vendorDao.getVendorById(id)
+    fun getVendorByIdFlow(id: Long): Flow<Vendor?> = vendorDao.getVendorByIdFlow(id)
+    fun getVendorsByCategory(category: VendorCategory): Flow<List<Vendor>> = vendorDao.getVendorsByCategory(category)
+    suspend fun insertVendor(vendor: Vendor): Long = vendorDao.insertVendor(vendor)
+    suspend fun updateVendor(vendor: Vendor) = vendorDao.updateVendor(vendor)
+    suspend fun deleteVendor(vendor: Vendor) = vendorDao.deleteVendor(vendor)
+
+    // Expense operations
+    fun getAllExpenses(): Flow<List<Expense>> = expenseDao.getAllExpenses()
+    suspend fun getExpenseById(id: Long): Expense? = expenseDao.getExpenseById(id)
+    fun getExpenseByIdFlow(id: Long): Flow<Expense?> = expenseDao.getExpenseByIdFlow(id)
+    fun getExpensesByBuilding(buildingId: Long): Flow<List<Expense>> = expenseDao.getExpensesByBuilding(buildingId)
+    fun getExpensesByVendor(vendorId: Long): Flow<List<Expense>> = expenseDao.getExpensesByVendor(vendorId)
+    fun getExpensesByCategory(category: ExpenseCategory): Flow<List<Expense>> = expenseDao.getExpensesByCategory(category)
+    fun getExpensesByDateRange(startDate: Long, endDate: Long): Flow<List<Expense>> = expenseDao.getExpensesByDateRange(startDate, endDate)
+    suspend fun insertExpense(expense: Expense): Long = expenseDao.insertExpense(expense)
+    suspend fun updateExpense(expense: Expense) = expenseDao.updateExpense(expense)
+    suspend fun deleteExpense(expense: Expense) = expenseDao.deleteExpense(expense)
 }

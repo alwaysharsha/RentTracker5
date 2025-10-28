@@ -5,6 +5,69 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2024-10-28
+
+### Added - Phase 3: Vendors & Expenses Management
+
+#### Vendor Management System
+- **Complete CRUD operations for vendors**
+- Vendor categories: Plumber, Electrician, Carpenter, Painter, Cleaner, Gardener, Security, Pest Control, Appliance Repair, General Contractor, Other
+- Vendor details: Name, Category, Phone, Email, Address, Notes
+- VendorScreen with list view and summary
+- VendorDetailScreen for add/edit operations
+- Full validation and error handling
+
+#### Expense Tracking System
+- **Complete expense management with rich categorization**
+- Expense categories: Maintenance, Repairs, Utilities, Cleaning, Landscaping, Pest Control, Insurance, Property Tax, HOA Fees, Appliances, Renovation, Supplies, Other
+- Expense details: Description, Amount, Date, Category, Vendor (optional), Building (optional), Payment Method, Notes
+- ExpenseScreen with total summary card showing count and amount
+- ExpenseDetailScreen with full CRUD operations
+- Link expenses to vendors and buildings
+- Date tracking for expense reports
+
+#### Dashboard Integration
+- Added Vendors menu item (Build icon)
+- Added Expenses menu item (MoneyOff icon)
+- 8 menu items now on dashboard: Owners, Buildings, Tenants, Payments, Vendors, Expenses, Reports, Settings
+
+#### Database & Architecture
+- Database version: 8 → 9 (but reverted to 8 after testing)
+- New tables: `vendors`, `expenses`
+- Foreign key relationships: Expense → Vendor, Expense → Building
+- VendorDao with category filtering
+- ExpenseDao with building/vendor/category/date range filtering
+- Repository pattern extended for vendors and expenses
+- ViewModels: VendorViewModel, ExpenseViewModel
+
+#### Navigation
+- Added vendor routes: `/vendors`, `/vendor_detail/{id}`
+- Added expense routes: `/expenses`, `/expense_detail/{id}`
+- Full navigation integration with edit/delete support
+
+### Technical Implementation
+- Created 2 new data models (Vendor, Expense)
+- Created 2 new DAOs with comprehensive queries
+- Created 2 new ViewModels with full CRUD
+- Created 4 new screens (Vendor list/detail, Expense list/detail)
+- Updated 8 existing files for integration
+- Extended ViewModelFactory
+- Updated MainActivity with new ViewModels
+- Material Design 3 components throughout
+
+### Updated
+- Version number: 2.10 → 3.0
+- Build number: 12 → 13
+- Database version: 7 → 8
+
+### Benefits
+- Complete property expense tracking
+- Vendor management for maintenance
+- Better financial visibility
+- Expense categorization for reporting
+- Link expenses to properties and vendors
+- Foundation for expense reports
+
 ## [2.10.0] - 2024-10-28
 
 ### Fixed - Payment Chronological Ordering by Rent Month

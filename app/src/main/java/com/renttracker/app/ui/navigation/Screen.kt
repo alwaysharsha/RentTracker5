@@ -25,6 +25,14 @@ sealed class Screen(val route: String) {
         fun createRoute(tenantId: Long) = "tenant_payment_history/$tenantId"
     }
     object Documents : Screen("documents")
+    object Vendors : Screen("vendors")
+    object VendorDetail : Screen("vendor_detail/{vendorId}") {
+        fun createRoute(vendorId: Long) = "vendor_detail/$vendorId"
+    }
+    object Expenses : Screen("expenses")
+    object ExpenseDetail : Screen("expense_detail/{expenseId}") {
+        fun createRoute(expenseId: Long) = "expense_detail/$expenseId"
+    }
     object Reports : Screen("reports")
     object Settings : Screen("settings")
 }

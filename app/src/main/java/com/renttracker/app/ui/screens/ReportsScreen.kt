@@ -148,7 +148,9 @@ enum class ReportType(val displayName: String) {
     ACTIVE_TENANTS("Active Tenants"),
     CHECKOUT_TENANTS("Checked Out Tenants"),
     ALL_PAYMENTS("All Payments"),
-    PAYMENT_PENDING("Pending Payments")
+    PAYMENT_PENDING("Pending Payments"),
+    ALL_EXPENSES("All Expenses"),
+    EXPENSES_BY_CATEGORY("Expenses by Category")
 }
 
 @Composable

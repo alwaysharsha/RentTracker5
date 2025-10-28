@@ -28,6 +28,8 @@ fun RentTrackerApp(
     paymentViewModel: PaymentViewModel,
     settingsViewModel: SettingsViewModel,
     documentViewModel: DocumentViewModel,
+    vendorViewModel: VendorViewModel,
+    expenseViewModel: ExpenseViewModel,
     exportImportViewModel: ExportImportViewModel
 ) {
     val navController = rememberNavController()
@@ -192,6 +194,58 @@ fun RentTrackerApp(
             composable(Screen.Documents.route) {
                 DocumentsScreen(
                     documentViewModel = documentViewModel,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // Vendor screens
+            composable(Screen.Vendors.route) {
+                VendorScreen(
+                    viewModel = vendorViewModel,
+                    onNavigateToDetail = { vendorId ->
+                        navController.navigate(
+                            if (vendorId == null) "vendor_detail/0"
+                            else Screen.VendorDetail.createRoute(vendorId)
+                        )
+                    }
+                )
+            }
+            composable(
+                route = Screen.VendorDetail.route,
+                arguments = listOf(navArgument("vendorId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val vendorId = backStackEntry.arguments?.getLong("vendorId")
+                VendorDetailScreen(
+                    viewModel = vendorViewModel,
+                    vendorId = if (vendorId == 0L) null else vendorId,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // Expense screens
+            composable(Screen.Expenses.route) {
+                ExpenseScreen(
+                    expenseViewModel = expenseViewModel,
+                    settingsViewModel = settingsViewModel,
+                    onNavigateToDetail = { expenseId ->
+                        navController.navigate(
+                            if (expenseId == null) "expense_detail/0"
+                            else Screen.ExpenseDetail.createRoute(expenseId)
+                        )
+                    }
+                )
+            }
+            composable(
+                route = Screen.ExpenseDetail.route,
+                arguments = listOf(navArgument("expenseId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val expenseId = backStackEntry.arguments?.getLong("expenseId")
+                ExpenseDetailScreen(
+                    expenseViewModel = expenseViewModel,
+                    vendorViewModel = vendorViewModel,
+                    buildingViewModel = buildingViewModel,
+                    settingsViewModel = settingsViewModel,
+                    expenseId = if (expenseId == 0L) null else expenseId,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

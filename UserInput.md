@@ -198,21 +198,31 @@ Show widget to show the count of active leases and total payment
 - [x] In the Payment record add a Rent Month mandatory field at top of the screen with Month and year (MMM yyyy) format and select the current month as default.
 - [x] In payment screen of Tenant name show the chronological order of payments based on this Rent Month field.
 - [x] The RentMonth field should be editable with month and year not with full calendar
+
 ## Phase 3 (Don't start the development yet, until the phase 1 is completed)
 
 ### Fields
 
 - Expense Report
 - Vendors
+
+### Issues
+- [x] Show the Vendor and expenses on the dashboard screen
+
+## Phase 4 (Don't start the development yet, until the phase 1 is completed)
+
+### Fields
+
 - GoogleDrive integration to back up the data
 - Implement document upload UI now
 
-
+### Issues
 
 ## Status of Phase development
 - [x] Phase 1
 - [x] Phase 2
-- [ ] Phase 3
+- [x] Phase 3
+- [ ] Phase 4
 
 ## Icons
 

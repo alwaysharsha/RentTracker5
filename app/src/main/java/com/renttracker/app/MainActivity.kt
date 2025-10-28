@@ -25,6 +25,8 @@ class MainActivity : FragmentActivity() {
     private lateinit var paymentViewModel: PaymentViewModel
     private lateinit var settingsViewModel: SettingsViewModel
     private lateinit var documentViewModel: DocumentViewModel
+    private lateinit var vendorViewModel: VendorViewModel
+    private lateinit var expenseViewModel: ExpenseViewModel
     private lateinit var exportImportViewModel: ExportImportViewModel
     private var isAuthenticated = false
 
@@ -40,6 +42,8 @@ class MainActivity : FragmentActivity() {
         paymentViewModel = ViewModelProvider(this, viewModelFactory)[PaymentViewModel::class.java]
         settingsViewModel = ViewModelProvider(this, viewModelFactory)[SettingsViewModel::class.java]
         documentViewModel = ViewModelProvider(this, viewModelFactory)[DocumentViewModel::class.java]
+        vendorViewModel = ViewModelProvider(this, viewModelFactory)[VendorViewModel::class.java]
+        expenseViewModel = ViewModelProvider(this, viewModelFactory)[ExpenseViewModel::class.java]
         exportImportViewModel = ViewModelProvider(this, viewModelFactory)[ExportImportViewModel::class.java]
 
         // Check if app lock is enabled
@@ -122,6 +126,8 @@ class MainActivity : FragmentActivity() {
                         paymentViewModel = paymentViewModel,
                         settingsViewModel = settingsViewModel,
                         documentViewModel = documentViewModel,
+                        vendorViewModel = vendorViewModel,
+                        expenseViewModel = expenseViewModel,
                         exportImportViewModel = exportImportViewModel
                     )
                 }
