@@ -5,6 +5,41 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2024-10-28
+
+### Added - Dashboard Vendor & Expense Widgets
+
+#### Dashboard Enhancement
+- **Added Vendor count widget** showing total number of vendors
+- **Added Total Expenses widget** showing sum of all expenses with currency formatting
+- Dashboard now displays 4 key metrics in 2 rows:
+  - Row 1: Active Tenants, This Month Payments
+  - Row 2: **Vendors** (new), **Total Expenses** (new)
+- Vendor widget uses Build icon with tertiary container color
+- Expense widget uses MoneyOff icon with error container color (lighter)
+
+#### Visual Improvements
+- Better dashboard layout with organized stats cards
+- Color-coded widgets for easy identification
+- Consistent currency formatting across all monetary displays
+- Responsive grid layout maintained
+
+#### Technical Implementation
+- Updated DashboardScreen to accept VendorViewModel and ExpenseViewModel
+- Added state collection for vendors and expenses
+- Updated navigation to pass new ViewModels
+- Fixed ReportsScreen compilation issues with new expense report types
+
+### Updated
+- Version number: 3.0 → 3.1
+- Build number: 13 → 14
+
+### Benefits
+- Quick overview of vendor count at a glance
+- Total expense tracking on main dashboard
+- Better financial visibility for property management
+- Consistent with existing dashboard design patterns
+
 ## [3.0.0] - 2024-10-28
 
 ### Added - Phase 3: Vendors & Expenses Management

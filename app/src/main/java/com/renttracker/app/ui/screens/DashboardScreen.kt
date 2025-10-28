@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import com.renttracker.app.data.model.PaymentStatus
 import com.renttracker.app.ui.viewmodel.TenantViewModel
 import com.renttracker.app.ui.viewmodel.PaymentViewModel
+import com.renttracker.app.ui.viewmodel.VendorViewModel
+import com.renttracker.app.ui.viewmodel.ExpenseViewModel
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
 import java.text.DecimalFormat
 import java.util.Calendar
@@ -26,11 +28,15 @@ import java.util.Calendar
 fun DashboardScreen(
     tenantViewModel: TenantViewModel,
     paymentViewModel: PaymentViewModel,
+    vendorViewModel: VendorViewModel,
+    expenseViewModel: ExpenseViewModel,
     settingsViewModel: SettingsViewModel,
     onNavigateToScreen: (String) -> Unit
 ) {
     val activeTenants by tenantViewModel.activeTenants.collectAsState()
     val allPayments by paymentViewModel.allPayments.collectAsState()
+    val vendors by vendorViewModel.vendors.collectAsState()
+    val expenses by expenseViewModel.expenses.collectAsState()
     val currency by settingsViewModel.currency.collectAsState()
     
     val currencySymbol = when (currency) {
@@ -89,7 +95,7 @@ fun DashboardScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Stats Cards
+            // Stats Cards Row 1
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -108,6 +114,28 @@ fun DashboardScreen(
                     value = "$currencySymbol${decimalFormat.format(totalCurrentMonthPayments)}",
                     icon = Icons.Filled.Payments,
                     color = MaterialTheme.colorScheme.secondaryContainer
+                )
+            }
+            
+            // Stats Cards Row 2 - Vendors and Expenses
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                StatsCard(
+                    modifier = Modifier.weight(1f),
+                    title = "Vendors",
+                    value = vendors.size.toString(),
+                    icon = Icons.Filled.Build,
+                    color = MaterialTheme.colorScheme.tertiaryContainer
+                )
+                
+                StatsCard(
+                    modifier = Modifier.weight(1f),
+                    title = "Total Expenses",
+                    value = "$currencySymbol${decimalFormat.format(expenses.sumOf { it.amount })}",
+                    icon = Icons.Filled.MoneyOff,
+                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f)
                 )
             }
             

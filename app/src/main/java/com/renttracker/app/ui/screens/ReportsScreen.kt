@@ -72,6 +72,20 @@ fun ReportsScreen(
                     val pendingPayments = payments.filter { it.paymentType == PaymentStatus.PARTIAL }
                     PendingPaymentReport(payments = pendingPayments, currency = currency)
                 }
+                ReportType.ALL_EXPENSES -> {
+                    Text(
+                        text = "Expense reports coming soon",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                }
+                ReportType.EXPENSES_BY_CATEGORY -> {
+                    Text(
+                        text = "Expense category reports coming soon",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                }
             }
         }
     }
