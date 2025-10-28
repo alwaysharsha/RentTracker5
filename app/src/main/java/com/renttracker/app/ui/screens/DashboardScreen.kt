@@ -50,6 +50,7 @@ fun DashboardScreen(
         DashboardItem("Buildings", Icons.Filled.Home, "buildings"),
         DashboardItem("Tenants", Icons.Filled.Group, "tenants"),
         DashboardItem("Payments", Icons.Filled.Payment, "payments"),
+        DashboardItem("Documents", Icons.Filled.Description, "documents"),
         DashboardItem("Reports", Icons.Filled.Assessment, "reports"),
         DashboardItem("Settings", Icons.Filled.Settings, "settings")
     )

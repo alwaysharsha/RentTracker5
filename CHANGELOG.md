@@ -5,6 +5,45 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2024-10-28
+
+### Added - Documents Screen and Dashboard Icon
+
+#### Documents Management Screen
+- **Added dedicated Documents screen for viewing all uploaded documents**
+- Centralized view of all documents across Owners, Buildings, Tenants, and Payments
+- Document summary card showing total count and storage used
+- List view with document details:
+  - Document name and type (PDF, Image, etc.)
+  - Entity type indicator (Owner, Building, Tenant, Payment)
+  - Upload date and file size
+  - Optional notes
+- Delete functionality for individual documents
+- Empty state message when no documents exist
+- Icon-based document type display (PDF icon, image icon, generic document icon)
+
+#### Dashboard Integration
+- **Added Documents icon to dashboard menu**
+- Documents now accessible from main dashboard with dedicated icon (Description icon)
+- Dashboard grid updated from 6 to 7 menu items
+- Navigation integrated with Documents screen
+
+#### Technical Implementation
+- Extended DocumentViewModel with `allDocuments` Flow
+- Created DocumentsScreen.kt with Material Design 3 components
+- Added Screen.Documents route to navigation
+- Updated RentTrackerNavigation with Documents composable
+- Proper back navigation support
+
+### Updated
+- Version number: 2.4 → 2.5
+- Build number: 6 → 7
+
+### Status
+- **Phase 2 fully completed** - All issues resolved
+- Documents feature now accessible and functional
+- Ready for Phase 3 development
+
 ## [2.4.0] - 2024-10-28
 
 ### Changed - Icon Format Update

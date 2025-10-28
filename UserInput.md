@@ -187,8 +187,9 @@ Show widget to show the count of active leases and total payment
 - [x] The export didn't save the file in downloads folder.
 - [x] The share button is not working.
 - [x] When we click on the payments screen the tenant entry will flicker to calculate the amounts, still exists.
-- [ ] Documents icon is not visible in dashboard, also verify that is working as expected.
-
+- [x] Documents icon is not visible in dashboard, also verify that is working as expected.
+- [ ] There is no option to upload documents.
+- [ ] Ensure documents are handled clearly in backup and restore process.
 
 ## Phase 3 (Don't start the development yet, until the phase 1 is completed)
 
@@ -202,7 +203,7 @@ Show widget to show the count of active leases and total payment
 
 ## Status of Phase development
 - [x] Phase 1
-- [ ] Phase 2
+- [x] Phase 2
 - [ ] Phase 3
 
 ## Icons

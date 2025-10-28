@@ -188,6 +188,14 @@ fun RentTrackerApp(
                 )
             }
 
+            // Documents screen
+            composable(Screen.Documents.route) {
+                DocumentsScreen(
+                    documentViewModel = documentViewModel,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
             // Reports screen
             composable(Screen.Reports.route) {
                 ReportsScreen(

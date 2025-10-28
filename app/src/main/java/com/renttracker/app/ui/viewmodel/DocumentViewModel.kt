@@ -23,6 +23,8 @@ class DocumentViewModel(
     private val _uploadStatus = MutableStateFlow<UploadStatus>(UploadStatus.Idle)
     val uploadStatus: StateFlow<UploadStatus> = _uploadStatus
 
+    val allDocuments: Flow<List<Document>> = repository.getAllDocuments()
+
     fun getDocumentsByEntity(entityType: EntityType, entityId: Long): Flow<List<Document>> {
         return repository.getDocumentsByEntity(entityType, entityId)
     }
