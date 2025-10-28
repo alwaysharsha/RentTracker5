@@ -13,6 +13,10 @@ class BuildingViewModel(private val repository: RentTrackerRepository) : ViewMod
     val buildings: StateFlow<List<Building>> = repository.getAllBuildings()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    suspend fun getBuildingById(id: Long): Building? {
+        return repository.getBuildingById(id)
+    }
+
     fun insertBuilding(building: Building, onComplete: (Long) -> Unit = {}) {
         viewModelScope.launch {
             val id = repository.insertBuilding(building)

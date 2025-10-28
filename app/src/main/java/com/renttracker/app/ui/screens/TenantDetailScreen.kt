@@ -72,6 +72,10 @@ fun TenantDetailScreen(
     
     var nameError by remember { mutableStateOf(false) }
     var mobileError by remember { mutableStateOf(false) }
+    var buildingError by remember { mutableStateOf(false) }
+    var rentError by remember { mutableStateOf(false) }
+    var securityDepositError by remember { mutableStateOf(false) }
+    var startDateError by remember { mutableStateOf(false) }
 
     // Load existing tenant data for editing
     LaunchedEffect(tenantId) {
@@ -136,8 +140,12 @@ fun TenantDetailScreen(
                     IconButton(onClick = {
                         nameError = name.isBlank()
                         mobileError = mobile.isBlank()
+                        buildingError = selectedBuildingId == null
+                        rentError = rent.isBlank()
+                        securityDepositError = securityDeposit.isBlank()
+                        startDateError = startDate == null
 
-                        if (!nameError && !mobileError) {
+                        if (!nameError && !mobileError && !buildingError && !rentError && !securityDepositError && !startDateError) {
                             val tenant = Tenant(
                                 id = tenantId ?: 0,
                                 name = name,
@@ -244,11 +252,13 @@ fun TenantDetailScreen(
                     value = buildings.find { it.id == selectedBuildingId }?.name ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Building") },
+                    label = { Text("Building *") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedBuilding) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor()
+                        .menuAnchor(),
+                    isError = buildingError,
+                    supportingText = if (buildingError) { { Text("Building is required") } } else null
                 )
                 ExposedDropdownMenu(
                     expanded = expandedBuilding,
@@ -266,6 +276,7 @@ fun TenantDetailScreen(
                             text = { Text(building.name) },
                             onClick = {
                                 selectedBuildingId = building.id
+                                buildingError = false
                                 expandedBuilding = false
                             }
                         )
@@ -276,8 +287,13 @@ fun TenantDetailScreen(
             // Start Date
             EditableDateField(
                 value = startDate,
-                onValueChange = { startDate = it },
-                label = "Start Date"
+                onValueChange = {
+                    startDate = it
+                    startDateError = false
+                },
+                label = "Start Date *",
+                isError = startDateError,
+                errorMessage = "Start Date is required"
             )
 
             // Rent Increase Date
@@ -293,12 +309,15 @@ fun TenantDetailScreen(
                 onValueChange = {
                     if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*$"))) {
                         rent = it
+                        rentError = false
                     }
                 },
-                label = { Text("Rent") },
+                label = { Text("Rent *") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true
+                singleLine = true,
+                isError = rentError,
+                supportingText = if (rentError) { { Text("Rent is required") } } else null
             )
 
             // Security Deposit
@@ -307,12 +326,15 @@ fun TenantDetailScreen(
                 onValueChange = {
                     if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*$"))) {
                         securityDeposit = it
+                        securityDepositError = false
                     }
                 },
-                label = { Text("Security Deposit") },
+                label = { Text("Security Deposit *") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true
+                singleLine = true,
+                isError = securityDepositError,
+                supportingText = if (securityDepositError) { { Text("Security Deposit is required") } } else null
             )
 
             // Checkout Date

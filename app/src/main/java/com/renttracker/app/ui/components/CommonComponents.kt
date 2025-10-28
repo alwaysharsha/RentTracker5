@@ -129,7 +129,9 @@ fun EditableDateField(
     onValueChange: (Long?) -> Unit,
     label: String,
     modifier: Modifier = Modifier,
-    isRequired: Boolean = false
+    isRequired: Boolean = false,
+    isError: Boolean = false,
+    errorMessage: String? = null
 ) {
     var textValue by remember(value) { 
         mutableStateOf(if (value != null) formatSimpleDate(value) else "") 
@@ -164,6 +166,8 @@ fun EditableDateField(
         modifier = modifier.fillMaxWidth(),
         singleLine = true,
         placeholder = { Text("dd MMM yyyy") },
+        isError = isError,
+        supportingText = if (isError && errorMessage != null) { { Text(errorMessage) } } else null,
         trailingIcon = {
             Row {
                 if (value != null) {

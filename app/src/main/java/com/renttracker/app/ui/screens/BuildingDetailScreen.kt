@@ -41,6 +41,21 @@ fun BuildingDetailScreen(
 
     val owners by ownerViewModel.owners.collectAsState()
 
+    // Load building data for editing
+    LaunchedEffect(buildingId) {
+        buildingId?.let {
+            val building = viewModel.getBuildingById(it)
+            building?.let { b ->
+                existingBuilding = b
+                name = b.name
+                address = b.address ?: ""
+                selectedPropertyType = b.propertyType
+                notes = b.notes ?: ""
+                selectedOwnerId = b.ownerId
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             RentTrackerTopBar(

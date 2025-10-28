@@ -14,10 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.renttracker.app.data.model.PaymentStatus
 import com.renttracker.app.ui.viewmodel.TenantViewModel
 import com.renttracker.app.ui.viewmodel.PaymentViewModel
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
 import java.text.DecimalFormat
+import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +44,24 @@ fun DashboardScreen(
         else -> "$"
     }
     
-    val totalPayments = allPayments.sumOf { it.amount }
+    // Calculate current month payments
+    val calendar = Calendar.getInstance()
+    val currentMonth = calendar.get(Calendar.MONTH)
+    val currentYear = calendar.get(Calendar.YEAR)
+    
+    val currentMonthPayments = allPayments.filter { payment ->
+        val paymentCalendar = Calendar.getInstance().apply {
+            timeInMillis = payment.date
+        }
+        paymentCalendar.get(Calendar.MONTH) == currentMonth &&
+        paymentCalendar.get(Calendar.YEAR) == currentYear
+    }
+    
+    val totalCurrentMonthPayments = currentMonthPayments.sumOf { it.amount }
+    val totalPendingAmount = allPayments
+        .filter { it.paymentType == PaymentStatus.PARTIAL }
+        .sumOf { it.pendingAmount ?: 0.0 }
+    
     val decimalFormat = DecimalFormat("#,##0.00")
 
     val menuItems = listOf(
@@ -83,10 +102,21 @@ fun DashboardScreen(
                 
                 StatsCard(
                     modifier = Modifier.weight(1f),
-                    title = "Total Payments",
-                    value = "$currencySymbol${decimalFormat.format(totalPayments)}",
+                    title = "This Month",
+                    value = "$currencySymbol${decimalFormat.format(totalCurrentMonthPayments)}",
                     icon = Icons.Filled.Payments,
                     color = MaterialTheme.colorScheme.secondaryContainer
+                )
+            }
+            
+            // Pending Payments Card
+            if (totalPendingAmount > 0) {
+                StatsCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = "Total Pending",
+                    value = "$currencySymbol${decimalFormat.format(totalPendingAmount)}",
+                    icon = Icons.Filled.Warning,
+                    color = MaterialTheme.colorScheme.errorContainer
                 )
             }
             

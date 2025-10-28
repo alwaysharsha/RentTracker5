@@ -67,6 +67,11 @@ fun ReportsScreen(
                     val payments by paymentViewModel.allPayments.collectAsState()
                     PaymentReport(payments = payments, currency = currency)
                 }
+                ReportType.PAYMENT_PENDING -> {
+                    val payments by paymentViewModel.allPayments.collectAsState()
+                    val pendingPayments = payments.filter { it.paymentType == PaymentStatus.PARTIAL }
+                    PendingPaymentReport(payments = pendingPayments, currency = currency)
+                }
             }
         }
     }
@@ -142,5 +147,52 @@ fun PaymentReport(payments: List<Payment>, currency: String) {
 enum class ReportType(val displayName: String) {
     ACTIVE_TENANTS("Active Tenants"),
     CHECKOUT_TENANTS("Checked Out Tenants"),
-    ALL_PAYMENTS("All Payments")
+    ALL_PAYMENTS("All Payments"),
+    PAYMENT_PENDING("Pending Payments")
+}
+
+@Composable
+fun PendingPaymentReport(payments: List<Payment>, currency: String) {
+    if (payments.isEmpty()) {
+        Text(
+            text = "No pending payments found",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(vertical = 16.dp)
+        )
+    } else {
+        val totalPendingAmount = payments.sumOf { it.pendingAmount ?: 0.0 }
+        val totalPaidAmount = payments.sumOf { it.amount }
+        
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Pending Payments Summary",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Total Partial Payments: ${payments.size}")
+                        Text("Total Paid Amount: ${formatCurrency(totalPaidAmount, currency)}")
+                        Text(
+                            text = "Total Pending Amount: ${formatCurrency(totalPendingAmount, currency)}",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            items(payments) { payment ->
+                PaymentCard(payment = payment, currency = currency, onClick = {})
+            }
+        }
+    }
 }

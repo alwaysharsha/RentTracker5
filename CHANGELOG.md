@@ -5,6 +5,52 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2024-10-28
+
+### Fixed - Phase 2 Critical Issues
+
+#### Building Edit Data Population
+- **Fixed building edit screen not populating existing data**
+- Added `getBuildingById()` method to BuildingViewModel
+- Implemented LaunchedEffect to load building data when editing
+- All building fields now populate correctly: name, address, owner, property type, notes
+
+#### Tenant Mandatory Fields Validation
+- **Made Building, Rent, Security Deposit, and Start Date mandatory fields**
+- Added validation error states for all mandatory fields
+- Updated UI to show asterisks (*) for required fields
+- Error messages display when saving without required data
+- Prevents saving incomplete tenant records
+
+#### Payment Pending Report
+- **Added new "Pending Payments" report**
+- Shows all partial payments with pending amounts
+- Summary card displays:
+  - Total partial payment count
+  - Total paid amount
+  - Total pending amount (highlighted in red)
+- Accessible from Reports screen
+- Helps track outstanding payment obligations
+
+#### Dashboard Widget Improvements
+- **Changed "Total Payments" to "This Month" payments**
+- Now shows only current month payment totals
+- More relevant financial snapshot for users
+- **Added "Total Pending" widget**
+- Displays sum of all pending partial payments
+- Shows in error color (red) to draw attention
+- Only visible when pending payments exist
+
+### Updated
+- Version number: 2.6 → 2.7
+- Build number: 8 → 9
+
+### Technical Changes
+- Extended EditableDateField with isError and errorMessage parameters
+- Enhanced dashboard calculations for current month filtering
+- Added PaymentStatus filtering for pending calculations
+- Improved tenant validation logic
+
 ## [2.6.0] - 2024-10-28
 
 ### Changed - Dashboard Menu Cleanup

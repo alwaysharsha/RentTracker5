@@ -190,7 +190,11 @@ Show widget to show the count of active leases and total payment
 - [x] Documents icon is not visible in dashboard, also verify that is working as expected.
 - [x] Ensure documents are handled clearly in backup and restore process.
 - [x] Since document upload isn't fully handled remove the document button from the dashboard.
--
+- [x] Editing the building info doesn't populate the data.
+- [x] Tenant - Make Building, rent, security deposit, start date as mandatory.
+- [x] Report - Add payment pending report.
+- [x] Dashboard widget - total payments change for the current month payments.
+- [x] Dashboard widget - Show total pending payments.
 
 ## Phase 3 (Don't start the development yet, until the phase 1 is completed)
 
