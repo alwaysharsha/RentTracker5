@@ -5,6 +5,33 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2024-10-28
+
+### Changed - Dashboard Menu Cleanup
+
+#### Removed Documents Icon from Dashboard
+- **Temporarily removed Documents menu item from dashboard**
+- Document upload UI not yet fully implemented in entity detail screens
+- DocumentsScreen and backend functionality remain in codebase for future use
+- Will be re-added in Phase 3 when document upload UI is complete
+- Dashboard now shows 6 menu items: Owners, Buildings, Tenants, Payments, Reports, Settings
+
+#### Rationale
+- Documents backend infrastructure is complete (storage, DAO, ViewModel, export/import)
+- User-facing upload functionality needs integration into Owner/Building/Tenant/Payment screens
+- Removed from dashboard to avoid confusion until upload UI is fully implemented
+- Moved document upload UI implementation to Phase 3 roadmap
+
+### Updated
+- Version number: 2.5 → 2.6
+- Build number: 7 → 8
+
+### Technical Notes
+- DocumentsScreen.kt retained in codebase
+- Documents route still exists in navigation
+- All document backend functionality remains operational
+- Export/Import includes documents (verified working)
+
 ## [2.5.0] - 2024-10-28
 
 ### Added - Documents Screen and Dashboard Icon

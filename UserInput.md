@@ -188,8 +188,9 @@ Show widget to show the count of active leases and total payment
 - [x] The share button is not working.
 - [x] When we click on the payments screen the tenant entry will flicker to calculate the amounts, still exists.
 - [x] Documents icon is not visible in dashboard, also verify that is working as expected.
-- [ ] There is no option to upload documents.
 - [x] Ensure documents are handled clearly in backup and restore process.
+- [x] Since document upload isn't fully handled remove the document button from the dashboard.
+-
 
 ## Phase 3 (Don't start the development yet, until the phase 1 is completed)
 
@@ -198,6 +199,7 @@ Show widget to show the count of active leases and total payment
 - Expense Report
 - Vendors
 - GoogleDrive integration to back up the data
+- Implement document upload UI now
 
 
 
