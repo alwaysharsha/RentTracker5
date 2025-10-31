@@ -18,6 +18,8 @@ import androidx.lifecycle.lifecycleScope
 import com.renttracker.app.ui.navigation.RentTrackerApp
 import com.renttracker.app.ui.theme.RentTrackerTheme
 import com.renttracker.app.ui.viewmodel.*
+import com.renttracker.app.utils.Constants
+import com.renttracker.app.utils.showToast
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -34,19 +36,20 @@ class MainActivity : FragmentActivity() {
     private var isAuthenticated = false
     
     companion object {
-        private const val IMPORT_FILE_PICKER_REQUEST_CODE = 1001
+        private const val IMPORT_FILE_PICKER_REQUEST_CODE = Constants.IMPORT_FILE_PICKER_REQUEST_CODE
     }
     
     // Callback function to trigger import from Settings screen
     fun launchImportFilePicker() {
         try {
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                type = "*/*"
+                type = Constants.MIME_TYPE_ANY
                 addCategory(Intent.CATEGORY_OPENABLE)
             }
-            startActivityForResult(Intent.createChooser(intent, "Select Backup File"), IMPORT_FILE_PICKER_REQUEST_CODE)
+            startActivityForResult(Intent.createChooser(intent, Constants.BACKUP_FILE_CHOOSER_TITLE), IMPORT_FILE_PICKER_REQUEST_CODE)
         } catch (e: Exception) {
-            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+            android.util.Log.e(Constants.TAG_MAIN_ACTIVITY, "Exception launching file picker", e)
+            showToast(this, Constants.ERROR_GENERIC_PREFIX + e.message, Constants.TOAST_DURATION_LONG)
         }
     }
     
@@ -59,9 +62,9 @@ class MainActivity : FragmentActivity() {
                 exportImportViewModel.resetImportStatus()
                 exportImportViewModel.importData(uri) { success ->
                     if (success) {
-                        Toast.makeText(this, "Import completed successfully", Toast.LENGTH_SHORT).show()
+                        showToast(this, Constants.SUCCESS_IMPORT_COMPLETED, Constants.TOAST_DURATION_SHORT)
                     } else {
-                        Toast.makeText(this, "Import failed. Please check the file format.", Toast.LENGTH_LONG).show()
+                        showToast(this, Constants.ERROR_INVALID_FORMAT, Constants.TOAST_DURATION_LONG)
                     }
                 }
             }

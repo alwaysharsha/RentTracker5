@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.renttracker.app.data.preferences.PreferencesManager
 import com.renttracker.app.data.repository.RentTrackerRepository
 import com.renttracker.app.data.utils.DataExportImportManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,10 +13,11 @@ import kotlinx.coroutines.launch
 
 class ExportImportViewModel(
     private val repository: RentTrackerRepository,
-    private val context: Context
+    private val context: Context,
+    private val preferencesManager: PreferencesManager
 ) : ViewModel() {
 
-    private val dataManager = DataExportImportManager(context, repository)
+    private val dataManager = DataExportImportManager(context, repository, preferencesManager)
 
     private val _exportStatus = MutableStateFlow<ExportStatus>(ExportStatus.Idle)
     val exportStatus: StateFlow<ExportStatus> = _exportStatus
@@ -36,6 +38,7 @@ class ExportImportViewModel(
                     onComplete(null)
                 }
             } catch (e: Exception) {
+                android.util.Log.e("ExportImportViewModel", "Exception during export", e)
                 _exportStatus.value = ExportStatus.Error(e.message ?: "Unknown error")
                 onComplete(null)
             }
@@ -64,15 +67,15 @@ class ExportImportViewModel(
                     onComplete(false)
                 }
             } catch (e: SecurityException) {
-                e.printStackTrace()
+                android.util.Log.e("ExportImportViewModel", "Security exception during import", e)
                 _importStatus.value = ImportStatus.Error("Permission denied. Cannot access the selected file.")
                 onComplete(false)
             } catch (e: IllegalArgumentException) {
-                e.printStackTrace()
+                android.util.Log.e("ExportImportViewModel", "Invalid argument during import", e)
                 _importStatus.value = ImportStatus.Error("Invalid file format. Please select a valid RentTracker backup file.")
                 onComplete(false)
             } catch (e: Exception) {
-                e.printStackTrace()
+                android.util.Log.e("ExportImportViewModel", "Exception during import", e)
                 _importStatus.value = ImportStatus.Error("Import failed: ${e.message ?: "Unknown error"}")
                 onComplete(false)
             }

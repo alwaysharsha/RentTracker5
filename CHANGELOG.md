@@ -5,6 +5,139 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.8.3] - 2024-10-31
+
+### Fixed - Currency & Settings Backup/Restore
+
+#### Settings Export Implementation
+- **Added settings export to backup functionality**
+- Currency selection now included in backup files
+- App lock settings exported with backup
+- Payment methods exported to backup
+- Settings stored in dedicated "settings" JSON object
+
+#### Settings Import Implementation
+- **Added settings restore from backup files**
+- Currency selection restored during import
+- App lock settings restored during import
+- Payment methods restored during import
+- Settings imported even when not clearing existing data
+
+#### Architecture Updates
+- **Updated DataExportImportManager** to include PreferencesManager
+- **Enhanced ExportImportViewModel** to handle settings
+- **Updated ViewModelFactory** to pass PreferencesManager
+- **Comprehensive settings backup/restore** with error handling
+
+#### Technical Implementation
+- Added PreferencesManager dependency to DataExportImportManager
+- Export settings include: currency, appLock, paymentMethods
+- Import settings with fallback to defaults for missing values
+- Settings imported before data to ensure proper configuration
+- Error handling prevents import failure if settings are corrupted
+
+### Updated
+- Version number: 4.8.2 → 4.8.3
+- Build number: 35 → 36
+
+### Benefits
+- ✅ **Complete settings backup** - All user preferences preserved
+- ✅ **Currency selection restored** - No more fallback to USD
+- ✅ **App lock settings preserved** - Security settings maintained
+- ✅ **Payment methods restored** - Custom payment methods preserved
+- ✅ **Seamless user experience** - Settings transfer between devices
+
+## [4.8.2] - 2024-10-31
+
+### Advanced Code Optimization & Utilities
+
+#### Created Utility Classes
+- **New Extensions.kt** - Common extension functions for Flow operations
+- **New UIUtils.kt** - Centralized UI utility functions for consistent behavior
+- **Enhanced Constants.kt** - Added more comprehensive constants including Toast durations and error messages
+
+#### Improved Error Handling
+- **Standardized Toast messages** - All Toast calls now use utility functions
+- **Better error message formatting** - Consistent error message structure
+- **Enhanced logging** - Added MainActivity log tag for better debugging
+- **Centralized error handling** - Utility functions for consistent error display
+
+#### Code Reusability Improvements
+- **showErrorToast() function** - Standardized error toast display
+- **showToast() function** - Consistent toast messaging across the app
+- **Flow extensions** - Safe first() operations with error handling
+- **Operation batch processing** - Utility for executing multiple operations with error handling
+
+#### Enhanced Constants Management
+- **Toast duration constants** - `TOAST_DURATION_SHORT`, `TOAST_DURATION_LONG`
+- **Error message prefixes** - Standardized error message formatting
+- **Additional log tags** - `TAG_MAIN_ACTIVITY` for better debugging
+- **Comprehensive error constants** - All error messages centralized
+
+### Technical Implementation
+- Created `utils/Extensions.kt` with Flow and operation utilities
+- Created `utils/UIUtils.kt` with Toast and context utilities
+- Updated `MainActivity` to use centralized Toast utilities
+- Updated `SettingsScreen` to use error handling utilities
+- Enhanced `Constants.kt` with additional app-wide constants
+
+### Updated
+- Version number: 4.8.1 → 4.8.2
+- Build number: 34 → 35
+
+### Benefits
+- ✅ **Consistent UI behavior** - Standardized Toast messages and error handling
+- ✅ **Better code reusability** - Utility functions reduce code duplication
+- ✅ **Enhanced error handling** - Centralized error message formatting
+- ✅ **Improved maintainability** - Common operations extracted to utilities
+- ✅ **Production-ready utilities** - Scalable utility functions for future development
+
+## [4.8.1] - 2024-10-31
+
+### Cleanup & Code Optimization
+
+#### Removed Unused Imports
+- **Cleaned up SettingsScreen imports** - Removed unused `FileProvider` import
+- **Optimized import statements** - Only importing what's actually used
+- **Reduced compilation overhead** - Cleaner, more efficient code
+
+#### Improved Error Logging
+- **Replaced printStackTrace with proper Android logging**
+- **Added structured log tags** for better debugging and crash analysis
+- **Enhanced error tracking** - More detailed logs for export/import operations
+- **Better production debugging** - Logs now appear in Android logcat with proper tags
+
+#### Created Constants File
+- **New Constants.kt utility file** - Centralized all hardcoded strings and values
+- **MIME type constants** - `MIME_TYPE_JSON`, `MIME_TYPE_TEXT`, `MIME_TYPE_ANY`
+- **Error message constants** - Standardized error messages across the app
+- **Request code constants** - Centralized request code management
+- **Log tag constants** - Consistent logging tags for better debugging
+
+#### Code Quality Improvements
+- **Eliminated magic strings** - All hardcoded values moved to constants
+- **Better maintainability** - Centralized constants for easy updates
+- **Improved readability** - Cleaner code with meaningful constant names
+- **Reduced technical debt** - Following Android development best practices
+
+### Technical Changes
+- Created `utils/Constants.kt` with app-wide constants
+- Updated `MainActivity` to use centralized constants
+- Replaced all `printStackTrace()` calls with `android.util.Log.e()`
+- Added proper log tags for different components
+- Removed unused imports from SettingsScreen
+
+### Updated
+- Version number: 4.8.0 → 4.8.1
+- Build number: 33 → 34
+
+### Benefits
+- ✅ **Cleaner codebase** - Removed unused imports and magic strings
+- ✅ **Better debugging** - Proper logging with structured tags
+- ✅ **Easier maintenance** - Centralized constants for quick updates
+- ✅ **Production ready** - Following Android development best practices
+- ✅ **Reduced technical debt** - Cleaner, more maintainable code
+
 ## [4.8.0] - 2024-10-31
 
 ### Fixed - Import Button RequestCode Error (Legacy Solution)

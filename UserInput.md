@@ -211,6 +211,7 @@ Show widget to show the count of active leases and total payment
 - [x] Import is crashing the app again.
 - [x] Remove Vendors and Total expenses widgets from the dashboard.
 - [x] Crash happens when I click on Import link/button - Fixed "Can only use lower 16 bits for requestCode" error by using legacy startActivityForResult() pattern instead of modern Activity Result API
+- [x] Currency selection not captured in backup - Fixed by adding settings export/import to backup/restore functionality
 
 ## Phase 4 (Don't start the development yet, until the phase 1 is completed)
 

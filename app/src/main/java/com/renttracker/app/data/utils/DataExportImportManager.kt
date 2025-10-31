@@ -8,6 +8,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import com.renttracker.app.data.model.*
+import com.renttracker.app.data.preferences.PreferencesManager
 import com.renttracker.app.data.repository.RentTrackerRepository
 import kotlinx.coroutines.flow.first
 import org.json.JSONArray
@@ -22,7 +23,8 @@ import java.util.*
  */
 class DataExportImportManager(
     private val context: Context,
-    private val repository: RentTrackerRepository
+    private val repository: RentTrackerRepository,
+    private val preferencesManager: PreferencesManager
 ) {
 
     /**
@@ -34,6 +36,13 @@ class DataExportImportManager(
             val exportData = JSONObject()
             exportData.put("version", 1)
             exportData.put("exportDate", System.currentTimeMillis())
+            
+            // Export Settings
+            val settings = JSONObject()
+            settings.put("currency", preferencesManager.currencyFlow.first())
+            settings.put("appLock", preferencesManager.appLockFlow.first())
+            settings.put("paymentMethods", preferencesManager.paymentMethodsFlow.first().joinToString(","))
+            exportData.put("settings", settings)
             
             // Export Owners
             val owners = repository.getAllOwners().first()
@@ -130,7 +139,7 @@ class DataExportImportManager(
                 createFileProviderUri(exportDir = File(context.getExternalFilesDir(null), "exports"), fileName = fileName, jsonContent = jsonContent)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            android.util.Log.e("DataExportImportManager", "Exception during export", e)
             null
         }
     }
@@ -202,8 +211,38 @@ class DataExportImportManager(
                     repository.getAllVendors().first().forEach { repository.deleteVendor(it) }
                     repository.getAllOwners().first().forEach { repository.deleteOwner(it) }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    android.util.Log.e("DataExportImportManager", "Failed to clear existing data", e)
                     // Continue with import even if clear fails
+                }
+            }
+            
+            // Import Settings (always import settings, even if not clearing data)
+            val settingsObject = importData.optJSONObject("settings")
+            settingsObject?.let { settings ->
+                try {
+                    // Import currency
+                    val currency = settings.optString("currency", "USD")
+                    preferencesManager.setCurrency(currency)
+                    
+                    // Import app lock setting
+                    val appLock = settings.optBoolean("appLock", false)
+                    preferencesManager.setAppLock(appLock)
+                    
+                    // Import payment methods
+                    val paymentMethodsString = settings.optString("paymentMethods", "")
+                    if (paymentMethodsString.isNotEmpty()) {
+                        val paymentMethods = paymentMethodsString.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                        if (paymentMethods.isNotEmpty()) {
+                            preferencesManager.setPaymentMethods(paymentMethods)
+                        } else {
+                            // Do nothing if payment methods list is empty
+                        }
+                    } else {
+                        // Do nothing if payment methods string is empty
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("DataExportImportManager", "Failed to import settings", e)
+                    // Continue with import even if settings import fails
                 }
             }
             
@@ -227,7 +266,7 @@ class DataExportImportManager(
                         }
                     } catch (e: Exception) {
                         // Log error but continue with other owners
-                        e.printStackTrace()
+                        android.util.Log.e("DataExportImportManager", "Failed to import owner", e)
                     }
                 }
             }
@@ -250,7 +289,7 @@ class DataExportImportManager(
                         }
                     } catch (e: Exception) {
                         // Log error but continue with other buildings
-                        e.printStackTrace()
+                        android.util.Log.e("DataExportImportManager", "Failed to import building", e)
                     }
                 }
             }
@@ -273,7 +312,7 @@ class DataExportImportManager(
                         }
                     } catch (e: Exception) {
                         // Log error but continue with other tenants
-                        e.printStackTrace()
+                        android.util.Log.e("DataExportImportManager", "Failed to import tenant", e)
                     }
                 }
             }
@@ -292,7 +331,7 @@ class DataExportImportManager(
                         repository.insertPayment(payment)
                     } catch (e: Exception) {
                         // Log error but continue with other payments
-                        e.printStackTrace()
+                        android.util.Log.e("DataExportImportManager", "Failed to import payment", e)
                     }
                 }
             }
@@ -321,7 +360,7 @@ class DataExportImportManager(
                         repository.insertDocument(document)
                     } catch (e: Exception) {
                         // Log error but continue with other documents
-                        e.printStackTrace()
+                        android.util.Log.e("DataExportImportManager", "Failed to import document", e)
                     }
                 }
             }
@@ -340,7 +379,7 @@ class DataExportImportManager(
                         }
                     } catch (e: Exception) {
                         // Log error but continue with other vendors
-                        e.printStackTrace()
+                        android.util.Log.e("DataExportImportManager", "Failed to import vendor", e)
                     }
                 }
             }
@@ -364,14 +403,14 @@ class DataExportImportManager(
                         repository.insertExpense(expense)
                     } catch (e: Exception) {
                         // Log error but continue with other expenses
-                        e.printStackTrace()
+                        android.util.Log.e("DataExportImportManager", "Failed to import expense", e)
                     }
                 }
             }
             
             true
         } catch (e: Exception) {
-            e.printStackTrace()
+            android.util.Log.e("DataExportImportManager", "Exception during import", e)
             false
         }
     }

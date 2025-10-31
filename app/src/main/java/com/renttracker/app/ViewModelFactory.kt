@@ -40,7 +40,7 @@ class ViewModelFactory(
                 ExpenseViewModel(repository) as T
             }
             modelClass.isAssignableFrom(ExportImportViewModel::class.java) -> {
-                ExportImportViewModel(repository, context) as T
+                ExportImportViewModel(repository, context, preferencesManager) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class")
         }

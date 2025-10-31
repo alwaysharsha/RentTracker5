@@ -20,11 +20,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
 import com.renttracker.app.MainActivity
 import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.viewmodel.ExportImportViewModel
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
+import com.renttracker.app.utils.Constants
+import com.renttracker.app.utils.showErrorToast
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -216,7 +217,7 @@ fun SettingsScreen(
                                     // Call MainActivity's import function to avoid requestCode conflicts
                                     mainActivity.launchImportFilePicker()
                                 } catch (e: Exception) {
-                                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                                    showErrorToast(context, e.message)
                                 }
                             },
                             modifier = Modifier.weight(1f),
@@ -248,8 +249,8 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version: 4.8.0")
-                    Text("Build: 33")
+                    Text("Version: 4.8.3")
+                    Text("Build: 36")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }
