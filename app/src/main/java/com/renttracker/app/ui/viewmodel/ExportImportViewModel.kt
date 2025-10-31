@@ -45,6 +45,13 @@ class ExportImportViewModel(
     fun importData(uri: Uri, clearExisting: Boolean = false, onComplete: (Boolean) -> Unit = {}) {
         viewModelScope.launch {
             try {
+                // Validate URI before proceeding
+                if (uri.toString().isEmpty()) {
+                    _importStatus.value = ImportStatus.Error("Invalid file selected")
+                    onComplete(false)
+                    return@launch
+                }
+                
                 _importStatus.value = ImportStatus.Importing
                 val success = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                     dataManager.importData(uri, clearExisting)
@@ -53,12 +60,20 @@ class ExportImportViewModel(
                     _importStatus.value = ImportStatus.Success
                     onComplete(true)
                 } else {
-                    _importStatus.value = ImportStatus.Error("Failed to import data")
+                    _importStatus.value = ImportStatus.Error("Failed to import data. Please check if the file is a valid RentTracker backup.")
                     onComplete(false)
                 }
+            } catch (e: SecurityException) {
+                e.printStackTrace()
+                _importStatus.value = ImportStatus.Error("Permission denied. Cannot access the selected file.")
+                onComplete(false)
+            } catch (e: IllegalArgumentException) {
+                e.printStackTrace()
+                _importStatus.value = ImportStatus.Error("Invalid file format. Please select a valid RentTracker backup file.")
+                onComplete(false)
             } catch (e: Exception) {
-                e.printStackTrace() // Add logging
-                _importStatus.value = ImportStatus.Error(e.message ?: "Unknown error")
+                e.printStackTrace()
+                _importStatus.value = ImportStatus.Error("Import failed: ${e.message ?: "Unknown error"}")
                 onComplete(false)
             }
         }

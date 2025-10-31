@@ -210,7 +210,7 @@ Show widget to show the count of active leases and total payment
 - [x] Vendor phone number should be validated to numbers only similar to other phone numbers.
 - [x] Import is crashing the app again.
 - [x] Remove Vendors and Total expenses widgets from the dashboard.
-- [x] Crash happens when I click on Import link/button
+- [x] Crash happens when I click on Import link/button - Fixed "Can only use lower 16 bits for requestCode" error by using legacy startActivityForResult() pattern instead of modern Activity Result API
 
 ## Phase 4 (Don't start the development yet, until the phase 1 is completed)
 

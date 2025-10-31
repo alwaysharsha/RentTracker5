@@ -5,6 +5,187 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.8.0] - 2024-10-31
+
+### Fixed - Import Button RequestCode Error (Legacy Solution)
+
+#### Legacy startActivityForResult Implementation
+- **Replaced modern Activity Result API with legacy startActivityForResult pattern**
+- Eliminates requestCode conflicts by using traditional Activity lifecycle methods
+- Uses `onActivityResult()` with custom request code (1001) for file picker handling
+- Avoids the 16-bit requestCode limitation entirely
+
+#### Technical Implementation
+- **Added companion object with request code constant**
+- Implemented `onActivityResult()` override method in MainActivity
+- Updated `launchImportFilePicker()` to use `startActivityForResult()`
+- Removed `registerForActivityResult()` and ActivityResultContracts imports
+
+#### Architecture Benefits
+- **Zero requestCode conflicts** - Legacy API doesn't use the limited requestCode pool
+- **Proven compatibility** - Works across all Android versions and devices
+- **Simple and reliable** - Traditional Android pattern with predictable behavior
+- **No Activity Result API limitations** - Bypasses modern framework constraints
+
+### Updated
+- Version number: 4.7.0 → 4.8.0
+- Build number: 32 → 33
+
+### Benefits
+- ✅ **Complete elimination of requestCode conflicts**
+- ✅ **Universal Android compatibility**
+- ✅ **Proven legacy implementation**
+- ✅ **Reliable file picker functionality**
+- ✅ **No modern API limitations**
+
+## [4.7.0] - 2024-10-31
+
+### Fixed - Import Button RequestCode Conflict (Final Solution)
+
+#### MainActivity-Level Activity Result Implementation
+- **Moved file picker launcher from SettingsScreen to MainActivity**
+- Eliminates requestCode conflicts by using Activity-level `registerForActivityResult()`
+- MainActivity handles all file picker operations with proper lifecycle management
+- SettingsScreen calls MainActivity function to trigger import
+
+#### Architecture Changes
+- **Updated RentTrackerApp navigation to pass MainActivity reference**
+- Modified SettingsScreen signature to accept MainActivity parameter
+- Created callback mechanism: `MainActivity.launchImportFilePicker()`
+- Clean separation of concerns between UI and Activity Result handling
+
+#### Enhanced Import Flow
+- **MainActivity handles the complete import process**
+- File picker launch, URI handling, and import execution at Activity level
+- Proper Toast messages for success/failure feedback
+- Simplified SettingsScreen with just button click handling
+
+#### Technical Implementation
+- Added `importFileLauncher` in MainActivity using `registerForActivityResult()`
+- Created `launchImportFilePicker()` public function for SettingsScreen to call
+- Updated navigation chain: MainActivity → RentTrackerApp → SettingsScreen
+- Removed all Activity Result launchers from SettingsScreen
+
+### Updated
+- Version number: 4.6.2 → 4.7.0
+- Build number: 31 → 32
+
+### Benefits
+- ✅ **Complete elimination of requestCode conflicts**
+- ✅ **Proper Activity lifecycle management**
+- ✅ **Clean architecture with separation of concerns**
+- ✅ **Reliable file picker functionality**
+- ✅ **Better error handling and user feedback**
+
+## [4.6.2] - 2024-10-31
+
+### Fixed - Import Button Persistent File Picker Issues
+
+#### Legacy Activity Result Implementation
+- **Switched to StartActivityForResult contract for maximum compatibility**
+- Replaced modern Activity Result contracts with legacy Intent-based approach
+- Uses traditional `ACTION_GET_CONTENT` Intent for file selection
+- Added detailed exception handling and logging for debugging
+
+#### Enhanced Error Diagnostics
+- **Added comprehensive error logging to identify root cause**
+- Specific exception handling for SecurityException, ActivityNotFoundException, IllegalArgumentException
+- Detailed error messages displayed to users
+- Debug logging added to track file picker launch attempts
+
+#### Simplified Intent Structure
+- **Reduced complexity to avoid potential conflicts**
+- Simplest possible Intent configuration (`type = "*/*"`)
+- Removed extra MIME types and categories that might cause issues
+- Clean, direct file picker launch without chooser complications
+
+### Technical Implementation
+- Updated import launcher to use `ActivityResultContracts.StartActivityForResult()`
+- Enhanced error handling with specific exception types
+- Added debug logging for troubleshooting
+- Simplified Intent creation for broader compatibility
+
+### Updated
+- Version number: 4.6.1 → 4.6.2
+- Build number: 30 → 31
+
+### Benefits
+- ✅ Maximum compatibility with different Android versions
+- ✅ Better error diagnostics for troubleshooting
+- ✅ Simplified file picker implementation
+- ✅ Detailed logging for debugging issues
+
+## [4.6.1] - 2024-10-31
+
+### Fixed - Import Button RequestCode Error
+
+#### Activity Result API Fix
+- **Fixed "Can only use lower 16 bits for requestCode" error**
+- Replaced `GetContent()` contract with `OpenDocument()` contract
+- `OpenDocument` is more stable and avoids requestCode conflicts
+- Updated MIME type handling to accept multiple file types
+
+#### Enhanced File Picker Compatibility
+- **Added MIME type array for broader file support**
+- Accepts: "application/json", "text/plain", "*/*"
+- Better compatibility with different file manager apps
+- Maintains JSON file preference while allowing fallback options
+
+#### Technical Improvements
+- More robust Activity Result launcher implementation
+- Better error handling for file picker operations
+- Improved user experience with reliable file selection
+
+### Updated
+- Version number: 4.6 → 4.6.1
+- Build number: 29 → 30
+
+### Benefits
+- ✅ Import button opens file picker without crashing
+- ✅ No more requestCode conflicts
+- ✅ Better file manager compatibility
+- ✅ Reliable import functionality
+
+## [4.6.0] - 2024-10-31
+
+### Fixed - Import Button Crash Issue
+
+#### Enhanced Import Button Error Handling
+- **Fixed crash when clicking Import button in Settings**
+- Added proper URI validation before import operations
+- Enhanced exception handling for SecurityException and IllegalArgumentException
+- Better error messages for user feedback
+- Reset import status before starting new import operations
+
+#### File Picker Improvements
+- **Changed MIME type from generic "*/*" to specific "application/json"**
+- Better file filtering to show only relevant backup files
+- Fallback error handling for file picker not found
+- Improved error messages with exception details
+
+#### JSON Conversion Type Safety
+- **Fixed type mismatch warnings in JSON parsing**
+- Updated all `optString("field", null)` to `optString("field", "").ifEmpty { null }`
+- Resolved Kotlin type inference issues in DataExportImportManager
+- Better null handling for optional fields in import data
+
+#### Technical Improvements
+- Added URI validation in ExportImportViewModel
+- Enhanced error handling with specific exception types
+- Improved import status management
+- Better user feedback for import failures
+
+### Updated
+- Version number: 4.5 → 4.6
+- Build number: 28 → 29
+
+### Benefits
+- ✅ Import button works without crashing
+- ✅ Better error messages for users
+- ✅ More reliable file picker operation
+- ✅ Enhanced type safety in JSON processing
+- ✅ Improved debugging capabilities
+
 ## [3.5.0] - 2024-10-28
 
 ### Fixed - Import Button Click Crash

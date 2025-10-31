@@ -1,6 +1,9 @@
 package com.renttracker.app
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -29,6 +32,41 @@ class MainActivity : FragmentActivity() {
     private lateinit var expenseViewModel: ExpenseViewModel
     private lateinit var exportImportViewModel: ExportImportViewModel
     private var isAuthenticated = false
+    
+    companion object {
+        private const val IMPORT_FILE_PICKER_REQUEST_CODE = 1001
+    }
+    
+    // Callback function to trigger import from Settings screen
+    fun launchImportFilePicker() {
+        try {
+            val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                type = "*/*"
+                addCategory(Intent.CATEGORY_OPENABLE)
+            }
+            startActivityForResult(Intent.createChooser(intent, "Select Backup File"), IMPORT_FILE_PICKER_REQUEST_CODE)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+    
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        
+        if (requestCode == IMPORT_FILE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
+            data?.data?.let { uri ->
+                // Handle the import
+                exportImportViewModel.resetImportStatus()
+                exportImportViewModel.importData(uri) { success ->
+                    if (success) {
+                        Toast.makeText(this, "Import completed successfully", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this, "Import failed. Please check the file format.", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -128,7 +166,8 @@ class MainActivity : FragmentActivity() {
                         documentViewModel = documentViewModel,
                         vendorViewModel = vendorViewModel,
                         expenseViewModel = expenseViewModel,
-                        exportImportViewModel = exportImportViewModel
+                        exportImportViewModel = exportImportViewModel,
+                        mainActivity = this
                     )
                 }
             }

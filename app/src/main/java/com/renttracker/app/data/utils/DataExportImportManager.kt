@@ -168,8 +168,19 @@ class DataExportImportManager(
      */
     suspend fun importData(uri: Uri, clearExisting: Boolean = false): Boolean {
         return try {
+            // Validate URI
+            if (uri.toString().isEmpty()) {
+                return false
+            }
+            
             val inputStream = context.contentResolver.openInputStream(uri)
-            val jsonString = inputStream?.bufferedReader()?.use { it.readText() } ?: return false
+                ?: return false
+            
+            val jsonString = inputStream.bufferedReader().use { it.readText() }
+            if (jsonString.isBlank()) {
+                return false
+            }
+            
             val importData = JSONObject(jsonString)
             
             // Validate version
@@ -381,10 +392,10 @@ class DataExportImportManager(
         return Owner(
             id = json.optLong("id", 0),
             name = json.getString("name"),
-            email = json.optString("email", null),
+            email = json.optString("email", "").ifEmpty { null },
             mobile = json.getString("mobile"),
-            mobile2 = json.optString("mobile2", null),
-            address = json.optString("address", null)
+            mobile2 = json.optString("mobile2", "").ifEmpty { null },
+            address = json.optString("address", "").ifEmpty { null }
         )
     }
 
@@ -404,9 +415,9 @@ class DataExportImportManager(
             id = json.optLong("id", 0),
             name = json.getString("name"),
             ownerId = json.getLong("ownerId"),
-            address = json.optString("address", null),
+            address = json.optString("address", "").ifEmpty { null },
             propertyType = PropertyType.valueOf(json.getString("propertyType")),
-            notes = json.optString("notes", null)
+            notes = json.optString("notes", "").ifEmpty { null }
         )
     }
 
@@ -433,17 +444,17 @@ class DataExportImportManager(
         return Tenant(
             id = json.optLong("id", 0),
             name = json.getString("name"),
-            email = json.optString("email", null),
+            email = json.optString("email", "").ifEmpty { null },
             mobile = json.getString("mobile"),
-            mobile2 = json.optString("mobile2", null),
-            familyMembers = json.optString("familyMembers", null),
+            mobile2 = json.optString("mobile2", "").ifEmpty { null },
+            familyMembers = json.optString("familyMembers", "").ifEmpty { null },
             buildingId = if (json.isNull("buildingId")) null else json.optLong("buildingId"),
             startDate = if (json.isNull("startDate")) null else json.optLong("startDate"),
             checkoutDate = if (json.isNull("checkoutDate")) null else json.optLong("checkoutDate", 0),
             rentIncreaseDate = if (json.isNull("rentIncreaseDate")) null else json.optLong("rentIncreaseDate", 0),
             rent = if (json.isNull("rent")) null else json.optDouble("rent"),
             securityDeposit = if (json.isNull("securityDeposit")) null else json.optDouble("securityDeposit"),
-            notes = json.optString("notes", null),
+            notes = json.optString("notes", "").ifEmpty { null },
             isCheckedOut = json.getBoolean("isCheckedOut")
         )
     }
@@ -470,10 +481,10 @@ class DataExportImportManager(
             date = json.getLong("date"),
             amount = json.getDouble("amount"),
             paymentMethod = json.getString("paymentMethod"),
-            transactionDetails = json.optString("transactionDetails", null),
+            transactionDetails = json.optString("transactionDetails", "").ifEmpty { null },
             paymentType = PaymentStatus.valueOf(json.getString("paymentType")),
             pendingAmount = if (json.isNull("pendingAmount")) null else json.optDouble("pendingAmount"),
-            notes = json.optString("notes", null),
+            notes = json.optString("notes", "").ifEmpty { null },
             rentMonth = json.optLong("rentMonth", System.currentTimeMillis())
         )
     }
@@ -503,8 +514,8 @@ class DataExportImportManager(
             entityId = json.getLong("entityId"),
             uploadDate = json.getLong("uploadDate"),
             fileSize = json.getLong("fileSize"),
-            mimeType = json.optString("mimeType", null),
-            notes = json.optString("notes", null)
+            mimeType = json.optString("mimeType", "").ifEmpty { null },
+            notes = json.optString("notes", "").ifEmpty { null }
         )
     }
 

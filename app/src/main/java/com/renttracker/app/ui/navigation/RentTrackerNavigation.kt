@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.renttracker.app.MainActivity
 import com.renttracker.app.ui.screens.*
 import com.renttracker.app.ui.viewmodel.*
 
@@ -30,7 +31,8 @@ fun RentTrackerApp(
     documentViewModel: DocumentViewModel,
     vendorViewModel: VendorViewModel,
     expenseViewModel: ExpenseViewModel,
-    exportImportViewModel: ExportImportViewModel
+    exportImportViewModel: ExportImportViewModel,
+    mainActivity: MainActivity
 ) {
     val navController = rememberNavController()
 
@@ -263,7 +265,8 @@ fun RentTrackerApp(
             composable(Screen.Settings.route) {
                 SettingsScreen(
                     viewModel = settingsViewModel,
-                    exportImportViewModel = exportImportViewModel
+                    exportImportViewModel = exportImportViewModel,
+                    mainActivity = mainActivity
                 )
             }
         }
