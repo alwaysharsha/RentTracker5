@@ -282,15 +282,16 @@ fun RentTrackerApp(
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
+        BottomNavItem("Docs", Screen.Documents.route, Icons.Filled.Star),
         BottomNavItem("Home", Screen.Dashboard.route, Icons.Filled.Dashboard),
-        BottomNavItem("Documents", Screen.Documents.route, Icons.Filled.Description),
         BottomNavItem("Owners", Screen.Owners.route, Icons.Filled.Person),
         BottomNavItem("Buildings", Screen.Buildings.route, Icons.Filled.Home),
         BottomNavItem("Tenants", Screen.Tenants.route, Icons.Filled.Group),
         BottomNavItem("Payments", Screen.Payments.route, Icons.Filled.Payment),
         BottomNavItem("Vendors", Screen.Vendors.route, Icons.Filled.Build),
         BottomNavItem("Expenses", Screen.Expenses.route, Icons.Filled.MoneyOff),
-        BottomNavItem("Reports", Screen.Reports.route, Icons.Filled.Assessment)
+        BottomNavItem("Reports", Screen.Reports.route, Icons.Filled.Assessment),
+        BottomNavItem("Settings", Screen.Settings.route, Icons.Filled.Settings)
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
