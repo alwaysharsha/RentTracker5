@@ -58,8 +58,15 @@ class MainActivity : FragmentActivity() {
     }
     
     // Callback functions for document upload
-    fun launchDocumentFilePicker() {
+    private var pendingDocumentName: String? = null
+    private var pendingEntityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.OWNER
+    private var pendingNotes: String? = null
+    
+    fun launchDocumentFilePicker(documentName: String? = null, entityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.OWNER, notes: String? = null) {
         try {
+            pendingDocumentName = documentName
+            pendingEntityType = entityType
+            pendingNotes = notes
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                 type = "*/*"
                 addCategory(Intent.CATEGORY_OPENABLE)
@@ -71,8 +78,11 @@ class MainActivity : FragmentActivity() {
         }
     }
     
-    fun launchDocumentCamera() {
+    fun launchDocumentCamera(documentName: String? = null, entityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.OWNER, notes: String? = null) {
         try {
+            pendingDocumentName = documentName
+            pendingEntityType = entityType
+            pendingNotes = notes
             val photoUri = createImageUri()
             photoUri?.let { uri ->
                 val cameraIntent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE).apply {
@@ -146,15 +156,15 @@ class MainActivity : FragmentActivity() {
         try {
             val documentUri = uri ?: createImageUri() // Use the camera URI if provided
             documentUri?.let { fileUri ->
-                val fileName = getFileName(fileUri) ?: "document_${System.currentTimeMillis()}"
+                val fileName = pendingDocumentName ?: getFileName(fileUri) ?: "document_${System.currentTimeMillis()}"
                 
-                // Upload document using the same logic as DocumentsScreen
+                // Upload document using the pending values
                 documentViewModel.uploadDocument(
                     uri = fileUri,
                     documentName = fileName,
-                    entityType = com.renttracker.app.data.model.EntityType.OWNER,
-                    entityId = 0L,
-                    notes = null
+                    entityType = pendingEntityType,
+                    entityId = 0L, // Use 0 for general documents not tied to specific entity
+                    notes = pendingNotes
                 ) { success ->
                     if (success) {
                         showToast(this, "Document uploaded successfully", Constants.TOAST_DURATION_SHORT)
@@ -162,6 +172,11 @@ class MainActivity : FragmentActivity() {
                         showToast(this, "Failed to upload document", Constants.TOAST_DURATION_LONG)
                     }
                 }
+                
+                // Clear pending values
+                pendingDocumentName = null
+                pendingEntityType = com.renttracker.app.data.model.EntityType.OWNER
+                pendingNotes = null
             }
         } catch (e: Exception) {
             e.printStackTrace()

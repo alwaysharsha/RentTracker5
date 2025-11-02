@@ -44,6 +44,8 @@ fun DocumentsScreen(
     var documentToDelete by remember { mutableStateOf<Document?>(null) }
     var showUploadDialog by remember { mutableStateOf(false) }
     var showPermissionDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
+    var documentToEdit by remember { mutableStateOf<Document?>(null) }
 
     Scaffold(
         topBar = {
@@ -167,6 +169,10 @@ fun DocumentsScreen(
                             onDelete = {
                                 documentToDelete = document
                                 showDeleteDialog = true
+                            },
+                            onEdit = {
+                                documentToEdit = document
+                                showEditDialog = true
                             }
                         )
                     }
@@ -201,15 +207,84 @@ fun DocumentsScreen(
         )
     }
     
-    // Upload Dialog
+    // Upload Document Dialog
     if (showUploadDialog) {
+        var documentName by remember { mutableStateOf("") }
+        var selectedEntityType by remember { mutableStateOf(EntityType.OWNER) }
+        var notes by remember { mutableStateOf("") }
+        
         AlertDialog(
             onDismissRequest = { showUploadDialog = false },
-            title = { Text("Add Document") },
+            title = { Text("Upload Document") },
             text = {
                 Column {
-                    Text("Choose how you want to add a document:")
+                    // Document Name
+                    OutlinedTextField(
+                        value = documentName,
+                        onValueChange = { documentName = it },
+                        label = { Text("Document Name (Optional)") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    
                     Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Entity Type
+                    Text(
+                        text = "Entity Type",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp)
+                    ) {
+                        items(EntityType.values()) { entityType ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { selectedEntityType = entityType }
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = selectedEntityType == entityType,
+                                    onClick = { selectedEntityType = entityType }
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = when (entityType) {
+                                        EntityType.OWNER -> "Owner Document"
+                                        EntityType.BUILDING -> "Building Document"
+                                        EntityType.TENANT -> "Tenant Document"
+                                        EntityType.PAYMENT -> "Payment Document"
+                                    },
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Notes
+                    OutlinedTextField(
+                        value = notes,
+                        onValueChange = { notes = it },
+                        label = { Text("Notes (Optional)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLines = 3
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Upload Options
+                    Text(
+                        text = "Choose upload method:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
                     
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -219,7 +294,11 @@ fun DocumentsScreen(
                         OutlinedButton(
                             onClick = {
                                 try {
-                                    mainActivity.launchDocumentFilePicker()
+                                    mainActivity.launchDocumentFilePicker(
+                                        documentName.takeIf { it.isNotBlank() },
+                                        selectedEntityType,
+                                        notes.takeIf { it.isNotBlank() }
+                                    )
                                     showUploadDialog = false
                                 } catch (e: Exception) {
                                     e.printStackTrace()
@@ -242,7 +321,11 @@ fun DocumentsScreen(
                                             context,
                                             Manifest.permission.CAMERA
                                         ) == PackageManager.PERMISSION_GRANTED -> {
-                                            mainActivity.launchDocumentCamera()
+                                            mainActivity.launchDocumentCamera(
+                                                documentName.takeIf { it.isNotBlank() },
+                                                selectedEntityType,
+                                                notes.takeIf { it.isNotBlank() }
+                                            )
                                             showUploadDialog = false
                                         }
                                         else -> {
@@ -305,6 +388,105 @@ fun DocumentsScreen(
             }
         )
     }
+    
+    // Edit Document Dialog
+    if (showEditDialog && documentToEdit != null) {
+        var editedName by remember { mutableStateOf(documentToEdit?.documentName ?: "") }
+        var editedNotes by remember { mutableStateOf(documentToEdit?.notes ?: "") }
+        var selectedEntityType by remember { mutableStateOf(documentToEdit?.entityType ?: EntityType.OWNER) }
+        
+        AlertDialog(
+            onDismissRequest = { showEditDialog = false },
+            title = { Text("Edit Document") },
+            text = {
+                Column {
+                    // Document Name
+                    OutlinedTextField(
+                        value = editedName,
+                        onValueChange = { editedName = it },
+                        label = { Text("Document Name") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Entity Type
+                    Text(
+                        text = "Entity Type",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp)
+                    ) {
+                        items(EntityType.values()) { entityType ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { selectedEntityType = entityType }
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = selectedEntityType == entityType,
+                                    onClick = { selectedEntityType = entityType }
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = when (entityType) {
+                                        EntityType.OWNER -> "Owner Document"
+                                        EntityType.BUILDING -> "Building Document"
+                                        EntityType.TENANT -> "Tenant Document"
+                                        EntityType.PAYMENT -> "Payment Document"
+                                    },
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Notes
+                    OutlinedTextField(
+                        value = editedNotes,
+                        onValueChange = { editedNotes = it },
+                        label = { Text("Notes (Optional)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLines = 3
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        documentToEdit?.let { document ->
+                            documentViewModel.updateDocument(
+                                document.copy(
+                                    documentName = editedName,
+                                    entityType = selectedEntityType,
+                                    notes = editedNotes.takeIf { it.isNotBlank() }
+                                )
+                            )
+                        }
+                        showEditDialog = false
+                    }
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showEditDialog = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -312,7 +494,8 @@ fun DocumentCard(
     document: Document,
     dateFormat: SimpleDateFormat,
     documentViewModel: DocumentViewModel,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onEdit: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -377,13 +560,25 @@ fun DocumentCard(
                 }
             }
 
-            // Delete Button
-            IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.error
-                )
+            // Action Buttons
+            Row {
+                // Edit Button
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = "Edit",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                // Delete Button
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
