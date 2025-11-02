@@ -296,7 +296,7 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("Version: 4.8.5")
-                    Text("Build: 49")
+                    Text("Build: 50")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }
