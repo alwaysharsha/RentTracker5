@@ -185,7 +185,8 @@ class DataExportImportManagerTest {
         
         // Import data - should not throw exception
         try {
-            val success = dataManager.importData(uri!!, clearExisting = false)
+            @Suppress("UNUSED_VARIABLE")
+            val unused = dataManager.importData(uri!!, clearExisting = false)
             // The import operation should complete without throwing an exception
         } catch (e: Exception) {
             fail("Import operation should not throw exception: ${e.message}")
@@ -224,7 +225,8 @@ class DataExportImportManagerTest {
         
         // Import empty backup - should not throw exception
         try {
-            val success = dataManager.importData(uri!!, clearExisting = false)
+            @Suppress("UNUSED_VARIABLE")
+            val unused = dataManager.importData(uri!!, clearExisting = false)
             // The import should complete without throwing an exception
         } catch (e: Exception) {
             fail("Import of empty backup should not throw exception: ${e.message}")

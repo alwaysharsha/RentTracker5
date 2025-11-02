@@ -206,7 +206,8 @@ class SQLiteBackupManagerTest {
         
         // Restore from backup with clear existing - should not throw exception
         try {
-            val restoreSuccess = backupManager.restoreFromBackup(backupUri, clearExisting = true)
+            @Suppress("UNUSED_VARIABLE")
+            val unused = backupManager.restoreFromBackup(backupUri, clearExisting = true)
             // The operation should complete without throwing an exception
             // We don't assert specific success/failure as test environment has limitations
         } catch (e: Exception) {
@@ -243,7 +244,8 @@ class SQLiteBackupManagerTest {
         
         // Restore from backup without clearing existing - should not throw exception
         try {
-            val restoreSuccess = backupManager.restoreFromBackup(backupUri, clearExisting = false)
+            @Suppress("UNUSED_VARIABLE")
+            val unused = backupManager.restoreFromBackup(backupUri, clearExisting = false)
             // The operation should complete without throwing an exception
         } catch (e: Exception) {
             fail("Restore operation should not throw exception: ${e.message}")
@@ -289,7 +291,8 @@ class SQLiteBackupManagerTest {
         
         // Restore from backup - should not throw exception
         try {
-            val restoreSuccess = backupManager.restoreFromBackup(backupUri, clearExisting = false)
+            @Suppress("UNUSED_VARIABLE")
+            val unused = backupManager.restoreFromBackup(backupUri, clearExisting = false)
             // The operation should complete without throwing an exception
         } catch (e: Exception) {
             fail("Restore operation should not throw exception: ${e.message}")
@@ -315,7 +318,8 @@ class SQLiteBackupManagerTest {
         
         // Restore from backup - should not throw exception
         try {
-            val restoreSuccess = backupManager.restoreFromBackup(backupUri, clearExisting = false)
+            @Suppress("UNUSED_VARIABLE")
+            val unused = backupManager.restoreFromBackup(backupUri, clearExisting = false)
             // The operation should complete without throwing an exception
         } catch (e: Exception) {
             fail("Restore operation should not throw exception: ${e.message}")

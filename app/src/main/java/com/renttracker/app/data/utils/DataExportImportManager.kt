@@ -216,6 +216,7 @@ class DataExportImportManager(
             } else {
                 android.util.Log.d("DataExportImportManager", "Detected JSON backup (legacy)")
                 // JSON backup (legacy)
+                @Suppress("DEPRECATION")
                 importFromJson(uri, clearExisting)
             }
         } catch (e: SecurityException) {

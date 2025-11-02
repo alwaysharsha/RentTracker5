@@ -26,78 +26,78 @@ object BackupTestUtils {
         database: RentTrackerDatabase,
         preferencesManager: PreferencesManager
     ): Boolean {
-        return try {
-            Log.d(TAG, "=== STARTING BACKUP TEST ===")
-            
-            // First, force database to sync and log current database state
-            Log.d(TAG, "Forcing database sync before backup...")
-            try {
-                // Force database to write any pending changes
-                val writableDb = database.openHelper.writableDatabase
-                writableDb.execSQL("PRAGMA synchronous = FULL")
-                writableDb.execSQL("PRAGMA wal_checkpoint(FULL)")
-                Log.d(TAG, "Database sync completed")
-            } catch (e: Exception) {
-                Log.w(TAG, "Could not force database sync: ${e.message}")
-            }
-            
-            logCurrentDatabaseState(database, preferencesManager)
-            
-            // Create backup
-            Log.d(TAG, "Creating test backup...")
-            val backupManager = SQLiteBackupManager(context, database, preferencesManager)
-            val backupUri = backupManager.createBackup()
-            
-            if (backupUri == null) {
-                Log.e(TAG, "Backup creation failed - returned null URI")
-                return false
-            }
-            
-            Log.d(TAG, "Backup created successfully: $backupUri")
-            
-            // Check if backup file is accessible
-            try {
-                context.contentResolver.openInputStream(backupUri)?.use { input ->
-                    val availableBytes = input.available()
-                    Log.d(TAG, "Backup file is accessible, $availableBytes bytes available")
-                } ?: run {
-                    Log.e(TAG, "Cannot access backup file - input stream is null")
-                    return false
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to access backup file", e)
-                return false
-            }
-            
-            // Validate the created backup
-            Log.d(TAG, "Validating created backup...")
-            val isValid = validateBackupFile(context, backupUri)
-            
-            Log.d(TAG, "Backup validation result: $isValid")
-            
-            if (isValid) {
-                // Test restore to ensure it works end-to-end
-                Log.d(TAG, "Testing restore process...")
-                val restoreSuccess = backupManager.restoreFromBackup(backupUri, false)
-                Log.d(TAG, "Restore test result: $restoreSuccess")
-                
-                if (restoreSuccess) {
-                    Log.d(TAG, "✅ BACKUP TEST PASSED")
-                    return true
-                } else {
-                    Log.e(TAG, "❌ BACKUP TEST FAILED: Restore test failed")
-                    return false
-                }
-            } else {
-                Log.e(TAG, "❌ BACKUP TEST FAILED: Backup validation failed")
-                return false
-            }
-            
+    try {
+        Log.d(TAG, "=== STARTING BACKUP TEST ===")
+        
+        // First, force database to sync and log current database state
+        Log.d(TAG, "Forcing database sync before backup...")
+        try {
+            // Force database to write any pending changes
+            val writableDb = database.openHelper.writableDatabase
+            writableDb.execSQL("PRAGMA synchronous = FULL")
+            writableDb.execSQL("PRAGMA wal_checkpoint(FULL)")
+            Log.d(TAG, "Database sync completed")
         } catch (e: Exception) {
-            Log.e(TAG, "❌ BACKUP TEST FAILED: Exception during backup test", e)
+            Log.w(TAG, "Could not force database sync: ${e.message}")
+        }
+        
+        logCurrentDatabaseState(database, preferencesManager)
+        
+        // Create backup
+        Log.d(TAG, "Creating test backup...")
+        val backupManager = SQLiteBackupManager(context, database, preferencesManager)
+        val backupUri = backupManager.createBackup()
+        
+        if (backupUri == null) {
+            Log.e(TAG, "Backup creation failed - returned null URI")
             return false
         }
+        
+        Log.d(TAG, "Backup created successfully: $backupUri")
+        
+        // Check if backup file is accessible
+        try {
+            context.contentResolver.openInputStream(backupUri)?.use { input ->
+                val availableBytes = input.available()
+                Log.d(TAG, "Backup file is accessible, $availableBytes bytes available")
+            } ?: run {
+                Log.e(TAG, "Cannot access backup file - input stream is null")
+                return false
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to access backup file", e)
+            return false
+        }
+        
+        // Validate the created backup
+        Log.d(TAG, "Validating created backup...")
+        val isValid = validateBackupFile(context, backupUri)
+        
+        Log.d(TAG, "Backup validation result: $isValid")
+        
+        if (isValid) {
+            // Test restore to ensure it works end-to-end
+            Log.d(TAG, "Testing restore process...")
+            val restoreSuccess = backupManager.restoreFromBackup(backupUri, false)
+            Log.d(TAG, "Restore test result: $restoreSuccess")
+            
+            if (restoreSuccess) {
+                Log.d(TAG, "✅ BACKUP TEST PASSED")
+                return true
+            } else {
+                Log.e(TAG, "❌ BACKUP TEST FAILED: Restore test failed")
+                return false
+            }
+        } else {
+            Log.e(TAG, "❌ BACKUP TEST FAILED: Backup validation failed")
+            return false
+        }
+        
+    } catch (e: Exception) {
+        Log.e(TAG, "❌ BACKUP TEST FAILED: Exception during backup test", e)
+        return false
     }
+}
     
     /**
      * Validates a backup file format and contents

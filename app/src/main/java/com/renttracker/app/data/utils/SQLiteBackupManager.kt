@@ -132,7 +132,7 @@ class SQLiteBackupManager(
                 return false
             }
             
-            var restoreSuccess = false
+            var restoreSuccess: Boolean
             
             try {
                 android.util.Log.d("SQLiteBackupManager", "Opening ZIP file for reading")
