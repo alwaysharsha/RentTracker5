@@ -329,6 +329,7 @@ class SQLiteBackupManagerTest {
             
             // At minimum, the settings should be accessible and not null
             assertNotNull("Currency should not be null", finalCurrency)
+            assertNotNull("App lock should not be null", finalAppLock)
             // Payment methods should also be accessible
             assertNotNull("Payment methods should not be null", finalPaymentMethods)
         } catch (e: Exception) {
