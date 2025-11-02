@@ -2,8 +2,11 @@ package com.renttracker.app.ui.screens
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.provider.MediaStore
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -41,46 +44,14 @@ fun DocumentsScreen(
     var documentToDelete by remember { mutableStateOf<Document?>(null) }
     var showUploadDialog by remember { mutableStateOf(false) }
     
-    // File picker launcher
-    val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
+    // Single activity result launcher for both file picker and camera
+    val activityLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
         try {
-            uri?.let { fileUri ->
-                handleFileUpload(context, documentViewModel, fileUri)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // Show error or handle gracefully
-        }
-    }
-    
-    // Camera launcher
-    var photoUri by remember { mutableStateOf<Uri?>(null) }
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
-    ) { success ->
-        try {
-            if (success && photoUri != null) {
-                photoUri?.let { uri ->
+            if (result.resultCode == android.app.Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
                     handleFileUpload(context, documentViewModel, uri)
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // Show error or handle gracefully
-        }
-    }
-    
-    // Permission launcher for camera
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        try {
-            if (isGranted) {
-                photoUri = createImageUri(context)
-                photoUri?.let { uri ->
-                    cameraLauncher.launch(uri)
                 }
             }
         } catch (e: Exception) {
@@ -263,7 +234,11 @@ fun DocumentsScreen(
                         OutlinedButton(
                             onClick = {
                                 try {
-                                    filePickerLauncher.launch("*/*")
+                                    val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                                        type = "*/*"
+                                        addCategory(Intent.CATEGORY_OPENABLE)
+                                    }
+                                    activityLauncher.launch(Intent.createChooser(intent, "Select a file"))
                                     showUploadDialog = false
                                 } catch (e: Exception) {
                                     e.printStackTrace()
@@ -286,14 +261,22 @@ fun DocumentsScreen(
                                             context,
                                             Manifest.permission.CAMERA
                                         ) == PackageManager.PERMISSION_GRANTED -> {
-                                            photoUri = createImageUri(context)
+                                            val photoUri = createImageUri(context)
                                             photoUri?.let { uri ->
-                                                cameraLauncher.launch(uri)
+                                                val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                                                    putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                                                    addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                }
+                                                activityLauncher.launch(cameraIntent)
                                             }
                                             showUploadDialog = false
                                         }
                                         else -> {
-                                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                                            // Request camera permission
+                                            val permissionIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                                data = Uri.fromParts("package", context.packageName, null)
+                                            }
+                                            activityLauncher.launch(permissionIntent)
                                         }
                                     }
                                 } catch (e: Exception) {
