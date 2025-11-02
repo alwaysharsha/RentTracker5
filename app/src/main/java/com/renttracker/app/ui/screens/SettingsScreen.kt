@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewModelScope
+import com.renttracker.app.BuildConfig
 import com.renttracker.app.MainActivity
 import com.renttracker.app.data.database.RentTrackerDatabase
 import com.renttracker.app.data.preferences.PreferencesManager
@@ -248,39 +249,41 @@ fun SettingsScreen(
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    // Backup Test Button
-                    Button(
-                        onClick = {
-                            coroutineScope.launch {
-                                try {
-                                    android.util.Log.d("SettingsScreen", "Starting backup test...")
-                                    val testResult = BackupTestUtils.createAndValidateTestBackup(
-                                        context,
-                                        database,
-                                        preferencesManager
-                                    )
-                                    
-                                    if (testResult) {
-                                        android.util.Log.d("SettingsScreen", "✅ Backup test PASSED")
-                                        Toast.makeText(context, "Backup test PASSED! Check logs for details.", Toast.LENGTH_LONG).show()
-                                    } else {
-                                        android.util.Log.e("SettingsScreen", "❌ Backup test FAILED")
-                                        Toast.makeText(context, "Backup test FAILED! Check logs for details.", Toast.LENGTH_LONG).show()
+                    // Backup Test Button - Feature Flag Controlled
+                    if (BuildConfig.ENABLE_TEST_BACKUP_SYSTEM) {
+                        Button(
+                            onClick = {
+                                coroutineScope.launch {
+                                    try {
+                                        android.util.Log.d("SettingsScreen", "Starting backup test...")
+                                        val testResult = BackupTestUtils.createAndValidateTestBackup(
+                                            context,
+                                            database,
+                                            preferencesManager
+                                        )
+                                        
+                                        if (testResult) {
+                                            android.util.Log.d("SettingsScreen", "✅ Backup test PASSED")
+                                            Toast.makeText(context, "Backup test PASSED! Check logs for details.", Toast.LENGTH_LONG).show()
+                                        } else {
+                                            android.util.Log.e("SettingsScreen", "❌ Backup test FAILED")
+                                            Toast.makeText(context, "Backup test FAILED! Check logs for details.", Toast.LENGTH_LONG).show()
+                                        }
+                                    } catch (e: Exception) {
+                                        android.util.Log.e("SettingsScreen", "Exception during backup test", e)
+                                        Toast.makeText(context, "Backup test ERROR: ${e.message}", Toast.LENGTH_LONG).show()
                                     }
-                                } catch (e: Exception) {
-                                    android.util.Log.e("SettingsScreen", "Exception during backup test", e)
-                                    Toast.makeText(context, "Backup test ERROR: ${e.message}", Toast.LENGTH_LONG).show()
                                 }
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary
-                        )
-                    ) {
-                        Icon(Icons.Filled.BugReport, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Test Backup System")
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                            )
+                        ) {
+                            Icon(Icons.Filled.BugReport, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Test Backup System")
+                        }
                     }
                 }
             }
@@ -296,7 +299,7 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("Version: 4.8.5")
-                    Text("Build: 59")
+                    Text("Build: 60")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }

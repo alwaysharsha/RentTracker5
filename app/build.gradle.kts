@@ -28,6 +28,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("boolean", "ENABLE_TEST_BACKUP_SYSTEM", "false")
+        }
+        debug {
+            buildConfigField("boolean", "ENABLE_TEST_BACKUP_SYSTEM", "false")
         }
     }
     
@@ -42,6 +46,7 @@ android {
     
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     
     composeOptions {
