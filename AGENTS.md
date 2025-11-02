@@ -1,5 +1,6 @@
 This project is a rent tracker app for android
 My build system is gradle
+Environment is Windows 11, run the commands in Powershell.
 Code is in Kotlin
 System requirements: 
     - minSdkVersion 21
