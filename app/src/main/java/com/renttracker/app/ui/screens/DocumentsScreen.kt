@@ -1,11 +1,9 @@
 package com.renttracker.app.ui.screens
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.provider.MediaStore
 import android.provider.Settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,7 +24,6 @@ import com.renttracker.app.MainActivity
 import com.renttracker.app.data.model.Document
 import com.renttracker.app.data.model.EntityType
 import com.renttracker.app.ui.viewmodel.DocumentViewModel
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 

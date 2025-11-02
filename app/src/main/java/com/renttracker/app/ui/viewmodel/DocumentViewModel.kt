@@ -25,14 +25,6 @@ class DocumentViewModel(
 
     val allDocuments: Flow<List<Document>> = repository.getAllDocuments()
 
-    fun getDocumentsByEntity(entityType: EntityType, entityId: Long): Flow<List<Document>> {
-        return repository.getDocumentsByEntity(entityType, entityId)
-    }
-
-    fun getDocumentCountByEntity(entityType: EntityType, entityId: Long): Flow<Int> {
-        return repository.getDocumentCountByEntity(entityType, entityId)
-    }
-
     fun getDocumentById(documentId: Long): Flow<Document?> {
         return repository.getDocumentByIdFlow(documentId)
     }

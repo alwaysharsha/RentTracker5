@@ -279,9 +279,3 @@ fun RentTrackerApp(
         }
     }
 }
-
-data class BottomNavItem(
-    val label: String,
-    val route: String,
-    val icon: ImageVector
-)
