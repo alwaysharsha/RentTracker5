@@ -45,8 +45,13 @@ fun DocumentsScreen(
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { fileUri ->
-            handleFileUpload(context, documentViewModel, fileUri)
+        try {
+            uri?.let { fileUri ->
+                handleFileUpload(context, documentViewModel, fileUri)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Show error or handle gracefully
         }
     }
     
@@ -55,10 +60,15 @@ fun DocumentsScreen(
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
-        if (success && photoUri != null) {
-            photoUri?.let { uri ->
-                handleFileUpload(context, documentViewModel, uri)
+        try {
+            if (success && photoUri != null) {
+                photoUri?.let { uri ->
+                    handleFileUpload(context, documentViewModel, uri)
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Show error or handle gracefully
         }
     }
     
@@ -66,11 +76,16 @@ fun DocumentsScreen(
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        if (isGranted) {
-            photoUri = createImageUri(context)
-            photoUri?.let { uri ->
-                cameraLauncher.launch(uri)
+        try {
+            if (isGranted) {
+                photoUri = createImageUri(context)
+                photoUri?.let { uri ->
+                    cameraLauncher.launch(uri)
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Show error or handle gracefully
         }
     }
 
@@ -247,8 +262,13 @@ fun DocumentsScreen(
                         // File picker button
                         OutlinedButton(
                             onClick = {
-                                filePickerLauncher.launch("*/*")
-                                showUploadDialog = false
+                                try {
+                                    filePickerLauncher.launch("*/*")
+                                    showUploadDialog = false
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                    // Handle error gracefully
+                                }
                             },
                             modifier = Modifier.weight(1f)
                         ) {
@@ -260,20 +280,25 @@ fun DocumentsScreen(
                         // Camera button
                         OutlinedButton(
                             onClick = {
-                                when {
-                                    ContextCompat.checkSelfPermission(
-                                        context,
-                                        Manifest.permission.CAMERA
-                                    ) == PackageManager.PERMISSION_GRANTED -> {
-                                        photoUri = createImageUri(context)
-                                        photoUri?.let { uri ->
-                                            cameraLauncher.launch(uri)
+                                try {
+                                    when {
+                                        ContextCompat.checkSelfPermission(
+                                            context,
+                                            Manifest.permission.CAMERA
+                                        ) == PackageManager.PERMISSION_GRANTED -> {
+                                            photoUri = createImageUri(context)
+                                            photoUri?.let { uri ->
+                                                cameraLauncher.launch(uri)
+                                            }
+                                            showUploadDialog = false
                                         }
-                                        showUploadDialog = false
+                                        else -> {
+                                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                                        }
                                     }
-                                    else -> {
-                                        permissionLauncher.launch(Manifest.permission.CAMERA)
-                                    }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                    // Handle error gracefully
                                 }
                             },
                             modifier = Modifier.weight(1f)
@@ -381,18 +406,23 @@ private fun handleFileUpload(
     documentViewModel: DocumentViewModel,
     fileUri: Uri
 ) {
-    val fileName = getFileName(context, fileUri) ?: "document_${System.currentTimeMillis()}"
-    
-    // For now, we'll upload as a general document without entity association
-    // This can be enhanced later to allow users to select entity type
-    documentViewModel.uploadDocument(
-        uri = fileUri,
-        documentName = fileName,
-        entityType = EntityType.OWNER, // Default to OWNER for general documents
-        entityId = 0L, // Use 0 for general documents not tied to specific entity
-        notes = null
-    ) { success ->
-        // Handle upload completion if needed
+    try {
+        val fileName = getFileName(context, fileUri) ?: "document_${System.currentTimeMillis()}"
+        
+        // For now, we'll upload as a general document without entity association
+        // This can be enhanced later to allow users to select entity type
+        documentViewModel.uploadDocument(
+            uri = fileUri,
+            documentName = fileName,
+            entityType = EntityType.OWNER, // Default to OWNER for general documents
+            entityId = 0L, // Use 0 for general documents not tied to specific entity
+            notes = null
+        ) { success ->
+            // Handle upload completion if needed
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        // Handle error gracefully
     }
 }
 
@@ -401,16 +431,24 @@ private fun createImageUri(context: Context): Uri? {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val imageFileName = "IMG_$timeStamp.jpg"
         val storageDir = File(context.cacheDir, "images")
+        
+        // Create directory if it doesn't exist
         if (!storageDir.exists()) {
             storageDir.mkdirs()
         }
+        
         val imageFile = File(storageDir, imageFileName)
         
-        FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            imageFile
-        )
+        // Check if file was created successfully
+        if (imageFile.exists() || imageFile.createNewFile()) {
+            FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                imageFile
+            )
+        } else {
+            null
+        }
     } catch (e: Exception) {
         e.printStackTrace()
         null
