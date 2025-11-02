@@ -173,6 +173,12 @@ class SQLiteBackupManager(
                             DATABASE_FILE_NAME -> {
                                 restoreDatabase(zipIn)
                             }
+                            "renttracker_database.db-wal" -> {
+                                restoreWalFile(zipIn)
+                            }
+                            "renttracker_database.db-shm" -> {
+                                restoreShmFile(zipIn)
+                            }
                             DOCUMENTS_FOLDER -> {
                                 // Skip folder entries, actual documents are handled as individual files
                             }
@@ -215,6 +221,26 @@ class SQLiteBackupManager(
         try {
             android.util.Log.d("SQLiteBackupManager", "=== ADDING DATABASE TO BACKUP ===")
             
+            // Force WAL checkpoint to merge all changes into main database
+            try {
+                val writableDb = database.openHelper.writableDatabase
+                android.util.Log.d("SQLiteBackupManager", "Forcing WAL checkpoint before backup...")
+                writableDb.execSQL("PRAGMA wal_checkpoint(FULL)")
+                android.util.Log.d("SQLiteBackupManager", "WAL checkpoint completed")
+                
+                // Check if WAL files exist and their sizes
+                val dbFile = getDatabaseFile()
+                val walFile = File("${dbFile.absolutePath}-wal")
+                val shmFile = File("${dbFile.absolutePath}-shm")
+                
+                android.util.Log.d("SQLiteBackupManager", "Main DB file: ${dbFile.absolutePath} (${dbFile.length()} bytes)")
+                android.util.Log.d("SQLiteBackupManager", "WAL file exists: ${walFile.exists()} (${walFile.length()} bytes)")
+                android.util.Log.d("SQLiteBackupManager", "SHM file exists: ${shmFile.exists()} (${shmFile.length()} bytes)")
+                
+            } catch (e: Exception) {
+                android.util.Log.w("SQLiteBackupManager", "Could not force WAL checkpoint: ${e.message}")
+            }
+            
             // Get the actual database file path
             val dbFile = getDatabaseFile()
             android.util.Log.d("SQLiteBackupManager", "Database file path: ${dbFile.absolutePath}")
@@ -230,6 +256,31 @@ class SQLiteBackupManager(
                 }
                 zipOut.closeEntry()
                 android.util.Log.d("SQLiteBackupManager", "✅ Database added to backup: $bytesCopied bytes")
+                
+                // Also add WAL and SHM files if they exist (for complete backup)
+                val walFile = File("${dbFile.absolutePath}-wal")
+                val shmFile = File("${dbFile.absolutePath}-shm")
+                
+                if (walFile.exists() && walFile.length() > 0) {
+                    android.util.Log.d("SQLiteBackupManager", "Adding WAL file to backup...")
+                    zipOut.putNextEntry(ZipEntry("renttracker_database.db-wal"))
+                    val walBytes = FileInputStream(walFile).use { input ->
+                        input.copyTo(zipOut)
+                    }
+                    zipOut.closeEntry()
+                    android.util.Log.d("SQLiteBackupManager", "✅ WAL file added to backup: $walBytes bytes")
+                }
+                
+                if (shmFile.exists() && shmFile.length() > 0) {
+                    android.util.Log.d("SQLiteBackupManager", "Adding SHM file to backup...")
+                    zipOut.putNextEntry(ZipEntry("renttracker_database.db-shm"))
+                    val shmBytes = FileInputStream(shmFile).use { input ->
+                        input.copyTo(zipOut)
+                    }
+                    zipOut.closeEntry()
+                    android.util.Log.d("SQLiteBackupManager", "✅ SHM file added to backup: $shmBytes bytes")
+                }
+                
             } else {
                 android.util.Log.e("SQLiteBackupManager", "❌ Database file is not valid for backup:")
                 android.util.Log.e("SQLiteBackupManager", "   Exists: ${dbFile.exists()}")
@@ -465,6 +516,42 @@ class SQLiteBackupManager(
     /**
      * Restores the database from zip
      */
+    /**
+     * Restores WAL file from the zip
+     */
+    private fun restoreWalFile(zipIn: ZipInputStream) {
+        try {
+            android.util.Log.d("SQLiteBackupManager", "Restoring WAL file...")
+            val dbFile = getDatabaseFile()
+            val walFile = File("${dbFile.absolutePath}-wal")
+            
+            FileOutputStream(walFile).use { output ->
+                zipIn.copyTo(output)
+            }
+            android.util.Log.d("SQLiteBackupManager", "✅ WAL file restored successfully")
+        } catch (e: Exception) {
+            android.util.Log.e("SQLiteBackupManager", "Failed to restore WAL file", e)
+        }
+    }
+
+    /**
+     * Restores SHM file from the zip
+     */
+    private fun restoreShmFile(zipIn: ZipInputStream) {
+        try {
+            android.util.Log.d("SQLiteBackupManager", "Restoring SHM file...")
+            val dbFile = getDatabaseFile()
+            val shmFile = File("${dbFile.absolutePath}-shm")
+            
+            FileOutputStream(shmFile).use { output ->
+                zipIn.copyTo(output)
+            }
+            android.util.Log.d("SQLiteBackupManager", "✅ SHM file restored successfully")
+        } catch (e: Exception) {
+            android.util.Log.e("SQLiteBackupManager", "Failed to restore SHM file", e)
+        }
+    }
+
     private fun restoreDatabase(zipIn: ZipInputStream) {
         try {
             val dbFile = getDatabaseFile()
