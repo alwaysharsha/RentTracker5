@@ -7,8 +7,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.MediaStore
 import android.provider.Settings
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -43,54 +41,7 @@ fun DocumentsScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var documentToDelete by remember { mutableStateOf<Document?>(null) }
     var showUploadDialog by remember { mutableStateOf(false) }
-    
-    // File picker launcher
-    val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        try {
-            uri?.let { fileUri ->
-                handleFileUpload(context, documentViewModel, fileUri)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // Show error or handle gracefully
-        }
-    }
-    
-    // Camera launcher
-    var photoUri by remember { mutableStateOf<Uri?>(null) }
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
-    ) { success ->
-        try {
-            if (success && photoUri != null) {
-                photoUri?.let { uri ->
-                    handleFileUpload(context, documentViewModel, uri)
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // Show error or handle gracefully
-        }
-    }
-    
-    // Permission launcher for camera
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        try {
-            if (isGranted) {
-                photoUri = createImageUri(context)
-                photoUri?.let { uri ->
-                    cameraLauncher.launch(uri)
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // Show error or handle gracefully
-        }
-    }
+    var showPermissionDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -266,7 +217,11 @@ fun DocumentsScreen(
                         OutlinedButton(
                             onClick = {
                                 try {
-                                    filePickerLauncher.launch("*/*")
+                                    val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                                        type = "*/*"
+                                        addCategory(Intent.CATEGORY_OPENABLE)
+                                    }
+                                    context.startActivity(Intent.createChooser(intent, "Select a file"))
                                     showUploadDialog = false
                                 } catch (e: Exception) {
                                     e.printStackTrace()
@@ -289,14 +244,19 @@ fun DocumentsScreen(
                                             context,
                                             Manifest.permission.CAMERA
                                         ) == PackageManager.PERMISSION_GRANTED -> {
-                                            photoUri = createImageUri(context)
+                                            val photoUri = createImageUri(context)
                                             photoUri?.let { uri ->
-                                                cameraLauncher.launch(uri)
+                                                val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                                                    putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                                                    addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                }
+                                                context.startActivity(cameraIntent)
                                             }
                                             showUploadDialog = false
                                         }
                                         else -> {
-                                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                                            showUploadDialog = false
+                                            showPermissionDialog = true
                                         }
                                     }
                                 } catch (e: Exception) {
@@ -315,6 +275,40 @@ fun DocumentsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showUploadDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+    
+    // Permission Dialog
+    if (showPermissionDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermissionDialog = false },
+            title = { Text("Camera Permission Required") },
+            text = { Text("Camera permission is required to take photos. Please grant camera permission in app settings.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        try {
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.fromParts("package", context.packageName, null)
+                            }
+                            context.startActivity(intent)
+                            showPermissionDialog = false
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            showPermissionDialog = false
+                        }
+                    }
+                ) {
+                    Text("Open Settings")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showPermissionDialog = false }
+                ) {
                     Text("Cancel")
                 }
             }
