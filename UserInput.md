@@ -220,8 +220,16 @@ Show widget to show the count of active leases and total payment
 
 ### Fields
 
+- Implement document upload UI now, simple mechanism of file picker or camera.
+
+### Issues
+
+## Phase 5 (Don't start the development yet, until the phase 1 is completed)
+
+### Fields
+
 - GoogleDrive integration to back up the data
-- Implement document upload UI now
+
 
 ### Issues
 
@@ -230,6 +238,7 @@ Show widget to show the count of active leases and total payment
 - [x] Phase 2
 - [x] Phase 3
 - [ ] Phase 4
+- [ ] Phase 5
 
 ## Icons
 
