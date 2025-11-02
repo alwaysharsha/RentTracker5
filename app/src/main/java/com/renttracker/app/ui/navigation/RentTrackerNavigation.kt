@@ -1,25 +1,12 @@
 package com.renttracker.app.ui.navigation
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.Arrangement
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -287,84 +274,6 @@ fun RentTrackerApp(
                     database = database,
                     preferencesManager = preferencesManager
                 )
-            }
-        }
-    }
-}
-
-@Composable
-fun BottomNavigationBar(navController: NavHostController) {
-    val items = listOf(
-        BottomNavItem("Docs", Screen.Documents.route, Icons.Filled.Star),
-        BottomNavItem("Home", Screen.Dashboard.route, Icons.Filled.Dashboard),
-        BottomNavItem("Owners", Screen.Owners.route, Icons.Filled.Person),
-        BottomNavItem("Buildings", Screen.Buildings.route, Icons.Filled.Home),
-        BottomNavItem("Tenants", Screen.Tenants.route, Icons.Filled.Group),
-        BottomNavItem("Payments", Screen.Payments.route, Icons.Filled.Payment),
-        BottomNavItem("Vendors", Screen.Vendors.route, Icons.Filled.Build),
-        BottomNavItem("Expenses", Screen.Expenses.route, Icons.Filled.MoneyOff),
-        BottomNavItem("Reports", Screen.Reports.route, Icons.Filled.Assessment),
-        BottomNavItem("Settings", Screen.Settings.route, Icons.Filled.Settings)
-    )
-
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
-
-    // Only show bottom bar on main screens
-    val showBottomBar = items.any { 
-        currentDestination?.hierarchy?.any { dest -> dest.route == it.route } == true
-    }
-
-    if (showBottomBar) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 3.dp
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                items.forEach { item ->
-                    Column(
-                        modifier = Modifier
-                            .clickable {
-                                navController.navigate(item.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }
-                            .padding(8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            imageVector = item.icon,
-                            contentDescription = item.label,
-                            modifier = Modifier.size(24.dp),
-                            tint = if (currentDestination?.hierarchy?.any { it.route == item.route } == true) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            }
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = item.label,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (currentDestination?.hierarchy?.any { it.route == item.route } == true) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            }
-                        )
-                    }
-                }
             }
         }
     }
