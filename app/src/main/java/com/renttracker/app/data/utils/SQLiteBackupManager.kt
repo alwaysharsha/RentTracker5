@@ -236,6 +236,31 @@ class SQLiteBackupManager(
                 android.util.Log.e("SQLiteBackupManager", "   CanRead: ${dbFile.canRead()}")
                 android.util.Log.e("SQLiteBackupManager", "   Size: ${dbFile.length()} bytes")
                 
+                // Try to find the database using the Room database instance
+                android.util.Log.w("SQLiteBackupManager", "Attempting to find database through Room instance...")
+                try {
+                    // Force database to be created and written
+                    val writableDb = database.openHelper.writableDatabase
+                    val dbPath = writableDb.path ?: "unknown"
+                    android.util.Log.d("SQLiteBackupManager", "Room database path: $dbPath")
+                    val roomDbFile = File(dbPath)
+                    android.util.Log.d("SQLiteBackupManager", "Room database exists: ${roomDbFile.exists()}")
+                    android.util.Log.d("SQLiteBackupManager", "Room database size: ${roomDbFile.length()} bytes")
+                    
+                    if (roomDbFile.exists() && roomDbFile.length() > 0) {
+                        android.util.Log.d("SQLiteBackupManager", "Found valid Room database, adding to ZIP...")
+                        zipOut.putNextEntry(ZipEntry(DATABASE_FILE_NAME))
+                        val bytesCopied = FileInputStream(roomDbFile).use { input ->
+                            input.copyTo(zipOut)
+                        }
+                        zipOut.closeEntry()
+                        android.util.Log.d("SQLiteBackupManager", "✅ Room database added to backup: $bytesCopied bytes")
+                        return
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("SQLiteBackupManager", "Failed to access Room database", e)
+                }
+                
                 // Create an empty database file to ensure backup structure is valid
                 android.util.Log.w("SQLiteBackupManager", "Creating empty database file to maintain backup structure")
                 zipOut.putNextEntry(ZipEntry(DATABASE_FILE_NAME))

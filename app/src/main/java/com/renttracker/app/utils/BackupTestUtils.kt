@@ -29,7 +29,18 @@ object BackupTestUtils {
         return try {
             Log.d(TAG, "=== STARTING BACKUP TEST ===")
             
-            // First, log current database state
+            // First, force database to sync and log current database state
+            Log.d(TAG, "Forcing database sync before backup...")
+            try {
+                // Force database to write any pending changes
+                val writableDb = database.openHelper.writableDatabase
+                writableDb.execSQL("PRAGMA synchronous = FULL")
+                writableDb.execSQL("PRAGMA wal_checkpoint(FULL)")
+                Log.d(TAG, "Database sync completed")
+            } catch (e: Exception) {
+                Log.w(TAG, "Could not force database sync: ${e.message}")
+            }
+            
             logCurrentDatabaseState(database, preferencesManager)
             
             // Create backup
@@ -71,7 +82,7 @@ object BackupTestUtils {
                 Log.d(TAG, "Restore test result: $restoreSuccess")
                 
                 if (restoreSuccess) {
-                    Log.d(TAG, "✅ BACKUP TEST COMPLETE: All tests passed!")
+                    Log.d(TAG, "✅ BACKUP TEST PASSED")
                     return true
                 } else {
                     Log.e(TAG, "❌ BACKUP TEST FAILED: Restore test failed")
@@ -83,7 +94,7 @@ object BackupTestUtils {
             }
             
         } catch (e: Exception) {
-            Log.e(TAG, "Exception during backup test", e)
+            Log.e(TAG, "❌ BACKUP TEST FAILED: Exception during backup test", e)
             return false
         }
     }
@@ -207,17 +218,71 @@ object BackupTestUtils {
             Log.d(TAG, "Database file size: ${dbFileObj.length()} bytes")
             Log.d(TAG, "Database file readable: ${dbFileObj.canRead()}")
             
-            val owners = database.ownerDao().getAllOwners().first()
-            val buildings = database.buildingDao().getAllBuildings().first()
-            val tenants = database.tenantDao().getActiveTenants().first()
-            val payments = database.paymentDao().getAllPayments().first()
-            val documents = database.documentDao().getAllDocuments().first()
+            // Force database to be opened and check if it's actually writable
+            try {
+                val writableDb = database.openHelper.writableDatabase
+                Log.d(TAG, "Database is writable: ${writableDb.isOpen}")
+                Log.d(TAG, "Database version: ${writableDb.version}")
+                Log.d(TAG, "Database path from writable: ${writableDb.path}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error accessing writable database", e)
+            }
             
-            Log.d(TAG, "Owners count: ${owners.size}")
-            Log.d(TAG, "Buildings count: ${buildings.size}")
-            Log.d(TAG, "Active tenants count: ${tenants.size}")
-            Log.d(TAG, "Payments count: ${payments.size}")
-            Log.d(TAG, "Documents count: ${documents.size}")
+            // Get actual data counts with detailed logging
+            try {
+                Log.d(TAG, "Querying owners table...")
+                val owners = database.ownerDao().getAllOwners().first()
+                Log.d(TAG, "Owners count: ${owners.size}")
+                if (owners.isNotEmpty()) {
+                    Log.d(TAG, "Sample owner: ${owners.first()}")
+                }
+                
+                Log.d(TAG, "Querying buildings table...")
+                val buildings = database.buildingDao().getAllBuildings().first()
+                Log.d(TAG, "Buildings count: ${buildings.size}")
+                if (buildings.isNotEmpty()) {
+                    Log.d(TAG, "Sample building: ${buildings.first()}")
+                }
+                
+                Log.d(TAG, "Querying tenants table...")
+                val tenants = database.tenantDao().getActiveTenants().first()
+                Log.d(TAG, "Active tenants count: ${tenants.size}")
+                if (tenants.isNotEmpty()) {
+                    Log.d(TAG, "Sample tenant: ${tenants.first()}")
+                }
+                
+                Log.d(TAG, "Querying payments table...")
+                val payments = database.paymentDao().getAllPayments().first()
+                Log.d(TAG, "Payments count: ${payments.size}")
+                if (payments.isNotEmpty()) {
+                    Log.d(TAG, "Sample payment: ${payments.first()}")
+                }
+                
+                Log.d(TAG, "Querying documents table...")
+                val documents = database.documentDao().getAllDocuments().first()
+                Log.d(TAG, "Documents count: ${documents.size}")
+                if (documents.isNotEmpty()) {
+                    Log.d(TAG, "Sample document: ${documents.first()}")
+                }
+                
+                // Check if there are any vendor or expense records
+                try {
+                    val vendors = database.vendorDao().getAllVendors().first()
+                    Log.d(TAG, "Vendors count: ${vendors.size}")
+                } catch (e: Exception) {
+                    Log.w(TAG, "Could not query vendors: ${e.message}")
+                }
+                
+                try {
+                    val expenses = database.expenseDao().getAllExpenses().first()
+                    Log.d(TAG, "Expenses count: ${expenses.size}")
+                } catch (e: Exception) {
+                    Log.w(TAG, "Could not query expenses: ${e.message}")
+                }
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Error querying database tables", e)
+            }
             
             // Log preferences
             try {
@@ -229,13 +294,13 @@ object BackupTestUtils {
                 Log.d(TAG, "App Lock: $appLock")
                 Log.d(TAG, "Payment Methods: $paymentMethods")
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to read preferences: ${e.message}")
+                Log.e(TAG, "Error reading preferences", e)
             }
             
             Log.d(TAG, "=== END DATABASE STATE ===")
-            
         } catch (e: Exception) {
-            Log.e(TAG, "Exception while logging database state", e)
+            Log.e(TAG, "Error in logCurrentDatabaseState", e)
         }
     }
+
 }
