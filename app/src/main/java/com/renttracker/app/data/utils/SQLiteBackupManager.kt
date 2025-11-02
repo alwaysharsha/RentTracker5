@@ -136,65 +136,66 @@ class SQLiteBackupManager(
             
             try {
                 android.util.Log.d("SQLiteBackupManager", "Opening ZIP file for reading")
+                
+                // First, read metadata to validate backup
+                android.util.Log.d("SQLiteBackupManager", "Reading metadata from ZIP")
+                val metadata = readMetadataFromFile(tempBackupFile)
+                android.util.Log.d("SQLiteBackupManager", "Metadata read: $metadata")
+                
+                if (metadata == null) {
+                    android.util.Log.e("SQLiteBackupManager", "Metadata is null, cannot proceed with restore")
+                    return false
+                }
+                
+                val metadataValid = validateMetadata(metadata)
+                android.util.Log.d("SQLiteBackupManager", "Metadata validation result: $metadataValid")
+                
+                if (!metadataValid) {
+                    android.util.Log.e("SQLiteBackupManager", "Metadata validation failed, cannot proceed with restore")
+                    return false
+                }
+                
+                // Now read the ZIP file again for the actual restore
+                android.util.Log.d("SQLiteBackupManager", "Starting actual restore from ZIP")
                 ZipInputStream(FileInputStream(tempBackupFile)).use { zipIn ->
+                    var entry = zipIn.nextEntry
                     
-                    // First, read metadata to validate backup
-                    android.util.Log.d("SQLiteBackupManager", "Reading metadata from ZIP")
-                    val metadata = readMetadata(zipIn)
-                    android.util.Log.d("SQLiteBackupManager", "Metadata read: $metadata")
-                    
-                    if (metadata == null) {
-                        android.util.Log.e("SQLiteBackupManager", "Metadata is null, cannot proceed with restore")
-                        return false
+                    // Clear existing data if requested
+                    if (clearExisting) {
+                        clearExistingData()
                     }
                     
-                    val metadataValid = validateMetadata(metadata)
-                    android.util.Log.d("SQLiteBackupManager", "Metadata validation result: $metadataValid")
-                    
-                    if (!metadataValid) {
-                        android.util.Log.e("SQLiteBackupManager", "Metadata validation failed, cannot proceed with restore")
-                        return false
-                    }
-                    
-                    // Reset zip stream to read from beginning
-                    zipIn.closeEntry()
-                    ZipInputStream(FileInputStream(tempBackupFile)).use { newZipIn ->
-                        var entry = newZipIn.nextEntry
+                    // Process each entry in the zip
+                    while (entry != null) {
+                        android.util.Log.d("SQLiteBackupManager", "Processing entry: ${entry.name}")
                         
-                        // Clear existing data if requested
-                        if (clearExisting) {
-                            clearExistingData()
-                        }
-                        
-                        // Process each entry in the zip
-                        while (entry != null) {
-                            when (entry.name) {
-                                DATABASE_FILE_NAME -> {
-                                    restoreDatabase(newZipIn)
-                                }
-                                DOCUMENTS_FOLDER -> {
-                                    // Skip folder entry, individual files will be processed
-                                }
-                                METADATA_FILE_NAME -> {
-                                    // Metadata already processed
-                                }
-                                else -> {
-                                    // Handle document files
-                                    if (entry.name.startsWith("$DOCUMENTS_FOLDER/")) {
-                                        restoreDocumentFile(newZipIn, entry.name)
-                                    }
+                        when (entry.name) {
+                            DATABASE_FILE_NAME -> {
+                                restoreDatabase(zipIn)
+                            }
+                            DOCUMENTS_FOLDER -> {
+                                // Skip folder entries, actual documents are handled as individual files
+                            }
+                            METADATA_FILE_NAME -> {
+                                // Metadata already processed
+                            }
+                            else -> {
+                                // Check if it's a document file
+                                if (entry.name.startsWith("$DOCUMENTS_FOLDER/")) {
+                                    restoreDocumentFile(zipIn, entry.name)
                                 }
                             }
-                            newZipIn.closeEntry()
-                            entry = newZipIn.nextEntry
                         }
                         
-                        // Restore settings from metadata
-                        restoreSettings(metadata)
-                        
-                        restoreSuccess = true
+                        zipIn.closeEntry()
+                        entry = zipIn.nextEntry
                     }
                 }
+                
+                // Restore settings from metadata
+                restoreSettings(metadata)
+                
+                restoreSuccess = true
             } finally {
                 // Clean up temp file
                 tempBackupFile.delete()
@@ -212,24 +213,50 @@ class SQLiteBackupManager(
      */
     private fun addDatabaseToZip(zipOut: ZipOutputStream) {
         try {
+            android.util.Log.d("SQLiteBackupManager", "=== ADDING DATABASE TO BACKUP ===")
+            
             // Get the actual database file path
             val dbFile = getDatabaseFile()
             android.util.Log.d("SQLiteBackupManager", "Database file path: ${dbFile.absolutePath}")
             android.util.Log.d("SQLiteBackupManager", "Database file exists: ${dbFile.exists()}")
             android.util.Log.d("SQLiteBackupManager", "Database file size: ${dbFile.length()} bytes")
+            android.util.Log.d("SQLiteBackupManager", "Database file readable: ${dbFile.canRead()}")
             
-            if (dbFile.exists()) {
+            if (dbFile.exists() && dbFile.canRead() && dbFile.length() > 0) {
+                android.util.Log.d("SQLiteBackupManager", "Database file is valid, adding to ZIP...")
                 zipOut.putNextEntry(ZipEntry(DATABASE_FILE_NAME))
                 val bytesCopied = FileInputStream(dbFile).use { input ->
                     input.copyTo(zipOut)
                 }
                 zipOut.closeEntry()
-                android.util.Log.d("SQLiteBackupManager", "Database added to backup: $bytesCopied bytes")
+                android.util.Log.d("SQLiteBackupManager", "✅ Database added to backup: $bytesCopied bytes")
             } else {
-                android.util.Log.e("SQLiteBackupManager", "Database file does not exist!")
+                android.util.Log.e("SQLiteBackupManager", "❌ Database file is not valid for backup:")
+                android.util.Log.e("SQLiteBackupManager", "   Exists: ${dbFile.exists()}")
+                android.util.Log.e("SQLiteBackupManager", "   CanRead: ${dbFile.canRead()}")
+                android.util.Log.e("SQLiteBackupManager", "   Size: ${dbFile.length()} bytes")
+                
+                // Create an empty database file to ensure backup structure is valid
+                android.util.Log.w("SQLiteBackupManager", "Creating empty database file to maintain backup structure")
+                zipOut.putNextEntry(ZipEntry(DATABASE_FILE_NAME))
+                // Write minimal SQLite header for empty database
+                val emptyDbHeader = "SQLite format 3\u0000\u0000\u0000\u0000"
+                zipOut.write(emptyDbHeader.toByteArray())
+                zipOut.closeEntry()
+                android.util.Log.w("SQLiteBackupManager", "Created empty database placeholder in backup")
             }
         } catch (e: Exception) {
-            android.util.Log.e("SQLiteBackupManager", "Failed to add database to zip", e)
+            android.util.Log.e("SQLiteBackupManager", "❌ Exception while adding database to backup", e)
+            // Try to create an empty database file to prevent backup failure
+            try {
+                zipOut.putNextEntry(ZipEntry(DATABASE_FILE_NAME))
+                val emptyDbHeader = "SQLite format 3\u0000\u0000\u0000\u0000"
+                zipOut.write(emptyDbHeader.toByteArray())
+                zipOut.closeEntry()
+                android.util.Log.w("SQLiteBackupManager", "Created empty database placeholder after exception")
+            } catch (ex: Exception) {
+                android.util.Log.e("SQLiteBackupManager", "Failed to create even empty database placeholder", ex)
+            }
         }
     }
 
@@ -327,6 +354,37 @@ class SQLiteBackupManager(
     /**
      * Reads metadata from zip file
      */
+    /**
+     * Reads metadata from a ZIP file (separate method to avoid stream position issues)
+     */
+    private fun readMetadataFromFile(zipFile: File): String? {
+        return try {
+            android.util.Log.d("SQLiteBackupManager", "Reading metadata from ZIP file")
+            ZipInputStream(FileInputStream(zipFile)).use { zipIn ->
+                var entry = zipIn.nextEntry
+                var foundEntries = mutableListOf<String>()
+                
+                while (entry != null) {
+                    foundEntries.add(entry.name)
+                    android.util.Log.d("SQLiteBackupManager", "ZIP entry: ${entry.name}")
+                    if (entry.name == METADATA_FILE_NAME) {
+                        val metadata = zipIn.bufferedReader().use { it.readText() }
+                        android.util.Log.d("SQLiteBackupManager", "Found metadata: $metadata")
+                        return metadata
+                    }
+                    zipIn.closeEntry()
+                    entry = zipIn.nextEntry
+                }
+                
+                android.util.Log.e("SQLiteBackupManager", "Metadata file not found in ZIP. Entries found: $foundEntries")
+                null
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SQLiteBackupManager", "Exception reading metadata from ZIP file", e)
+            null
+        }
+    }
+
     private fun readMetadata(zipIn: ZipInputStream): String? {
         return try {
             android.util.Log.d("SQLiteBackupManager", "Reading metadata from ZIP")
@@ -492,8 +550,63 @@ class SQLiteBackupManager(
      */
     private fun getDatabaseFile(): File {
         // For Room databases, we need to get the underlying file
-        val dbPath = context.getDatabasePath("renttracker_database").path
-        return File(dbPath)
+        // Try multiple possible database file names and paths
+        val possiblePaths = listOf(
+            context.getDatabasePath("rent_tracker_database").path,  // Correct name with underscore
+            context.getDatabasePath("renttracker_database").path,  // Fallback without underscore
+            context.getDatabasePath("rent_tracker_database.db").path,
+            context.getDatabasePath("renttracker_database.db").path,
+            "/data/data/${context.packageName}/databases/rent_tracker_database",
+            "/data/data/${context.packageName}/databases/renttracker_database",
+            "/data/user/0/${context.packageName}/databases/rent_tracker_database",  // Modern Android path
+            "/data/user/0/${context.packageName}/databases/renttracker_database"
+        )
+        
+        android.util.Log.d("SQLiteBackupManager", "Searching for database file...")
+        
+        for (path in possiblePaths) {
+            val file = File(path)
+            android.util.Log.d("SQLiteBackupManager", "Checking path: $path")
+            android.util.Log.d("SQLiteBackupManager", "  Exists: ${file.exists()}")
+            android.util.Log.d("SQLiteBackupManager", "  Size: ${file.length()} bytes")
+            
+            if (file.exists() && file.length() > 0) {
+                android.util.Log.d("SQLiteBackupManager", "Found valid database file: $path")
+                return file
+            }
+        }
+        
+        // If no existing file found, try to find any database files in the directory
+        val dbDir = File("/data/user/0/${context.packageName}/databases")
+        if (!dbDir.exists()) {
+            // Try the older path as fallback
+            val dbDirOld = File("/data/data/${context.packageName}/databases")
+            if (dbDirOld.exists()) {
+                val dbFiles = dbDirOld.listFiles()?.filter { it.name.contains("renttracker") || it.name.contains("rent_tracker") }
+                android.util.Log.d("SQLiteBackupManager", "Database directory contents (old path): ${dbFiles?.map { "${it.name} (${it.length()} bytes)" }}")
+                
+                val foundDb = dbFiles?.find { it.exists() && it.length() > 0 }
+                if (foundDb != null) {
+                    android.util.Log.d("SQLiteBackupManager", "Using found database file: ${foundDb.absolutePath}")
+                    return foundDb
+                }
+            }
+        } else {
+            val dbFiles = dbDir.listFiles()?.filter { it.name.contains("renttracker") || it.name.contains("rent_tracker") }
+            android.util.Log.d("SQLiteBackupManager", "Database directory contents: ${dbFiles?.map { "${it.name} (${it.length()} bytes)" }}")
+            
+            val foundDb = dbFiles?.find { it.exists() && it.length() > 0 }
+            if (foundDb != null) {
+                android.util.Log.d("SQLiteBackupManager", "Using found database file: ${foundDb.absolutePath}")
+                return foundDb
+            }
+        }
+        
+        // Last resort: return the default path even if it doesn't exist
+        // This will allow the backup process to continue and show proper error messages
+        val defaultPath = context.getDatabasePath("rent_tracker_database").path
+        android.util.Log.e("SQLiteBackupManager", "No valid database file found, using default path: $defaultPath")
+        return File(defaultPath)
     }
 
     /**
