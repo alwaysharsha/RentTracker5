@@ -11,11 +11,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.renttracker.app.data.model.Building
+import com.renttracker.app.data.model.EntityType
 import com.renttracker.app.data.model.Owner
 import com.renttracker.app.data.model.PropertyType
+import com.renttracker.app.ui.components.DocumentUploadComponent
 import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.components.ValidationTextField
 import com.renttracker.app.ui.viewmodel.BuildingViewModel
+import com.renttracker.app.ui.viewmodel.DocumentViewModel
 import com.renttracker.app.ui.viewmodel.OwnerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,6 +26,7 @@ import com.renttracker.app.ui.viewmodel.OwnerViewModel
 fun BuildingDetailScreen(
     viewModel: BuildingViewModel,
     ownerViewModel: OwnerViewModel,
+    documentViewModel: DocumentViewModel,
     buildingId: Long?,
     onNavigateBack: () -> Unit
 ) {
@@ -192,6 +196,17 @@ fun BuildingDetailScreen(
                 singleLine = false,
                 maxLines = 5
             )
+            
+            // Add document upload component (only show for existing buildings)
+            if (buildingId != null && buildingId > 0) {
+                Divider()
+                DocumentUploadComponent(
+                    documentViewModel = documentViewModel,
+                    entityType = EntityType.BUILDING,
+                    entityId = buildingId,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
 
         if (showDeleteDialog && existingBuilding != null) {

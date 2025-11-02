@@ -9,11 +9,16 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.renttracker.app.RentTrackerApplication
+import com.renttracker.app.data.model.EntityType
 import com.renttracker.app.data.model.Owner
+import com.renttracker.app.ui.components.DocumentUploadComponent
 import com.renttracker.app.ui.components.PhoneInputField
 import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.components.ValidationTextField
+import com.renttracker.app.ui.viewmodel.DocumentViewModel
 import com.renttracker.app.ui.viewmodel.OwnerViewModel
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
 
@@ -22,9 +27,12 @@ import com.renttracker.app.ui.viewmodel.SettingsViewModel
 fun OwnerDetailScreen(
     viewModel: OwnerViewModel,
     settingsViewModel: SettingsViewModel,
+    documentViewModel: DocumentViewModel,
     ownerId: Long?,
     onNavigateBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val application = context.applicationContext as RentTrackerApplication
     val currency by settingsViewModel.currency.collectAsState()
     
     // Get default country code based on currency
@@ -206,6 +214,17 @@ fun OwnerDetailScreen(
                 singleLine = false,
                 maxLines = 3
             )
+            
+            // Add document upload component (only show for existing owners)
+            if (ownerId != null && ownerId > 0) {
+                Divider()
+                DocumentUploadComponent(
+                    documentViewModel = documentViewModel,
+                    entityType = EntityType.OWNER,
+                    entityId = ownerId,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
 
         if (showDeleteDialog && existingOwner != null) {
