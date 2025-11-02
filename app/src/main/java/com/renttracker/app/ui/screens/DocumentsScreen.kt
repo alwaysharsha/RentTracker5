@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.renttracker.app.MainActivity
 import com.renttracker.app.data.model.Document
 import com.renttracker.app.data.model.EntityType
 import com.renttracker.app.ui.viewmodel.DocumentViewModel
@@ -33,7 +34,8 @@ import java.util.*
 @Composable
 fun DocumentsScreen(
     documentViewModel: DocumentViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    mainActivity: MainActivity
 ) {
     val context = LocalContext.current
     val documents by documentViewModel.allDocuments.collectAsState(initial = emptyList())
@@ -217,11 +219,7 @@ fun DocumentsScreen(
                         OutlinedButton(
                             onClick = {
                                 try {
-                                    val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                                        type = "*/*"
-                                        addCategory(Intent.CATEGORY_OPENABLE)
-                                    }
-                                    context.startActivity(Intent.createChooser(intent, "Select a file"))
+                                    mainActivity.launchDocumentFilePicker()
                                     showUploadDialog = false
                                 } catch (e: Exception) {
                                     e.printStackTrace()
@@ -244,14 +242,7 @@ fun DocumentsScreen(
                                             context,
                                             Manifest.permission.CAMERA
                                         ) == PackageManager.PERMISSION_GRANTED -> {
-                                            val photoUri = createImageUri(context)
-                                            photoUri?.let { uri ->
-                                                val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                                                    putExtra(MediaStore.EXTRA_OUTPUT, uri)
-                                                    addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                                }
-                                                context.startActivity(cameraIntent)
-                                            }
+                                            mainActivity.launchDocumentCamera()
                                             showUploadDialog = false
                                         }
                                         else -> {
@@ -395,72 +386,5 @@ fun DocumentCard(
                 )
             }
         }
-    }
-}
-
-private fun handleFileUpload(
-    context: Context,
-    documentViewModel: DocumentViewModel,
-    fileUri: Uri
-) {
-    try {
-        val fileName = getFileName(context, fileUri) ?: "document_${System.currentTimeMillis()}"
-        
-        // For now, we'll upload as a general document without entity association
-        // This can be enhanced later to allow users to select entity type
-        documentViewModel.uploadDocument(
-            uri = fileUri,
-            documentName = fileName,
-            entityType = EntityType.OWNER, // Default to OWNER for general documents
-            entityId = 0L, // Use 0 for general documents not tied to specific entity
-            notes = null
-        ) { success ->
-            // Handle upload completion if needed
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        // Handle error gracefully
-    }
-}
-
-private fun createImageUri(context: Context): Uri? {
-    return try {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val imageFileName = "IMG_$timeStamp.jpg"
-        val storageDir = File(context.cacheDir, "images")
-        
-        // Create directory if it doesn't exist
-        if (!storageDir.exists()) {
-            storageDir.mkdirs()
-        }
-        
-        val imageFile = File(storageDir, imageFileName)
-        
-        // Check if file was created successfully
-        if (imageFile.exists() || imageFile.createNewFile()) {
-            FileProvider.getUriForFile(
-                context,
-                "${context.packageName}.fileprovider",
-                imageFile
-            )
-        } else {
-            null
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
-    }
-}
-
-private fun getFileName(context: Context, uri: Uri): String? {
-    return try {
-        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-            val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
-            cursor.moveToFirst()
-            cursor.getString(nameIndex)
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
     }
 }

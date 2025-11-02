@@ -200,7 +200,8 @@ fun RentTrackerApp(
             composable(Screen.Documents.route) {
                 DocumentsScreen(
                     documentViewModel = documentViewModel,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    mainActivity = mainActivity
                 )
             }
 

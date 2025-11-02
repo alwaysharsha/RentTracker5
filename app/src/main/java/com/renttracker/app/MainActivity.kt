@@ -38,6 +38,8 @@ class MainActivity : FragmentActivity() {
     
     companion object {
         private const val IMPORT_FILE_PICKER_REQUEST_CODE = Constants.IMPORT_FILE_PICKER_REQUEST_CODE
+        private const val DOCUMENT_FILE_PICKER_REQUEST_CODE = 1001
+        private const val DOCUMENT_CAMERA_REQUEST_CODE = 1002
     }
     
     // Callback function to trigger import from Settings screen
@@ -52,6 +54,61 @@ class MainActivity : FragmentActivity() {
         } catch (e: Exception) {
             android.util.Log.e(Constants.TAG_MAIN_ACTIVITY, "Exception launching file picker", e)
             showToast(this, Constants.ERROR_GENERIC_PREFIX + e.message, Constants.TOAST_DURATION_LONG)
+        }
+    }
+    
+    // Callback functions for document upload
+    fun launchDocumentFilePicker() {
+        try {
+            val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                type = "*/*"
+                addCategory(Intent.CATEGORY_OPENABLE)
+            }
+            startActivityForResult(Intent.createChooser(intent, "Select a file"), DOCUMENT_FILE_PICKER_REQUEST_CODE)
+        } catch (e: Exception) {
+            android.util.Log.e(Constants.TAG_MAIN_ACTIVITY, "Exception launching document file picker", e)
+            showToast(this, "Error launching file picker: ${e.message}", Constants.TOAST_DURATION_LONG)
+        }
+    }
+    
+    fun launchDocumentCamera() {
+        try {
+            val photoUri = createImageUri()
+            photoUri?.let { uri ->
+                val cameraIntent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                    putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri)
+                    addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                startActivityForResult(cameraIntent, DOCUMENT_CAMERA_REQUEST_CODE)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e(Constants.TAG_MAIN_ACTIVITY, "Exception launching document camera", e)
+            showToast(this, "Error launching camera: ${e.message}", Constants.TOAST_DURATION_LONG)
+        }
+    }
+    
+    private fun createImageUri(): Uri? {
+        return try {
+            val timeStamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault()).format(java.util.Date())
+            val imageFileName = "IMG_$timeStamp.jpg"
+            val storageDir = java.io.File(cacheDir, "images")
+            if (!storageDir.exists()) {
+                storageDir.mkdirs()
+            }
+            val imageFile = java.io.File(storageDir, imageFileName)
+            
+            if (imageFile.exists() || imageFile.createNewFile()) {
+                androidx.core.content.FileProvider.getUriForFile(
+                    this,
+                    "${packageName}.fileprovider",
+                    imageFile
+                )
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
     
@@ -70,6 +127,58 @@ class MainActivity : FragmentActivity() {
                     }
                 }
             }
+        }
+        
+        // Handle document file picker result
+        if (requestCode == DOCUMENT_FILE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
+            data?.data?.let { uri ->
+                handleDocumentUpload(uri)
+            }
+        }
+        
+        // Handle document camera result
+        if (requestCode == DOCUMENT_CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
+            handleDocumentUpload(null) // Camera photo is handled via the URI we passed
+        }
+    }
+    
+    private fun handleDocumentUpload(uri: Uri?) {
+        try {
+            val documentUri = uri ?: createImageUri() // Use the camera URI if provided
+            documentUri?.let { fileUri ->
+                val fileName = getFileName(fileUri) ?: "document_${System.currentTimeMillis()}"
+                
+                // Upload document using the same logic as DocumentsScreen
+                documentViewModel.uploadDocument(
+                    uri = fileUri,
+                    documentName = fileName,
+                    entityType = com.renttracker.app.data.model.EntityType.OWNER,
+                    entityId = 0L,
+                    notes = null
+                ) { success ->
+                    if (success) {
+                        showToast(this, "Document uploaded successfully", Constants.TOAST_DURATION_SHORT)
+                    } else {
+                        showToast(this, "Failed to upload document", Constants.TOAST_DURATION_LONG)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            showToast(this, "Error uploading document: ${e.message}", Constants.TOAST_DURATION_LONG)
+        }
+    }
+    
+    private fun getFileName(uri: Uri): String? {
+        return try {
+            contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                cursor.moveToFirst()
+                cursor.getString(nameIndex)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 
