@@ -238,9 +238,11 @@ fun DocumentsScreen(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(120.dp)
+                            .height(160.dp)
                     ) {
-                        items(EntityType.values()) { entityType ->
+                        val entityTypes = EntityType.values()
+                        android.util.Log.d("DocumentsScreen", "Available entity types: ${entityTypes.map { it.name }}")
+                        items(entityTypes) { entityType ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -420,9 +422,11 @@ fun DocumentsScreen(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(120.dp)
+                            .height(160.dp)
                     ) {
-                        items(EntityType.values()) { entityType ->
+                        val entityTypes = EntityType.values()
+                        android.util.Log.d("DocumentsScreen", "Available entity types: ${entityTypes.map { it.name }}")
+                        items(entityTypes) { entityType ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
