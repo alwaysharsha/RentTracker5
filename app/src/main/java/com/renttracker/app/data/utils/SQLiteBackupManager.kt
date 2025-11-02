@@ -44,30 +44,49 @@ class SQLiteBackupManager(
      */
     suspend fun createBackup(): Uri? {
         return try {
+            android.util.Log.d("SQLiteBackupManager", "Starting backup creation...")
             val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
             val backupFileName = "RentTracker_Backup_$timestamp.zip"
             val tempBackupFile = File(context.cacheDir, backupFileName)
             
+            android.util.Log.d("SQLiteBackupManager", "Creating temporary backup file: ${tempBackupFile.absolutePath}")
+            
             ZipOutputStream(FileOutputStream(tempBackupFile)).use { zipOut ->
                 // Add database file
+                android.util.Log.d("SQLiteBackupManager", "Adding database to backup...")
                 addDatabaseToZip(zipOut)
                 
                 // Add document files
+                android.util.Log.d("SQLiteBackupManager", "Adding documents to backup...")
                 addDocumentsToZip(zipOut)
                 
                 // Add metadata file
+                android.util.Log.d("SQLiteBackupManager", "Adding metadata to backup...")
                 addMetadataToZip(zipOut)
             }
             
+            android.util.Log.d("SQLiteBackupManager", "Backup ZIP created, size: ${tempBackupFile.length()} bytes")
+            
             // Save the backup file to Downloads folder
+            android.util.Log.d("SQLiteBackupManager", "Saving backup to Downloads...")
             val backupUri = saveBackupToDownloads(tempBackupFile, backupFileName)
             
+            if (backupUri != null) {
+                android.util.Log.d("SQLiteBackupManager", "Backup saved successfully to: $backupUri")
+            } else {
+                android.util.Log.e("SQLiteBackupManager", "Failed to save backup to Downloads")
+            }
+            
             // Clean up temp file
-            tempBackupFile.delete()
+            if (tempBackupFile.delete()) {
+                android.util.Log.d("SQLiteBackupManager", "Temporary backup file cleaned up")
+            } else {
+                android.util.Log.w("SQLiteBackupManager", "Failed to clean up temporary backup file")
+            }
             
             backupUri
         } catch (e: Exception) {
-            android.util.Log.e("SQLiteBackupManager", "Exception during backup", e)
+            android.util.Log.e("SQLiteBackupManager", "Exception during backup creation", e)
             null
         }
     }
@@ -195,12 +214,19 @@ class SQLiteBackupManager(
         try {
             // Get the actual database file path
             val dbFile = getDatabaseFile()
+            android.util.Log.d("SQLiteBackupManager", "Database file path: ${dbFile.absolutePath}")
+            android.util.Log.d("SQLiteBackupManager", "Database file exists: ${dbFile.exists()}")
+            android.util.Log.d("SQLiteBackupManager", "Database file size: ${dbFile.length()} bytes")
+            
             if (dbFile.exists()) {
                 zipOut.putNextEntry(ZipEntry(DATABASE_FILE_NAME))
-                FileInputStream(dbFile).use { input ->
+                val bytesCopied = FileInputStream(dbFile).use { input ->
                     input.copyTo(zipOut)
                 }
                 zipOut.closeEntry()
+                android.util.Log.d("SQLiteBackupManager", "Database added to backup: $bytesCopied bytes")
+            } else {
+                android.util.Log.e("SQLiteBackupManager", "Database file does not exist!")
             }
         } catch (e: Exception) {
             android.util.Log.e("SQLiteBackupManager", "Failed to add database to zip", e)
@@ -474,9 +500,13 @@ class SQLiteBackupManager(
      * Saves backup file to Downloads folder
      */
     private fun saveBackupToDownloads(backupFile: File, fileName: String): Uri? {
+        android.util.Log.d("SQLiteBackupManager", "Saving backup to Downloads: $fileName")
+        android.util.Log.d("SQLiteBackupManager", "Source file size: ${backupFile.length()} bytes")
+        
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             // Try MediaStore first for Android 10+
             try {
+                android.util.Log.d("SQLiteBackupManager", "Using MediaStore for Android 10+")
                 val contentValues = ContentValues().apply {
                     put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
                     put(MediaStore.MediaColumns.MIME_TYPE, "application/zip")
@@ -488,20 +518,31 @@ class SQLiteBackupManager(
                     contentValues
                 )
                 
-                uri?.let {
-                    context.contentResolver.openOutputStream(it)?.use { output ->
-                        FileInputStream(backupFile).use { input ->
+                if (uri != null) {
+                    android.util.Log.d("SQLiteBackupManager", "MediaStore URI created: $uri")
+                    context.contentResolver.openOutputStream(uri)?.use { output ->
+                        val bytesCopied = FileInputStream(backupFile).use { input ->
                             input.copyTo(output)
                         }
+                        android.util.Log.d("SQLiteBackupManager", "Copied $bytesCopied bytes to MediaStore")
+                    } ?: run {
+                        android.util.Log.e("SQLiteBackupManager", "Failed to open MediaStore output stream")
+                        return null
                     }
-                    it
+                    uri
+                } else {
+                    android.util.Log.e("SQLiteBackupManager", "Failed to create MediaStore URI")
+                    // Fall back to app-specific storage
+                    createFileProviderUri(backupFile, fileName)
                 }
             } catch (e: Exception) {
+                android.util.Log.e("SQLiteBackupManager", "MediaStore failed, falling back to FileProvider", e)
                 // Fall back to app-specific storage if MediaStore fails
                 createFileProviderUri(backupFile, fileName)
             }
         } else {
             // For Android 9 and below, use app-specific external storage with FileProvider
+            android.util.Log.d("SQLiteBackupManager", "Using FileProvider for Android < 10")
             createFileProviderUri(backupFile, fileName)
         }
     }
@@ -510,27 +551,44 @@ class SQLiteBackupManager(
      * Creates a FileProvider URI for the backup file
      */
     private fun createFileProviderUri(backupFile: File, fileName: String): Uri {
+        android.util.Log.d("SQLiteBackupManager", "Creating FileProvider URI for backup")
         val exportDir = File(context.getExternalFilesDir(null), "exports")
+        android.util.Log.d("SQLiteBackupManager", "Export directory: ${exportDir.absolutePath}")
+        
         if (!exportDir.exists()) {
-            exportDir.mkdirs()
+            val created = exportDir.mkdirs()
+            android.util.Log.d("SQLiteBackupManager", "Export directory created: $created")
         }
         
         val finalBackupFile = File(exportDir, fileName)
-        FileInputStream(backupFile).use { input ->
-            FileOutputStream(finalBackupFile).use { output ->
-                input.copyTo(output)
+        android.util.Log.d("SQLiteBackupManager", "Final backup file: ${finalBackupFile.absolutePath}")
+        
+        try {
+            val bytesCopied = FileInputStream(backupFile).use { input ->
+                FileOutputStream(finalBackupFile).use { output ->
+                    input.copyTo(output)
+                }
             }
+            android.util.Log.d("SQLiteBackupManager", "Copied $bytesCopied bytes to final location")
+        } catch (e: Exception) {
+            android.util.Log.e("SQLiteBackupManager", "Failed to copy backup file", e)
+            throw e
         }
         
         return try {
-            FileProvider.getUriForFile(
+            val uri = FileProvider.getUriForFile(
                 context,
                 "${context.packageName}.fileprovider",
                 finalBackupFile
             )
+            android.util.Log.d("SQLiteBackupManager", "FileProvider URI created: $uri")
+            uri
         } catch (e: Exception) {
+            android.util.Log.w("SQLiteBackupManager", "FileProvider failed, using file URI as fallback", e)
             // Fallback for test environments where FileProvider may not be set up
-            Uri.fromFile(finalBackupFile)
+            val uri = Uri.fromFile(finalBackupFile)
+            android.util.Log.d("SQLiteBackupManager", "File URI fallback: $uri")
+            uri
         }
     }
 }

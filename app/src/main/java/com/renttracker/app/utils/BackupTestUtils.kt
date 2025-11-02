@@ -29,6 +29,9 @@ object BackupTestUtils {
         return try {
             Log.d(TAG, "=== STARTING BACKUP TEST ===")
             
+            // First, log current database state
+            logCurrentDatabaseState(database, preferencesManager)
+            
             // Create backup
             Log.d(TAG, "Creating test backup...")
             val backupManager = SQLiteBackupManager(context, database, preferencesManager)
@@ -40,6 +43,20 @@ object BackupTestUtils {
             }
             
             Log.d(TAG, "Backup created successfully: $backupUri")
+            
+            // Check if backup file is accessible
+            try {
+                context.contentResolver.openInputStream(backupUri)?.use { input ->
+                    val availableBytes = input.available()
+                    Log.d(TAG, "Backup file is accessible, $availableBytes bytes available")
+                } ?: run {
+                    Log.e(TAG, "Cannot access backup file - input stream is null")
+                    return false
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to access backup file", e)
+                return false
+            }
             
             // Validate the created backup
             Log.d(TAG, "Validating created backup...")
@@ -182,22 +199,43 @@ object BackupTestUtils {
         try {
             Log.d(TAG, "=== CURRENT DATABASE STATE ===")
             
+            // Check database file existence
+            val dbPath = database.openHelper.writableDatabase.path ?: "unknown"
+            val dbFileObj = File(dbPath)
+            Log.d(TAG, "Database file path: $dbPath")
+            Log.d(TAG, "Database file exists: ${dbFileObj.exists()}")
+            Log.d(TAG, "Database file size: ${dbFileObj.length()} bytes")
+            Log.d(TAG, "Database file readable: ${dbFileObj.canRead()}")
+            
             val owners = database.ownerDao().getAllOwners().first()
             val buildings = database.buildingDao().getAllBuildings().first()
             val tenants = database.tenantDao().getActiveTenants().first()
             val payments = database.paymentDao().getAllPayments().first()
+            val documents = database.documentDao().getAllDocuments().first()
             
             Log.d(TAG, "Owners count: ${owners.size}")
             Log.d(TAG, "Buildings count: ${buildings.size}")
-            Log.d(TAG, "Tenants count: ${tenants.size}")
+            Log.d(TAG, "Active tenants count: ${tenants.size}")
             Log.d(TAG, "Payments count: ${payments.size}")
+            Log.d(TAG, "Documents count: ${documents.size}")
             
-            Log.d(TAG, "Currency: ${preferencesManager.currencyFlow.first()}")
-            Log.d(TAG, "App Lock: ${preferencesManager.appLockFlow.first()}")
-            Log.d(TAG, "Payment Methods: ${preferencesManager.paymentMethodsFlow.first()}")
+            // Log preferences
+            try {
+                val currency = preferencesManager.getCurrencySync()
+                val appLock = preferencesManager.getAppLockSync()
+                val paymentMethods = preferencesManager.getPaymentMethodsSync()
+                
+                Log.d(TAG, "Currency: $currency")
+                Log.d(TAG, "App Lock: $appLock")
+                Log.d(TAG, "Payment Methods: $paymentMethods")
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to read preferences: ${e.message}")
+            }
+            
+            Log.d(TAG, "=== END DATABASE STATE ===")
             
         } catch (e: Exception) {
-            Log.e(TAG, "Error logging database state", e)
+            Log.e(TAG, "Exception while logging database state", e)
         }
     }
 }
