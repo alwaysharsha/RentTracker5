@@ -49,7 +49,8 @@ class PaymentDaoTest {
             amount = 1000.0,
             paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
-            tenantId = tenantId
+            tenantId = tenantId,
+            rentMonth = System.currentTimeMillis()
         )
         
         val id = database.paymentDao().insertPayment(payment)
@@ -67,14 +68,16 @@ class PaymentDaoTest {
             amount = 1000.0,
             paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
-            tenantId = tenantId
+            tenantId = tenantId,
+            rentMonth = System.currentTimeMillis()
         )
         val payment2 = Payment(
             date = System.currentTimeMillis(),
             amount = 500.0,
             paymentMethod = "Cash",
             paymentType = PaymentStatus.PARTIAL,
-            tenantId = tenantId
+            tenantId = tenantId,
+            rentMonth = System.currentTimeMillis()
         )
         
         database.paymentDao().insertPayment(payment1)
@@ -92,7 +95,8 @@ class PaymentDaoTest {
             amount = 1000.0,
             paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
-            tenantId = tenantId
+            tenantId = tenantId,
+            rentMonth = System.currentTimeMillis()
         )
         
         database.paymentDao().insertPayment(payment)
@@ -109,7 +113,8 @@ class PaymentDaoTest {
             amount = 1000.0,
             paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
-            tenantId = tenantId
+            tenantId = tenantId,
+            rentMonth = System.currentTimeMillis()
         )
         val id = database.paymentDao().insertPayment(payment)
         
@@ -127,7 +132,8 @@ class PaymentDaoTest {
             amount = 1000.0,
             paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
-            tenantId = tenantId
+            tenantId = tenantId,
+            rentMonth = System.currentTimeMillis()
         )
         val id = database.paymentDao().insertPayment(payment)
         

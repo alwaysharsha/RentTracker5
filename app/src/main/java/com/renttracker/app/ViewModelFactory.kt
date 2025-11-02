@@ -3,6 +3,7 @@ package com.renttracker.app
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.renttracker.app.data.database.RentTrackerDatabase
 import com.renttracker.app.data.preferences.PreferencesManager
 import com.renttracker.app.data.repository.RentTrackerRepository
 import com.renttracker.app.ui.viewmodel.*
@@ -10,7 +11,8 @@ import com.renttracker.app.ui.viewmodel.*
 class ViewModelFactory(
     private val repository: RentTrackerRepository,
     private val preferencesManager: PreferencesManager,
-    private val context: Context
+    private val context: Context,
+    private val database: RentTrackerDatabase
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -40,7 +42,7 @@ class ViewModelFactory(
                 ExpenseViewModel(repository) as T
             }
             modelClass.isAssignableFrom(ExportImportViewModel::class.java) -> {
-                ExportImportViewModel(repository, context, preferencesManager) as T
+                ExportImportViewModel(repository, context, preferencesManager, database) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class")
         }

@@ -20,11 +20,17 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.lifecycle.viewModelScope
 import com.renttracker.app.MainActivity
+import com.renttracker.app.data.database.RentTrackerDatabase
+import com.renttracker.app.data.preferences.PreferencesManager
 import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.viewmodel.ExportImportViewModel
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
 import com.renttracker.app.utils.Constants
+import com.renttracker.app.utils.BackupTestUtils
 import com.renttracker.app.utils.showErrorToast
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -32,7 +38,9 @@ import com.renttracker.app.utils.showErrorToast
 fun SettingsScreen(
     viewModel: SettingsViewModel,
     exportImportViewModel: ExportImportViewModel,
-    mainActivity: MainActivity
+    mainActivity: MainActivity,
+    database: RentTrackerDatabase,
+    preferencesManager: PreferencesManager
 ) {
     val currency by viewModel.currency.collectAsState()
     val appLock by viewModel.appLock.collectAsState()
@@ -42,6 +50,7 @@ fun SettingsScreen(
     val importStatus by exportImportViewModel.importStatus.collectAsState()
     
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     
     var expandedCurrency by remember { mutableStateOf(false) }
     var showPaymentMethodsDialog by remember { mutableStateOf(false) }
@@ -236,6 +245,43 @@ fun SettingsScreen(
                             Text("Import")
                         }
                     }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    // Backup Test Button
+                    Button(
+                        onClick = {
+                            coroutineScope.launch {
+                                try {
+                                    android.util.Log.d("SettingsScreen", "Starting backup test...")
+                                    val testResult = BackupTestUtils.createAndValidateTestBackup(
+                                        context,
+                                        database,
+                                        preferencesManager
+                                    )
+                                    
+                                    if (testResult) {
+                                        android.util.Log.d("SettingsScreen", "✅ Backup test PASSED")
+                                        Toast.makeText(context, "Backup test PASSED! Check logs for details.", Toast.LENGTH_LONG).show()
+                                    } else {
+                                        android.util.Log.e("SettingsScreen", "❌ Backup test FAILED")
+                                        Toast.makeText(context, "Backup test FAILED! Check logs for details.", Toast.LENGTH_LONG).show()
+                                    }
+                                } catch (e: Exception) {
+                                    android.util.Log.e("SettingsScreen", "Exception during backup test", e)
+                                    Toast.makeText(context, "Backup test ERROR: ${e.message}", Toast.LENGTH_LONG).show()
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary
+                        )
+                    ) {
+                        Icon(Icons.Filled.BugReport, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Test Backup System")
+                    }
                 }
             }
 
@@ -249,8 +295,8 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version: 4.8.3")
-                    Text("Build: 36")
+                    Text("Version: 4.8.4")
+                    Text("Build: 42")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }

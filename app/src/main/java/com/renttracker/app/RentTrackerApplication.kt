@@ -7,7 +7,7 @@ import com.renttracker.app.data.preferences.PreferencesManager
 import com.renttracker.app.data.repository.RentTrackerRepository
 
 class RentTrackerApplication : Application() {
-    private val database by lazy {
+    val database: RentTrackerDatabase by lazy {
         Room.databaseBuilder(
             applicationContext,
             RentTrackerDatabase::class.java,

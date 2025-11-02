@@ -1,12 +1,8 @@
 package com.renttracker.app.data.utils
 
-import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
-import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
-import androidx.core.content.FileProvider
+import com.renttracker.app.data.database.RentTrackerDatabase
 import com.renttracker.app.data.model.*
 import com.renttracker.app.data.preferences.PreferencesManager
 import com.renttracker.app.data.repository.RentTrackerRepository
@@ -24,14 +20,31 @@ import java.util.*
 class DataExportImportManager(
     private val context: Context,
     private val repository: RentTrackerRepository,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    private val database: RentTrackerDatabase
 ) {
 
+    private val sqliteBackupManager = SQLiteBackupManager(context, database, preferencesManager)
+
     /**
-     * Exports all data to JSON format
-     * @return URI of the exported file, or null if export failed
+     * Exports all data to SQLite backup format (ZIP file containing database and documents)
+     * @return URI of the exported backup file, or null if export failed
      */
     suspend fun exportData(): Uri? {
+        return try {
+            sqliteBackupManager.createBackup()
+        } catch (e: Exception) {
+            android.util.Log.e("DataExportImportManager", "Exception during export", e)
+            null
+        }
+    }
+
+    /**
+     * Legacy method for backward compatibility - exports to JSON format
+     * @deprecated Use exportData() for SQLite backup
+     */
+    @Deprecated("Use SQLite backup instead")
+    suspend fun exportDataToJson(): Uri? {
         return try {
             val exportData = JSONObject()
             exportData.put("version", 1)
@@ -106,76 +119,123 @@ class DataExportImportManager(
             val fileName = "RentTracker_Backup_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.json"
             val jsonContent = exportData.toString(2).toByteArray()
             
-            // Save to Downloads folder for Android 10+ using MediaStore
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // Try MediaStore first for Android 10+
-                val mediaStoreUri = try {
-                    val contentValues = ContentValues().apply {
-                        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                        put(MediaStore.MediaColumns.MIME_TYPE, "application/json")
-                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/RentTracker")
-                    }
-                    
-                    val uri = context.contentResolver.insert(
-                        MediaStore.Downloads.EXTERNAL_CONTENT_URI,
-                        contentValues
-                    )
-                    
-                    uri?.let {
-                        context.contentResolver.openOutputStream(it)?.use { output ->
-                            output.write(jsonContent)
-                        }
-                        it
-                    }
-                } catch (e: Exception) {
-                    // Fall back to app-specific storage if MediaStore fails
-                    null
-                }
-                
-                // Return MediaStore URI or fallback to app-specific storage
-                mediaStoreUri ?: createFileProviderUri(exportDir = File(context.getExternalFilesDir(null), "exports"), fileName = fileName, jsonContent = jsonContent)
-            } else {
-                // For Android 9 and below, use app-specific external storage with FileProvider
-                createFileProviderUri(exportDir = File(context.getExternalFilesDir(null), "exports"), fileName = fileName, jsonContent = jsonContent)
+            // Save to app-specific external storage
+            val exportDir = File(context.getExternalFilesDir(null), "exports")
+            if (!exportDir.exists()) {
+                exportDir.mkdirs()
+            }
+            val exportFile = File(exportDir, fileName)
+            FileOutputStream(exportFile).use { output ->
+                output.write(jsonContent)
+            }
+            
+            // Return FileProvider URI
+            try {
+                androidx.core.content.FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    exportFile
+                )
+            } catch (e: Exception) {
+                // Fallback for test environments
+                Uri.fromFile(exportFile)
             }
         } catch (e: Exception) {
-            android.util.Log.e("DataExportImportManager", "Exception during export", e)
+            android.util.Log.e("DataExportImportManager", "Exception during JSON export", e)
             null
         }
     }
 
-    /**
-     * Creates a FileProvider URI for the exported file
-     * Falls back to Uri.fromFile() if FileProvider fails (for test environments)
-     */
-    private fun createFileProviderUri(exportDir: File, fileName: String, jsonContent: ByteArray): Uri {
-        if (!exportDir.exists()) {
-            exportDir.mkdirs()
-        }
-        val exportFile = File(exportDir, fileName)
-        FileOutputStream(exportFile).use { output ->
-            output.write(jsonContent)
-        }
-        
-        return try {
-            FileProvider.getUriForFile(
-                context,
-                "${context.packageName}.fileprovider",
-                exportFile
-            )
-        } catch (e: Exception) {
-            // Fallback for test environments where FileProvider may not be set up
-            Uri.fromFile(exportFile)
-        }
-    }
 
     /**
-     * Imports data from JSON file
-     * @param uri URI of the JSON file to import
+     * Imports data from backup file (SQLite ZIP or JSON)
+     * @param uri URI of the backup file to import
      * @param clearExisting If true, clears existing data before import
      * @return True if import was successful, false otherwise
      */
     suspend fun importData(uri: Uri, clearExisting: Boolean = false): Boolean {
+        return try {
+            android.util.Log.d("DataExportImportManager", "Starting import process")
+            
+            // Validate URI
+            if (uri.toString().isEmpty()) {
+                android.util.Log.e("DataExportImportManager", "Empty URI provided")
+                return false
+            }
+            
+            // Check for ZIP format - be very lenient with detection
+            val uriString = uri.toString()
+            val pathString = uri.path ?: ""
+            
+            val isZipFile = uriString.endsWith(".zip", ignoreCase = true) || 
+                           pathString.endsWith(".zip", ignoreCase = true)
+            
+            android.util.Log.d("DataExportImportManager", "URI: $uriString")
+            android.util.Log.d("DataExportImportManager", "Path: $pathString")
+            android.util.Log.d("DataExportImportManager", "Is ZIP file: $isZipFile")
+            
+            if (isZipFile) {
+                android.util.Log.d("DataExportImportManager", "Detected ZIP file, forcing SQLite backup restore")
+                // For ZIP files, directly call SQLite backup manager to bypass any MIME type issues
+                return sqliteBackupManager.restoreFromBackup(uri, clearExisting)
+            }
+            
+            // For non-ZIP files, use the normal detection logic
+            val mimeType = try {
+                context.contentResolver.getType(uri) ?: ""
+            } catch (e: Exception) {
+                android.util.Log.e("DataExportImportManager", "Failed to get MIME type", e)
+                ""
+            }
+            
+            var fileName = try {
+                getFileName(uri) ?: ""
+            } catch (e: Exception) {
+                android.util.Log.e("DataExportImportManager", "Failed to get filename", e)
+                ""
+            }
+            
+            // Fallback: try to get filename from URI path
+            if (fileName.isEmpty()) {
+                fileName = pathString
+                android.util.Log.d("DataExportImportManager", "Using fallback filename from URI path: $fileName")
+            }
+            
+            android.util.Log.d("DataExportImportManager", "Importing file: $fileName")
+            android.util.Log.d("DataExportImportManager", "MIME type: $mimeType")
+            
+            // Check for ZIP format with MIME types as backup
+            val isZipByMimeType = mimeType == "application/zip" || 
+                                 mimeType == "application/x-zip-compressed" ||
+                                 fileName.endsWith(".zip", ignoreCase = true)
+            
+            if (isZipByMimeType) {
+                android.util.Log.d("DataExportImportManager", "Detected SQLite backup (ZIP) by MIME type")
+                // SQLite backup
+                sqliteBackupManager.restoreFromBackup(uri, clearExisting)
+            } else {
+                android.util.Log.d("DataExportImportManager", "Detected JSON backup (legacy)")
+                // JSON backup (legacy)
+                importFromJson(uri, clearExisting)
+            }
+        } catch (e: SecurityException) {
+            android.util.Log.e("DataExportImportManager", "Security exception during import", e)
+            false
+        } catch (e: IllegalArgumentException) {
+            android.util.Log.e("DataExportImportManager", "Illegal argument during import", e)
+            android.util.Log.e("DataExportImportManager", "Exception details: ${e::class.java.simpleName}: ${e.message}")
+            false
+        } catch (e: Exception) {
+            android.util.Log.e("DataExportImportManager", "Exception during import", e)
+            false
+        }
+    }
+
+    /**
+     * Legacy method for importing JSON backup files
+     */
+    @Deprecated("Use SQLite backup instead")
+    private suspend fun importFromJson(uri: Uri, clearExisting: Boolean = false): Boolean {
         return try {
             // Validate URI
             if (uri.toString().isEmpty()) {
@@ -410,8 +470,43 @@ class DataExportImportManager(
             
             true
         } catch (e: Exception) {
-            android.util.Log.e("DataExportImportManager", "Exception during import", e)
+            android.util.Log.e("DataExportImportManager", "Exception during JSON import", e)
             false
+        }
+    }
+
+    /**
+     * Helper method to get filename from URI
+     */
+    private fun getFileName(uri: Uri): String? {
+        return try {
+            android.util.Log.d("DataExportImportManager", "Extracting filename from URI: $uri")
+            
+            // Validate URI first
+            if (uri.toString().isEmpty()) {
+                android.util.Log.w("DataExportImportManager", "Empty URI provided to getFileName")
+                return null
+            }
+            
+            val fileName = context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                if (nameIndex >= 0 && cursor.moveToFirst()) {
+                    cursor.getString(nameIndex)
+                } else {
+                    null
+                }
+            }
+            android.util.Log.d("DataExportImportManager", "Extracted filename: $fileName")
+            fileName
+        } catch (e: SecurityException) {
+            android.util.Log.e("DataExportImportManager", "Security exception extracting filename", e)
+            null
+        } catch (e: IllegalArgumentException) {
+            android.util.Log.e("DataExportImportManager", "Illegal argument extracting filename", e)
+            null
+        } catch (e: Exception) {
+            android.util.Log.e("DataExportImportManager", "Error extracting filename", e)
+            null
         }
     }
 

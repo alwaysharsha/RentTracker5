@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class MainActivity : FragmentActivity() {
+    private lateinit var app: RentTrackerApplication
     private lateinit var ownerViewModel: OwnerViewModel
     private lateinit var buildingViewModel: BuildingViewModel
     private lateinit var tenantViewModel: TenantViewModel
@@ -43,7 +44,8 @@ class MainActivity : FragmentActivity() {
     fun launchImportFilePicker() {
         try {
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                type = Constants.MIME_TYPE_ANY
+                type = "*/*"
+                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/zip", "application/x-zip-compressed", "application/json", "text/plain"))
                 addCategory(Intent.CATEGORY_OPENABLE)
             }
             startActivityForResult(Intent.createChooser(intent, Constants.BACKUP_FILE_CHOOSER_TITLE), IMPORT_FILE_PICKER_REQUEST_CODE)
@@ -74,8 +76,8 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        val app = application as RentTrackerApplication
-        val viewModelFactory = ViewModelFactory(app.repository, app.preferencesManager, applicationContext)
+        app = application as RentTrackerApplication
+        val viewModelFactory = ViewModelFactory(app.repository, app.preferencesManager, applicationContext, app.database)
 
         ownerViewModel = ViewModelProvider(this, viewModelFactory)[OwnerViewModel::class.java]
         buildingViewModel = ViewModelProvider(this, viewModelFactory)[BuildingViewModel::class.java]
@@ -170,7 +172,9 @@ class MainActivity : FragmentActivity() {
                         vendorViewModel = vendorViewModel,
                         expenseViewModel = expenseViewModel,
                         exportImportViewModel = exportImportViewModel,
-                        mainActivity = this
+                        mainActivity = this,
+                        database = app.database,
+                        preferencesManager = app.preferencesManager
                     )
                 }
             }

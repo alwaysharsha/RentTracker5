@@ -54,7 +54,8 @@ class PaymentViewModelTest {
             amount = 1000.0,
             paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
-            tenantId = 1L
+            tenantId = 1L,
+            rentMonth = System.currentTimeMillis()
         )
 
         whenever(repository.insertPayment(payment)).thenReturn(1L)
@@ -77,7 +78,8 @@ class PaymentViewModelTest {
             amount = 1500.0,
             paymentMethod = "Cash",
             paymentType = PaymentStatus.FULL,
-            tenantId = 1L
+            tenantId = 1L,
+            rentMonth = System.currentTimeMillis()
         )
 
         var completed = false
@@ -98,7 +100,8 @@ class PaymentViewModelTest {
             amount = 1000.0,
             paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
-            tenantId = 1L
+            tenantId = 1L,
+            rentMonth = System.currentTimeMillis()
         )
 
         var completed = false
@@ -119,7 +122,8 @@ class PaymentViewModelTest {
             amount = 1000.0,
             paymentMethod = "UPI",
             paymentType = PaymentStatus.FULL,
-            tenantId = 1L
+            tenantId = 1L,
+            rentMonth = System.currentTimeMillis()
         )
 
         whenever(repository.getPaymentById(1L)).thenReturn(payment)
