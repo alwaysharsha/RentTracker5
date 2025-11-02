@@ -59,10 +59,10 @@ class MainActivity : FragmentActivity() {
     
     // Callback functions for document upload
     private var pendingDocumentName: String? = null
-    private var pendingEntityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.OWNER
+    private var pendingEntityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.TENANT
     private var pendingNotes: String? = null
     
-    fun launchDocumentFilePicker(documentName: String? = null, entityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.OWNER, notes: String? = null) {
+    fun launchDocumentFilePicker(documentName: String? = null, entityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.TENANT, notes: String? = null) {
         try {
             pendingDocumentName = documentName
             pendingEntityType = entityType
@@ -78,7 +78,7 @@ class MainActivity : FragmentActivity() {
         }
     }
     
-    fun launchDocumentCamera(documentName: String? = null, entityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.OWNER, notes: String? = null) {
+    fun launchDocumentCamera(documentName: String? = null, entityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.TENANT, notes: String? = null) {
         try {
             pendingDocumentName = documentName
             pendingEntityType = entityType
@@ -175,7 +175,7 @@ class MainActivity : FragmentActivity() {
                 
                 // Clear pending values
                 pendingDocumentName = null
-                pendingEntityType = com.renttracker.app.data.model.EntityType.OWNER
+                pendingEntityType = com.renttracker.app.data.model.EntityType.TENANT
                 pendingNotes = null
             }
         } catch (e: Exception) {

@@ -210,7 +210,7 @@ fun DocumentsScreen(
     // Upload Document Dialog
     if (showUploadDialog) {
         var documentName by remember { mutableStateOf("") }
-        var selectedEntityType by remember { mutableStateOf(EntityType.OWNER) }
+        var selectedEntityType by remember { mutableStateOf(EntityType.TENANT) }
         var notes by remember { mutableStateOf("") }
         
         AlertDialog(
@@ -235,34 +235,46 @@ fun DocumentsScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(160.dp)
+                    var expanded by remember { mutableStateOf(false) }
+                    ExposedDropdownMenuBox(
+                        expanded = expanded,
+                        onExpandedChange = { expanded = !expanded }
                     ) {
-                        val entityTypes = EntityType.values()
-                        android.util.Log.d("DocumentsScreen", "Available entity types: ${entityTypes.map { it.name }}")
-                        items(entityTypes) { entityType ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { selectedEntityType = entityType }
-                                    .padding(vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RadioButton(
-                                    selected = selectedEntityType == entityType,
-                                    onClick = { selectedEntityType = entityType }
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = when (entityType) {
-                                        EntityType.OWNER -> "Owner Document"
-                                        EntityType.BUILDING -> "Building Document"
-                                        EntityType.TENANT -> "Tenant Document"
-                                        EntityType.PAYMENT -> "Payment Document"
+                        OutlinedTextField(
+                            value = when (selectedEntityType) {
+                                EntityType.OWNER -> "Owner Document"
+                                EntityType.BUILDING -> "Building Document"
+                                EntityType.TENANT -> "Tenant Document"
+                                EntityType.PAYMENT -> "Payment Document"
+                            },
+                            onValueChange = { },
+                            readOnly = true,
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                        )
+                        
+                        ExposedDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            EntityType.values().forEach { entityType ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            when (entityType) {
+                                                EntityType.OWNER -> "Owner Document"
+                                                EntityType.BUILDING -> "Building Document"
+                                                EntityType.TENANT -> "Tenant Document"
+                                                EntityType.PAYMENT -> "Payment Document"
+                                            }
+                                        )
                                     },
-                                    style = MaterialTheme.typography.bodyMedium
+                                    onClick = {
+                                        selectedEntityType = entityType
+                                        expanded = false
+                                    }
                                 )
                             }
                         }
@@ -419,34 +431,46 @@ fun DocumentsScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(160.dp)
+                    var editExpanded by remember { mutableStateOf(false) }
+                    ExposedDropdownMenuBox(
+                        expanded = editExpanded,
+                        onExpandedChange = { editExpanded = !editExpanded }
                     ) {
-                        val entityTypes = EntityType.values()
-                        android.util.Log.d("DocumentsScreen", "Available entity types: ${entityTypes.map { it.name }}")
-                        items(entityTypes) { entityType ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { selectedEntityType = entityType }
-                                    .padding(vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RadioButton(
-                                    selected = selectedEntityType == entityType,
-                                    onClick = { selectedEntityType = entityType }
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = when (entityType) {
-                                        EntityType.OWNER -> "Owner Document"
-                                        EntityType.BUILDING -> "Building Document"
-                                        EntityType.TENANT -> "Tenant Document"
-                                        EntityType.PAYMENT -> "Payment Document"
+                        OutlinedTextField(
+                            value = when (selectedEntityType) {
+                                EntityType.OWNER -> "Owner Document"
+                                EntityType.BUILDING -> "Building Document"
+                                EntityType.TENANT -> "Tenant Document"
+                                EntityType.PAYMENT -> "Payment Document"
+                            },
+                            onValueChange = { },
+                            readOnly = true,
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = editExpanded) },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                        )
+                        
+                        ExposedDropdownMenu(
+                            expanded = editExpanded,
+                            onDismissRequest = { editExpanded = false }
+                        ) {
+                            EntityType.values().forEach { entityType ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            when (entityType) {
+                                                EntityType.OWNER -> "Owner Document"
+                                                EntityType.BUILDING -> "Building Document"
+                                                EntityType.TENANT -> "Tenant Document"
+                                                EntityType.PAYMENT -> "Payment Document"
+                                            }
+                                        )
                                     },
-                                    style = MaterialTheme.typography.bodyMedium
+                                    onClick = {
+                                        selectedEntityType = entityType
+                                        editExpanded = false
+                                    }
                                 )
                             }
                         }
