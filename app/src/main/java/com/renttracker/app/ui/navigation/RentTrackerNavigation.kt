@@ -289,6 +289,7 @@ fun BottomNavigationBar(navController: NavHostController) {
         BottomNavItem("Buildings", Screen.Buildings.route, Icons.Filled.Home),
         BottomNavItem("Tenants", Screen.Tenants.route, Icons.Filled.Group),
         BottomNavItem("Payments", Screen.Payments.route, Icons.Filled.Payment),
+        BottomNavItem("Documents", Screen.Documents.route, Icons.Filled.Description),
         BottomNavItem("Reports", Screen.Reports.route, Icons.Filled.Assessment),
         BottomNavItem("Settings", Screen.Settings.route, Icons.Filled.Settings)
     )
