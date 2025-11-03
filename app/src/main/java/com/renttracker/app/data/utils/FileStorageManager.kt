@@ -28,15 +28,34 @@ class FileStorageManager(private val context: Context) {
      */
     fun saveFile(sourceUri: Uri, fileName: String): String? {
         return try {
+            android.util.Log.d("FileStorageManager", "Attempting to save file: $fileName")
+            android.util.Log.d("FileStorageManager", "Source URI: $sourceUri")
+            
             val inputStream: InputStream? = context.contentResolver.openInputStream(sourceUri)
             inputStream?.use { input ->
                 val outputFile = File(documentsDir, fileName)
+                android.util.Log.d("FileStorageManager", "Output file path: ${outputFile.absolutePath}")
+                
                 FileOutputStream(outputFile).use { output ->
-                    input.copyTo(output)
+                    val bytesCopied = input.copyTo(output)
+                    android.util.Log.d("FileStorageManager", "Bytes copied: $bytesCopied")
                 }
-                outputFile.absolutePath
+                
+                val finalSize = outputFile.length()
+                android.util.Log.d("FileStorageManager", "Final file size: $finalSize bytes")
+                
+                if (finalSize > 0) {
+                    outputFile.absolutePath
+                } else {
+                    android.util.Log.e("FileStorageManager", "File saved but is 0 bytes!")
+                    null
+                }
+            } ?: run {
+                android.util.Log.e("FileStorageManager", "Failed to open input stream for URI: $sourceUri")
+                null
             }
         } catch (e: Exception) {
+            android.util.Log.e("FileStorageManager", "Exception saving file: ${e.message}", e)
             e.printStackTrace()
             null
         }

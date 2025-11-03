@@ -5,10 +5,15 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -16,16 +21,28 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.renttracker.app.MainActivity
 import com.renttracker.app.data.model.Document
 import com.renttracker.app.data.model.EntityType
 import com.renttracker.app.ui.viewmodel.DocumentViewModel
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import android.graphics.BitmapFactory
+import android.graphics.Bitmap
+import kotlin.math.max
+import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +60,8 @@ fun DocumentsScreen(
     var showPermissionDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
     var documentToEdit by remember { mutableStateOf<Document?>(null) }
+    var showPreviewDialog by remember { mutableStateOf(false) }
+    var documentToPreview by remember { mutableStateOf<Document?>(null) }
 
     Scaffold(
         topBar = {
@@ -170,6 +189,10 @@ fun DocumentsScreen(
                             onEdit = {
                                 documentToEdit = document
                                 showEditDialog = true
+                            },
+                            onPreview = {
+                                documentToPreview = document
+                                showPreviewDialog = true
                             }
                         )
                     }
@@ -512,6 +535,291 @@ fun DocumentsScreen(
             }
         )
     }
+    
+    // Document Preview Dialog
+    if (showPreviewDialog && documentToPreview != null) {
+        DocumentPreviewDialog(
+            document = documentToPreview!!,
+            onDismiss = { 
+                showPreviewDialog = false
+                documentToPreview = null
+            }
+        )
+    }
+}
+
+@Composable
+fun DocumentPreviewDialog(
+    document: Document,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    val file = File(document.filePath)
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { 
+            Text(
+                text = document.documentName,
+                maxLines = 1
+            )
+        },
+        text = {
+            if (file.exists()) {
+                when {
+                    document.documentType.lowercase() in listOf("jpg", "jpeg", "png", "gif", "bmp", "webp") -> {
+                        // Image Preview
+                        ImagePreview(file = file)
+                    }
+                    document.documentType.lowercase() in listOf("txt", "log", "md") -> {
+                        // Text Preview
+                        TextPreview(file = file)
+                    }
+                    else -> {
+                        // Unsupported preview type
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Description,
+                                contentDescription = null,
+                                modifier = Modifier.size(64.dp),
+                                tint = MaterialTheme.colorScheme.outline
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Preview not available for this file type",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "File type: ${document.documentType.uppercase()}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                        }
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Error,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "File not found",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+fun ImagePreview(file: File) {
+    var scale by remember { mutableStateOf(1f) }
+    var offsetX by remember { mutableStateOf(0f) }
+    var offsetY by remember { mutableStateOf(0f) }
+    
+    // Debug logging
+    android.util.Log.d("ImagePreview", "Attempting to load image: ${file.absolutePath}")
+    android.util.Log.d("ImagePreview", "File exists: ${file.exists()}")
+    android.util.Log.d("ImagePreview", "File size: ${file.length()} bytes")
+    android.util.Log.d("ImagePreview", "File readable: ${file.canRead()}")
+    
+    val bitmap = remember(file) {
+        try {
+            // Check if file exists and is readable first
+            if (!file.exists() || !file.canRead()) {
+                android.util.Log.e("ImagePreview", "File does not exist or is not readable")
+                null
+            } else {
+                // Try multiple BitmapFactory options
+                val options = BitmapFactory.Options().apply {
+                    inPreferredConfig = Bitmap.Config.ARGB_8888
+                    inSampleSize = 1
+                }
+                
+                android.util.Log.d("ImagePreview", "Trying primary decode with ARGB_8888")
+                val bitmap = BitmapFactory.decodeFile(file.absolutePath, options)
+                android.util.Log.d("ImagePreview", "Primary decode result: ${bitmap != null}")
+                
+                // If primary decode fails, try with more aggressive options
+                if (bitmap == null) {
+                    android.util.Log.d("ImagePreview", "Trying fallback decode with RGB_565")
+                    val fallbackOptions = BitmapFactory.Options().apply {
+                        inPreferredConfig = Bitmap.Config.RGB_565
+                        inSampleSize = 2
+                    }
+                    val fallbackBitmap = BitmapFactory.decodeFile(file.absolutePath, fallbackOptions)
+                    android.util.Log.d("ImagePreview", "Fallback decode result: ${fallbackBitmap != null}")
+                    fallbackBitmap
+                } else {
+                    bitmap
+                }
+            }
+        } catch (e: OutOfMemoryError) {
+            android.util.Log.e("ImagePreview", "OutOfMemoryError: ${e.message}")
+            // Handle OOM with aggressive sampling
+            try {
+                val oomOptions = BitmapFactory.Options().apply {
+                    inPreferredConfig = Bitmap.Config.RGB_565
+                    inSampleSize = 4
+                }
+                BitmapFactory.decodeFile(file.absolutePath, oomOptions)
+            } catch (e2: Exception) {
+                android.util.Log.e("ImagePreview", "OOM fallback failed: ${e2.message}")
+                null
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("ImagePreview", "Exception loading image: ${e.message}")
+            null
+        }
+    }
+    
+    if (bitmap != null) {
+        android.util.Log.d("ImagePreview", "Successfully loaded bitmap: ${bitmap.width}x${bitmap.height}")
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .clip(MaterialTheme.shapes.medium)
+                .pointerInput(Unit) {
+                    detectTransformGestures { _, pan, zoom, _ ->
+                        scale = max(1f, min(scale * zoom, 3f))
+                        val maxX = (size.width * (scale - 1)) / 2
+                        val maxY = (size.height * (scale - 1)) / 2
+                        offsetX = max(-maxX, min(offsetX + pan.x, maxX))
+                        offsetY = max(-maxY, min(offsetY + pan.y, maxY))
+                    }
+                }
+        ) {
+            Image(
+                painter = BitmapPainter(bitmap.asImageBitmap()),
+                contentDescription = "Image preview",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset { androidx.compose.ui.unit.IntOffset(offsetX.toInt(), offsetY.toInt()) },
+                contentScale = ContentScale.Fit
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = "Pinch to zoom, drag to pan",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.fillMaxWidth()
+        )
+    } else {
+        android.util.Log.d("ImagePreview", "Showing error state")
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = Icons.Filled.BrokenImage,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.error
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Could not load image",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "File: ${file.name}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Path: ${file.absolutePath}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Supported formats: JPG, PNG, GIF, BMP, WebP",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline
+            )
+        }
+    }
+}
+
+@Composable
+fun TextPreview(file: File) {
+    val text = remember(file) {
+        try {
+            file.readText().take(2000) // Limit to first 2000 characters
+        } catch (e: Exception) {
+            "Error reading file: ${e.message}"
+        }
+    }
+    
+    val fullText = remember(file) {
+        try {
+            file.readText()
+        } catch (e: Exception) {
+            ""
+        }
+    }
+    
+    if (text.startsWith("Error reading file:")) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error
+        )
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
+                .verticalScroll(rememberScrollState())
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .padding(12.dp)
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodySmall,
+                fontSize = 12.sp,
+                lineHeight = 16.sp
+            )
+            
+            if (fullText.length > 2000) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "... (showing first 2000 characters)",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline,
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -520,10 +828,13 @@ fun DocumentCard(
     dateFormat: SimpleDateFormat,
     documentViewModel: DocumentViewModel,
     onDelete: () -> Unit,
-    onEdit: () -> Unit
+    onEdit: () -> Unit,
+    onPreview: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onPreview() },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -536,7 +847,8 @@ fun DocumentCard(
             Icon(
                 imageVector = when (document.documentType.lowercase()) {
                     "pdf" -> Icons.Filled.PictureAsPdf
-                    "jpg", "jpeg", "png", "gif" -> Icons.Filled.Image
+                    "jpg", "jpeg", "png", "gif", "bmp", "webp" -> Icons.Filled.Image
+                    "txt", "log", "md" -> Icons.Filled.TextSnippet
                     else -> Icons.Filled.Description
                 },
                 contentDescription = null,
@@ -583,10 +895,31 @@ fun DocumentCard(
                         color = MaterialTheme.colorScheme.outline
                     )
                 }
+                
+                // Show preview availability
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = when {
+                        document.documentType.lowercase() in listOf("jpg", "jpeg", "png", "gif", "bmp", "webp") -> "📷 Image preview available"
+                        document.documentType.lowercase() in listOf("txt", "log", "md") -> "📄 Text preview available"
+                        else -> "📁 No preview available"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
             }
 
             // Action Buttons
             Row {
+                // Preview Button
+                IconButton(onClick = onPreview) {
+                    Icon(
+                        imageVector = Icons.Filled.Visibility,
+                        contentDescription = "Preview",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
                 // Edit Button
                 IconButton(onClick = onEdit) {
                     Icon(

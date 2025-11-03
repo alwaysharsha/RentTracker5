@@ -61,6 +61,7 @@ class MainActivity : FragmentActivity() {
     private var pendingDocumentName: String? = null
     private var pendingEntityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.TENANT
     private var pendingNotes: String? = null
+    private var pendingCameraUri: Uri? = null
     
     fun launchDocumentFilePicker(documentName: String? = null, entityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.TENANT, notes: String? = null) {
         try {
@@ -85,6 +86,8 @@ class MainActivity : FragmentActivity() {
             pendingNotes = notes
             val photoUri = createImageUri()
             photoUri?.let { uri ->
+                pendingCameraUri = uri // Store the camera URI
+                android.util.Log.d("MainActivity", "Camera URI stored: $uri")
                 val cameraIntent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE).apply {
                     putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri)
                     addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -148,38 +151,44 @@ class MainActivity : FragmentActivity() {
         
         // Handle document camera result
         if (requestCode == DOCUMENT_CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
-            handleDocumentUpload(null) // Camera photo is handled via the URI we passed
+            android.util.Log.d("MainActivity", "Camera result received, using stored URI: $pendingCameraUri")
+            handleDocumentUpload(pendingCameraUri) // Use the stored camera URI
         }
     }
     
     private fun handleDocumentUpload(uri: Uri?) {
         try {
-            val documentUri = uri ?: createImageUri() // Use the camera URI if provided
-            documentUri?.let { fileUri ->
-                val fileName = pendingDocumentName ?: getFileName(fileUri) ?: "document_${System.currentTimeMillis()}"
-                
-                // Upload document using the pending values
-                documentViewModel.uploadDocument(
-                    uri = fileUri,
-                    documentName = fileName,
-                    entityType = pendingEntityType,
-                    entityId = 0L, // Use 0 for general documents not tied to specific entity
-                    notes = pendingNotes
-                ) { success ->
-                    if (success) {
-                        showToast(this, "Document uploaded successfully", Constants.TOAST_DURATION_SHORT)
-                    } else {
-                        showToast(this, "Failed to upload document", Constants.TOAST_DURATION_LONG)
-                    }
-                }
-                
-                // Clear pending values
-                pendingDocumentName = null
-                pendingEntityType = com.renttracker.app.data.model.EntityType.TENANT
-                pendingNotes = null
+            android.util.Log.d("MainActivity", "handleDocumentUpload called with URI: $uri")
+            
+            if (uri == null) {
+                android.util.Log.e("MainActivity", "URI is null, cannot upload document")
+                showToast(this, "Error: No file to upload", Constants.TOAST_DURATION_LONG)
+                return
             }
+            
+            val fileName = pendingDocumentName ?: getFileName(uri) ?: "document_${System.currentTimeMillis()}"
+            
+            // Upload document using the pending values
+            documentViewModel.uploadDocument(
+                uri = uri,
+                documentName = fileName,
+                entityType = pendingEntityType,
+                entityId = 0L, // Use 0 for general documents not tied to specific entity
+                notes = pendingNotes
+            ) { success ->
+                if (success) {
+                    showToast(this, "Document uploaded successfully", Constants.TOAST_DURATION_SHORT)
+                } else {
+                    showToast(this, "Failed to upload document", Constants.TOAST_DURATION_LONG)
+                }
+            }
+            
+            // Clear pending values
+            pendingDocumentName = null
+            pendingNotes = null
+            pendingCameraUri = null
         } catch (e: Exception) {
-            e.printStackTrace()
+            android.util.Log.e(Constants.TAG_MAIN_ACTIVITY, "Exception handling document upload", e)
             showToast(this, "Error uploading document: ${e.message}", Constants.TOAST_DURATION_LONG)
         }
     }

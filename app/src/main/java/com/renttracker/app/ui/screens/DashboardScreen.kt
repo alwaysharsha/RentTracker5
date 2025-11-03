@@ -71,7 +71,7 @@ fun DashboardScreen(
         DashboardItem("Payments", Icons.Filled.Payment, "payments"),
         DashboardItem("Documents", Icons.Filled.Description, "documents"),
         DashboardItem("Vendors", Icons.Filled.Build, "vendors"),
-        DashboardItem("Expenses", Icons.Filled.AttachMoney, "expenses"),
+        DashboardItem("Expenses", Icons.Filled.ContentCut, "expenses"),
         DashboardItem("Reports", Icons.Filled.Assessment, "reports"),
         DashboardItem("Settings", Icons.Filled.Settings, "settings")
     )
