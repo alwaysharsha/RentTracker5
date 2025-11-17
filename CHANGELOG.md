@@ -5,6 +5,28 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.8.7] - 2024-11-17
+
+### Updated - Target API Level to 35
+
+#### Android API Update
+- **Updated compileSdk from 34 to 35**
+- **Updated targetSdk from 34 to 35**
+- Ensures compatibility with latest Android features and security updates
+- Prepares app for future Android releases
+
+### Updated
+- Version number: 4.8.6 → 4.8.7
+- Build number: 63 → 64
+- compileSdk: 34 → 35
+- targetSdk: 34 → 35
+
+### Benefits
+- ✅ **Latest Android API support** - Compatible with Android 15
+- ✅ **Enhanced security** - Latest security patches and features
+- ✅ **Future-ready** - Prepared for upcoming Android versions
+- ✅ **Better performance** - Access to latest Android optimizations
+
 ## [4.8.4] - 2024-11-01
 
 ### Added - SQLite Backup with Document Support

@@ -213,8 +213,9 @@ Show widget to show the count of active leases and total payment
 - [x] Crash happens when I click on Import link/button - Fixed "Can only use lower 16 bits for requestCode" error by using legacy startActivityForResult() pattern instead of modern Activity Result API
 - [x] Currency selection not captured in backup - Fixed by adding settings export/import to backup/restore functionality
 - [x] Change the backup mechanism to use sqllite instead of json. So that future back up integration to support documents we don't have to change the backup mechanism.
-- [ ] upload error: invalid file format: please select a valid Renttrcker backup file. - Fixed with ultimate fallback for ZIP files and enhanced error handling
-- [ ] when I click on the import button, the import isn't successful. but the toast message shows success. - Fixed by removing false success fallback and implementing proper error handling with lenient metadata validation 
+- [x] upload error: invalid file format: please select a valid Renttrcker backup file. - Fixed with ultimate fallback for ZIP files and enhanced error handling
+- [x] when I click on the import button, the import isn't successful. but the toast message shows success. - Fixed by removing false success fallback and implementing proper error handling with lenient metadata validation 
+- [x] Update the target API level to 35
 
 ## Phase 4 (Don't start the development yet, until the phase 1 is completed)
 

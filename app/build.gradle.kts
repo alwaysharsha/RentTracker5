@@ -6,14 +6,14 @@ plugins {
 
 android {
     namespace = "com.renttracker.app"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.renttracker.app"
         minSdk = 21
-        targetSdk = 34
-        versionCode = 18
-        // versionName = "3.5"
+        targetSdk = 35
+        versionCode = 64
+        versionName = "4.8.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
