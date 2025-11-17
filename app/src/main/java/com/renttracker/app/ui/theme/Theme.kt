@@ -27,6 +27,7 @@ private val LightColorScheme = lightColorScheme(
     tertiary = Blue40
 )
 
+@Suppress("DEPRECATION")
 @Composable
 fun RentTrackerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

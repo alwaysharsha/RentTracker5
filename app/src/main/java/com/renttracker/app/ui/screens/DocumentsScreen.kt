@@ -553,7 +553,6 @@ fun DocumentPreviewDialog(
     document: Document,
     onDismiss: () -> Unit
 ) {
-    val context = LocalContext.current
     val file = File(document.filePath)
     
     AlertDialog(
