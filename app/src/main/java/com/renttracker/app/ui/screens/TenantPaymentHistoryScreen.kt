@@ -2,13 +2,18 @@ package com.renttracker.app.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.renttracker.app.data.model.Payment
+import com.renttracker.app.data.model.PaymentStatus
+import com.renttracker.app.data.model.isPendingPayment
 import com.renttracker.app.data.model.Tenant
 import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.viewmodel.PaymentViewModel
@@ -28,9 +33,24 @@ fun TenantPaymentHistoryScreen(
     onAddPayment: (Long) -> Unit,
     onPaymentClick: (Long) -> Unit
 ) {
-    val tenant by tenantViewModel.getTenantById(tenantId).collectAsState(initial = null)
-    val payments by paymentViewModel.getPaymentsByTenant(tenantId).collectAsState()
+    val tenantFlow = remember(tenantId) { tenantViewModel.getTenantById(tenantId) }
+    val paymentsFlow = remember(tenantId) { paymentViewModel.getPaymentsByTenant(tenantId) }
+
+    val tenant by tenantFlow.collectAsState(initial = null)
+    val payments by paymentsFlow.collectAsState()
     val currency by settingsViewModel.currency.collectAsState()
+
+    var pendingOnly by rememberSaveable { mutableStateOf(false) }
+
+    val displayedPayments = remember(payments, pendingOnly) {
+        if (!pendingOnly) {
+            payments
+        } else {
+            payments.filter { it.isPendingPayment() }
+        }
+    }
+
+    val dateFormatter = remember { SimpleDateFormat("MMM yyyy", Locale.getDefault()) }
 
     Scaffold(
         topBar = {
@@ -59,10 +79,29 @@ fun TenantPaymentHistoryScreen(
                         .padding(bottom = 16.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = t.name,
-                            style = MaterialTheme.typography.titleLarge
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = t.name,
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Pending only",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    modifier = Modifier.padding(end = 8.dp)
+                                )
+                                Switch(
+                                    checked = pendingOnly,
+                                    onCheckedChange = { pendingOnly = it }
+                                )
+                            }
+                        }
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Mobile: ${t.mobile}",
@@ -79,11 +118,10 @@ fun TenantPaymentHistoryScreen(
             }
 
             // Payment Summary
-            val totalPaid = payments.sumOf { it.amount }
-            val paymentCount = payments.size
-            val partialPayments = payments.filter { it.paymentType == com.renttracker.app.data.model.PaymentStatus.PARTIAL }
+            val totalPaid = displayedPayments.sumOf { it.amount }
+            val paymentCount = displayedPayments.size
+            val partialPayments = displayedPayments.filter { it.paymentType == PaymentStatus.PARTIAL }
             val partialPaymentCount = partialPayments.size
-            val totalPartialAmount = partialPayments.sumOf { it.amount }
             val totalPending = partialPayments.sumOf { it.pendingAmount ?: 0.0 }
             
             Card(
@@ -94,96 +132,70 @@ fun TenantPaymentHistoryScreen(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Payment Summary",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    
+                Column(modifier = Modifier.padding(12.dp)) {
+                    // Compact summary in single row
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // Total Payments
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Total Payments",
-                                style = MaterialTheme.typography.labelSmall
+                                text = "$paymentCount",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                             )
                             Text(
-                                text = paymentCount.toString(),
-                                style = MaterialTheme.typography.headlineSmall
+                                text = "Payments",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            horizontalAlignment = androidx.compose.ui.Alignment.End
-                        ) {
-                            Text(
-                                text = "Total Amount",
-                                style = MaterialTheme.typography.labelSmall
-                            )
+                        
+                        // Divider
+                        Divider(
+                            modifier = Modifier
+                                .width(1.dp)
+                                .height(40.dp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                        )
+                        
+                        // Total Amount
+                        Column(modifier = Modifier.weight(1.5f)) {
                             Text(
                                 text = com.renttracker.app.ui.components.formatCurrency(totalPaid, currency),
-                                style = MaterialTheme.typography.headlineSmall
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                            )
+                            Text(
+                                text = "Total Paid",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Divider()
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Partial Payments",
-                                style = MaterialTheme.typography.labelSmall
+                        
+                        // Partial Payments (only if exists)
+                        if (partialPaymentCount > 0) {
+                            Divider(
+                                modifier = Modifier
+                                    .width(1.dp)
+                                    .height(40.dp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
                             )
-                            Text(
-                                text = partialPaymentCount.toString(),
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = if (partialPaymentCount > 0) 
-                                    MaterialTheme.colorScheme.tertiary 
-                                else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            horizontalAlignment = androidx.compose.ui.Alignment.End
-                        ) {
-                            Text(
-                                text = "Total Partial Payments",
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                            Text(
-                                text = com.renttracker.app.ui.components.formatCurrency(totalPartialAmount, currency),
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = if (partialPaymentCount > 0) 
-                                    MaterialTheme.colorScheme.tertiary 
-                                else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                    
-                    if (totalPending > 0) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
+                            
+                            Column(modifier = Modifier.weight(1.2f)) {
                                 Text(
-                                    text = "Total Pending",
-                                    style = MaterialTheme.typography.labelSmall,
+                                    text = com.renttracker.app.ui.components.formatCurrency(totalPending, currency),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.error
                                 )
                                 Text(
-                                    text = com.renttracker.app.ui.components.formatCurrency(totalPending, currency),
-                                    style = MaterialTheme.typography.titleLarge,
+                                    text = "Pending",
+                                    style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }
@@ -193,12 +205,12 @@ fun TenantPaymentHistoryScreen(
             }
 
             // Payment History
-            if (payments.isEmpty()) {
+            if (displayedPayments.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(32.dp),
-                    contentAlignment = androidx.compose.ui.Alignment.Center
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "No payment records found",
@@ -214,29 +226,31 @@ fun TenantPaymentHistoryScreen(
                 )
 
                 // Group payments by Rent Month
-                val dateFormatter = SimpleDateFormat("MMM yyyy", Locale.getDefault())
-                val groupedPayments = payments.groupBy { payment ->
-                    dateFormatter.format(Date(payment.rentMonth))
-                }.toSortedMap(compareByDescending { 
-                    SimpleDateFormat("MMM yyyy", Locale.getDefault()).parse(it)
-                })
+                val groupedPayments = remember(displayedPayments) {
+                    displayedPayments
+                        .groupBy { payment -> payment.rentMonth }
+                        .toSortedMap(compareByDescending { it })
+                }
 
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    groupedPayments.forEach { (monthYear, paymentsInMonth) ->
+                    groupedPayments.forEach { (rentMonth, paymentsInMonth) ->
                         item {
                             Text(
-                                text = monthYear,
+                                text = dateFormatter.format(Date(rentMonth)),
                                 style = MaterialTheme.typography.titleSmall,
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
                         }
-                        items(paymentsInMonth.size) { index ->
+                        items(
+                            items = paymentsInMonth,
+                            key = { it.id }
+                        ) { payment ->
                             PaymentCard(
-                                payment = paymentsInMonth[index],
+                                payment = payment,
                                 currency = currency,
-                                onClick = { onPaymentClick(paymentsInMonth[index].id) }
+                                onClick = { onPaymentClick(payment.id) }
                             )
                         }
                     }

@@ -19,4 +19,4 @@ Don't create new .md files in random, put details in changelog.md.
 
 <!-- Each feature development commit to git with meaning full commit message along with description. -->
 
-Update version and Build in app\src\main\java\com\renttracker\app\ui\screens\SettingsScreen.kt in Version and Build each time you fix an issue or release.
+Update version and Build in app\src\main\java\com\renttracker\app\ui\screens\SettingsScreen.kt in Version and Build and create Debug and Release assemble artifact each time you fix an issue or release.

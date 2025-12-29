@@ -5,6 +5,135 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.8.15] - 2025-12-29
+
+### Fixed - Tenant Payment History Flicker
+
+#### Tenant Payment History Screen
+- **Fixed flicker when opening the screen and when enabling/disabling the "Pending only" toggle**
+- Stabilized payment/tenant state collection across recompositions
+- Optimized grouping/sorting to reduce heavy recomputation
+
+### Updated
+- Version number: 4.8.14 → 4.8.15
+- Build number: 71 → 72
+
+## [4.8.14] - 2025-12-29
+
+### Added - Pending Only Toggle in Tenant Payment History
+
+#### Tenant Payment History Screen
+- **Added a right-aligned "Pending only" toggle** near tenant name/rent info
+- When enabled, the payment list shows only pending items (partial payments with pending amount)
+- Payment summary metrics update based on the filtered list
+
+### Updated
+- Version number: 4.8.13 → 4.8.14
+- Build number: 70 → 71
+
+## [4.8.13] - 2024-11-23
+
+### Removed - Country Code Field from Phone Input
+
+#### Simplified Phone Number Input
+- **Removed separate country code field from Tenant and Owner detail screens**
+- Users can now input full phone numbers with country code as needed (e.g., +919876543210)
+- Single phone input field instead of two separate fields (code + number)
+- More flexible - supports any country code format
+- Cleaner UI with less visual clutter
+
+#### Technical Changes
+- Updated `PhoneInputField` component to accept full phone numbers
+- Removed country code state variables from TenantDetailScreen
+- Removed country code state variables from OwnerDetailScreen
+- Removed country code parsing logic on edit
+- Phone numbers stored as-is without parsing
+- Placeholder text shows example: "+1234567890"
+
+#### User Experience Improvements
+- **Simpler input process** - One field instead of two
+- **More flexible** - Users can input any format they prefer
+- **No data loss** - Phone numbers stored exactly as entered
+- **Better for international users** - No assumptions about country codes
+- **Cleaner screens** - Reduced form complexity
+
+### Updated
+- Version number: 4.8.12 → 4.8.13
+- Build number: 69 → 70
+
+### Benefits
+- ✅ **Simplified UI** - Fewer form fields to fill
+- ✅ **More flexible** - Users control phone number format
+- ✅ **Better UX** - No parsing or validation errors
+- ✅ **International friendly** - Works with any country code
+- ✅ **Cleaner code** - Removed complex parsing logic
+
+## [4.8.12] - 2024-11-23
+
+### Optimized - Payment Summary Screen Space
+
+#### Compact Summary Layout
+- **Redesigned payment summary to use horizontal single-row layout**
+- Reduced vertical space from ~150dp to ~60dp
+- Changed from multi-row stacked layout to compact horizontal row
+- Maintains all critical information: Payment count, Total paid, Pending amount
+
+#### Visual Improvements
+- **Vertical dividers** separate summary sections for clarity
+- **Conditional pending section** only displays when partial payments exist
+- **Consistent typography** with bold titles and small labels
+- **Better space utilization** - more room for payment history list
+
+#### Technical Changes
+- Removed multiple Row/Column nesting that caused excessive spacing
+- Reduced padding from 16.dp to 12.dp in summary card
+- Simplified layout structure while maintaining visual hierarchy
+- Kept responsive design with weight-based column sizing
+
+### Updated
+- Version number: 4.8.11 → 4.8.12
+- Build number: 68 → 69
+
+### Benefits
+- ✅ **50% reduction in summary card height** - More space for payment history
+- ✅ **Cleaner visual design** - Horizontal layout is more intuitive
+- ✅ **Better information hierarchy** - Key metrics easily scannable
+- ✅ **Improved UX** - Users see more payment records without scrolling
+- ✅ **Responsive layout** - Adapts to different screen sizes
+
+## [4.8.11] - 2024-11-23
+
+### Fixed - Country Code Appending Issue in Tenant and Owner Details
+
+#### Phone Number Parsing Fix
+- **Fixed bug where country code was appended multiple times when editing tenant or owner details**
+- Replaced incorrect regex pattern that failed to parse phone numbers correctly
+- Implemented proper country code extraction logic (1-3 digits from stored phone number)
+- Now correctly separates country code from phone number on edit
+
+#### Technical Implementation
+- Updated TenantDetailScreen phone number parsing logic
+- Updated OwnerDetailScreen phone number parsing logic
+- Changed from regex-based splitting to length-based extraction
+- Tries 3-digit, 2-digit, then 1-digit country codes in order
+- Properly handles stored format: `+{countryCode}{phoneNumber}`
+
+#### Root Cause
+- Previous regex pattern `(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)` looked for transitions between digits and non-digits
+- Since country codes are all digits, the regex never found a split point
+- This caused the entire number to be treated as phone number instead of separating country code
+- Each edit would re-append the country code, causing duplication
+
+### Updated
+- Version number: 4.8.10 → 4.8.11
+- Build number: 67 → 68
+
+### Benefits
+- ✅ **Country code no longer duplicates on edit** - Phone numbers parse correctly
+- ✅ **Proper phone number separation** - Country code and number stored correctly
+- ✅ **Consistent behavior** - Works for both primary and secondary phone numbers
+- ✅ **Reliable editing** - Can edit tenant/owner details without data corruption
+
 ## [4.8.7] - 2024-11-17
 
 ### Updated - Target API Level to 35

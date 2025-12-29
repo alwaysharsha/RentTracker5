@@ -32,23 +32,9 @@ fun TenantDetailScreen(
 ) {
     val currency by settingsViewModel.currency.collectAsState()
     
-    // Set default country code based on currency
-    val defaultCountryCode = when (currency) {
-        "INR" -> "91"
-        "USD", "CAD" -> "1"
-        "GBP" -> "44"
-        "EUR" -> "33"  // France as default
-        "JPY" -> "81"
-        "CNY" -> "86"
-        "AUD" -> "61"
-        else -> "1"
-    }
-    
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var countryCode by remember { mutableStateOf(defaultCountryCode) }
     var mobile by remember { mutableStateOf("") }
-    var countryCode2 by remember { mutableStateOf(defaultCountryCode) }
     var mobile2 by remember { mutableStateOf("") }
     var familyMembers by remember { mutableStateOf("") }
     var isCheckedOut by remember { mutableStateOf(false) }
@@ -85,33 +71,9 @@ fun TenantDetailScreen(
                     existingTenant = it
                     name = it.name
                     email = it.email ?: ""
-                    // Parse mobile number
-                    val mobileStr = it.mobile
-                    if (mobileStr.startsWith("+")) {
-                        val parts = mobileStr.substring(1).split(Regex("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)"), 2)
-                        if (parts.size == 2) {
-                            countryCode = parts[0]
-                            mobile = parts[1]
-                        } else {
-                            mobile = mobileStr.substring(1)
-                        }
-                    } else {
-                        mobile = mobileStr
-                    }
-                    // Parse mobile2
-                    it.mobile2?.let { mobile2Str ->
-                        if (mobile2Str.startsWith("+")) {
-                            val parts = mobile2Str.substring(1).split(Regex("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)"), 2)
-                            if (parts.size == 2) {
-                                countryCode2 = parts[0]
-                                mobile2 = parts[1]
-                            } else {
-                                mobile2 = mobile2Str.substring(1)
-                            }
-                        } else {
-                            mobile2 = mobile2Str
-                        }
-                    }
+                    // Load mobile numbers as-is
+                    mobile = it.mobile
+                    mobile2 = it.mobile2 ?: ""
                     familyMembers = it.familyMembers ?: ""
                     isCheckedOut = it.isCheckedOut
                     notes = it.notes ?: ""
@@ -150,8 +112,8 @@ fun TenantDetailScreen(
                                 id = tenantId ?: 0,
                                 name = name,
                                 email = email.ifBlank { null },
-                                mobile = "+$countryCode$mobile",
-                                mobile2 = if (mobile2.isNotEmpty()) "+$countryCode2$mobile2" else null,
+                                mobile = mobile,
+                                mobile2 = if (mobile2.isNotEmpty()) mobile2 else null,
                                 familyMembers = familyMembers.ifBlank { null },
                                 buildingId = selectedBuildingId,
                                 startDate = startDate,
@@ -209,29 +171,20 @@ fun TenantDetailScreen(
             )
 
             PhoneInputField(
-                countryCode = countryCode,
-                onCountryCodeChange = { countryCode = it },
                 phoneNumber = mobile,
                 onPhoneNumberChange = {
-                    mobile = it.filter { char -> char.isDigit() }
+                    mobile = it
                     mobileError = false
                 },
                 label = "Mobile",
-                isRequired = true
+                isRequired = true,
+                isError = mobileError,
+                errorMessage = "Mobile is required"
             )
-            if (mobileError) {
-                Text(
-                    text = "Mobile is required",
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
 
             PhoneInputField(
-                countryCode = countryCode2,
-                onCountryCodeChange = { countryCode2 = it },
                 phoneNumber = mobile2,
-                onPhoneNumberChange = { mobile2 = it.filter { char -> char.isDigit() } },
+                onPhoneNumberChange = { mobile2 = it },
                 label = "Mobile 2"
             )
 

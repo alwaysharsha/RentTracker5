@@ -35,3 +35,7 @@ enum class PaymentStatus {
     PARTIAL,
     FULL
 }
+
+fun Payment.isPendingPayment(): Boolean {
+    return paymentType == PaymentStatus.PARTIAL && (pendingAmount ?: 0.0) > 0.0
+}

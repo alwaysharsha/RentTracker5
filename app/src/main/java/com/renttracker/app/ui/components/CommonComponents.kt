@@ -66,37 +66,33 @@ fun ValidationTextField(
 
 @Composable
 fun PhoneInputField(
-    countryCode: String,
-    onCountryCodeChange: (String) -> Unit,
     phoneNumber: String,
     onPhoneNumberChange: (String) -> Unit,
     label: String,
     isRequired: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isError: Boolean = false,
+    errorMessage: String = ""
 ) {
-    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedTextField(
-            value = countryCode,
-            onValueChange = { if (it.all { char -> char.isDigit() }) onCountryCodeChange(it) },
-            label = { Text("Code") },
-            modifier = Modifier.weight(0.3f),
-            singleLine = true,
-            prefix = { Text("+") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
-        OutlinedTextField(
-            value = phoneNumber,
-            onValueChange = { if (it.all { char -> char.isDigit() }) onPhoneNumberChange(it) },
-            label = {
-                Text(
-                    text = if (isRequired) "$label *" else label
-                )
-            },
-            modifier = Modifier.weight(0.7f),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
-    }
+    OutlinedTextField(
+        value = phoneNumber,
+        onValueChange = onPhoneNumberChange,
+        label = {
+            Text(
+                text = if (isRequired) "$label *" else label
+            )
+        },
+        modifier = modifier.fillMaxWidth(),
+        singleLine = true,
+        placeholder = { Text("+1234567890") },
+        isError = isError,
+        supportingText = {
+            if (isError && errorMessage.isNotEmpty()) {
+                Text(errorMessage)
+            }
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+    )
 }
 
 fun formatDate(timestamp: Long): String {
