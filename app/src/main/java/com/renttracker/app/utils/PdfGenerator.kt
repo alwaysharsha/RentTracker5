@@ -53,9 +53,9 @@ object PdfGenerator {
         paint.textSize = 12f
         paint.isFakeBoldText = true
         val startX = 50f
-        val colWidths = floatArrayOf(100f, 100f, 80f, 80f, 80f) // Date, Tenant, Amount, Status, Pending
+        val colWidths = floatArrayOf(80f, 90f, 70f, 60f, 70f, 125f) // Date, Tenant, Amount, Status, Pending, Notes
         
-        val headers = listOf("Date", "Tenant", "Amount", "Status", "Pending")
+        val headers = listOf("Date", "Tenant", "Amount", "Status", "Pending", "Notes")
         var currentX = startX
         
         headers.forEachIndexed { index, header ->
@@ -123,6 +123,12 @@ object PdfGenerator {
             } else {
                  canvas.drawText("-", currentX, yPosition, paint)
             }
+            currentX += colWidths[4]
+            
+            // Notes
+            val notes = payment.notes ?: "-"
+            val safeNotes = if (notes.length > 18) notes.substring(0, 15) + "..." else notes
+            canvas.drawText(safeNotes, currentX, yPosition, paint)
             
             yPosition += 20f
         }
@@ -204,7 +210,7 @@ object PdfGenerator {
 
         paint.isFakeBoldText = false
         for (tenant in tenants) {
-            if (yPosition > 800f) {
+            if (yPosition > 780f) {
                 pdfDocument.finishPage(page)
                 page = pdfDocument.startPage(pageInfo)
                 canvas = page.canvas
@@ -214,7 +220,21 @@ object PdfGenerator {
             canvas.drawText(name, 50f, yPosition, paint)
             canvas.drawText(tenant.mobile, 250f, yPosition, paint)
             canvas.drawText(tenant.email ?: "-", 400f, yPosition, paint)
-            yPosition += 20f
+            yPosition += 15f
+            
+            // Add notes if available
+            if (!tenant.notes.isNullOrBlank()) {
+                paint.textSize = 10f
+                paint.color = Color.DKGRAY
+                val notesText = "Notes: ${tenant.notes}"
+                val safeNotes = if (notesText.length > 70) notesText.substring(0, 67) + "..." else notesText
+                canvas.drawText(safeNotes, 60f, yPosition, paint)
+                paint.textSize = 12f
+                paint.color = Color.BLACK
+                yPosition += 15f
+            } else {
+                yPosition += 5f
+            }
         }
 
         pdfDocument.finishPage(page)
@@ -268,7 +288,7 @@ object PdfGenerator {
 
         paint.isFakeBoldText = false
         for ((building, income) in buildingIncomeMap) {
-            if (yPosition > 800f) {
+            if (yPosition > 780f) {
                 pdfDocument.finishPage(page)
                 page = pdfDocument.startPage(pageInfo)
                 canvas = page.canvas
@@ -280,7 +300,21 @@ object PdfGenerator {
             val shortAddr = if (address.length > 20) address.substring(0, 17) + "..." else address
             canvas.drawText(shortAddr, 250f, yPosition, paint)
             canvas.drawText(formatCurrency(income, currency), 450f, yPosition, paint)
-            yPosition += 20f
+            yPosition += 15f
+            
+            // Add notes if available
+            if (!building.notes.isNullOrBlank()) {
+                paint.textSize = 10f
+                paint.color = Color.DKGRAY
+                val notesText = "Notes: ${building.notes}"
+                val safeNotes = if (notesText.length > 70) notesText.substring(0, 67) + "..." else notesText
+                canvas.drawText(safeNotes, 60f, yPosition, paint)
+                paint.textSize = 12f
+                paint.color = Color.BLACK
+                yPosition += 15f
+            } else {
+                yPosition += 5f
+            }
         }
 
         pdfDocument.finishPage(page)
@@ -403,7 +437,7 @@ object PdfGenerator {
 
         paint.isFakeBoldText = false
         for (tenant in tenants) {
-            if (yPosition > 800f) {
+            if (yPosition > 780f) {
                 pdfDocument.finishPage(page)
                 page = pdfDocument.startPage(pageInfo)
                 canvas = page.canvas
@@ -419,7 +453,21 @@ object PdfGenerator {
             
             canvas.drawText(tenant.mobile, 350f, yPosition, paint)
             canvas.drawText(formatCurrency(tenant.rent ?: 0.0, currency), 480f, yPosition, paint)
-            yPosition += 20f
+            yPosition += 15f
+            
+            // Add notes if available
+            if (!tenant.notes.isNullOrBlank()) {
+                paint.textSize = 10f
+                paint.color = Color.DKGRAY
+                val notesText = "Notes: ${tenant.notes}"
+                val safeNotes = if (notesText.length > 70) notesText.substring(0, 67) + "..." else notesText
+                canvas.drawText(safeNotes, 60f, yPosition, paint)
+                paint.textSize = 12f
+                paint.color = Color.BLACK
+                yPosition += 15f
+            } else {
+                yPosition += 5f
+            }
         }
 
         pdfDocument.finishPage(page)

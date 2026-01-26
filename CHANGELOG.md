@@ -5,6 +5,36 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.8.22] - 2026-01-26
+
+### Added - Notes in PDF Exports
+
+#### Enhanced PDF Reports with Notes
+- **Payment reports now include notes column** - View payment-specific notes directly in exported PDFs
+- **Tenant reports display notes** - Tenant notes appear below each tenant entry in list exports
+- **Building income reports show notes** - Building notes included below each building entry
+- **Rent roll reports include tenant notes** - Comprehensive tenant information with notes
+
+#### Implementation Details
+- Notes displayed in smaller, gray text below main entries for clarity
+- Long notes automatically truncated with "..." for PDF space optimization
+- Notes column added to payment reports table layout
+- Consistent formatting across all report types
+
+#### Affected Reports
+- ✅ Payment Reports (All Payments & Pending Payments)
+- ✅ Tenant Reports (Active & Checked Out)
+- ✅ Income by Building Report
+- ✅ Rent Roll Report
+
+### Technical Updates
+- Updated Android Gradle Plugin: 8.3.0 → 8.7.3 (Gradle 10 compatible)
+- Resolved Gradle deprecation warnings for future compatibility
+
+### Updated
+- Version number: 4.8.21 → 4.8.22
+- Build number: 78 → 79
+
 ## [4.8.21] - 2026-01-26
 
 ### Improved - Collapsible Report List UI

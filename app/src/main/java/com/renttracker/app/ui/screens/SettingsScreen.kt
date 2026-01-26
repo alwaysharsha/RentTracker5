@@ -298,8 +298,8 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version: 4.8.21")
-                    Text("Build: 78")
+                    Text("Version: 4.8.22")
+                    Text("Build: 79")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }
