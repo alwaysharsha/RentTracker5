@@ -12,8 +12,8 @@ android {
         applicationId = "com.renttracker.app"
         minSdk = 21
         targetSdk = 35
-        versionCode = 67
-        versionName = "4.8.10"
+        versionCode = 78
+        versionName = "4.8.21"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -57,6 +57,11 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+        unitTests.isIncludeAndroidResources = true
     }
 }
 

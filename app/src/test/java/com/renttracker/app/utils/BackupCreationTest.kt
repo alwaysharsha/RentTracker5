@@ -1,3 +1,5 @@
+package com.renttracker.app.utils
+
 import java.io.File
 import java.io.FileOutputStream
 import java.util.zip.ZipEntry

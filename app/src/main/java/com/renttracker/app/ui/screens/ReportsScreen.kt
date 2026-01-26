@@ -1,27 +1,40 @@
 package com.renttracker.app.ui.screens
 
+import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import com.renttracker.app.data.model.*
 import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.components.formatCurrency
 import com.renttracker.app.ui.components.formatDate
 import com.renttracker.app.ui.viewmodel.*
+import com.renttracker.app.utils.PdfGenerator
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportsScreen(
     tenantViewModel: TenantViewModel,
     paymentViewModel: PaymentViewModel,
+    buildingViewModel: BuildingViewModel,
+    ownerViewModel: OwnerViewModel,
     settingsViewModel: SettingsViewModel
 ) {
     var selectedReportType by remember { mutableStateOf(ReportType.ACTIVE_TENANTS) }
+    var showReportList by remember { mutableStateOf(false) }
     val currency by settingsViewModel.currency.collectAsState()
 
     Scaffold(
@@ -29,48 +42,157 @@ fun ReportsScreen(
             RentTrackerTopBar(title = "Reports")
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
         ) {
-            // Report Type Selector
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            Row(
+                modifier = Modifier.fillMaxSize()
             ) {
-                ReportType.values().forEach { reportType ->
-                    FilterChip(
-                        selected = selectedReportType == reportType,
-                        onClick = { selectedReportType = reportType },
-                        label = { Text(reportType.displayName) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                // Report Type Selector - Collapsible Left Side
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = showReportList,
+                    enter = androidx.compose.animation.slideInHorizontally(),
+                    exit = androidx.compose.animation.slideOutHorizontally()
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .width(180.dp)
+                            .fillMaxHeight()
+                            .padding(8.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            items(ReportType.values().size) { index ->
+                                val reportType = ReportType.values()[index]
+                                val isSelected = selectedReportType == reportType
+                                
+                                Surface(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { 
+                                            selectedReportType = reportType
+                                            showReportList = false
+                                        },
+                                    color = if (isSelected) 
+                                        MaterialTheme.colorScheme.primaryContainer 
+                                    else 
+                                        MaterialTheme.colorScheme.surface
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                                    ) {
+                                        if (isSelected) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Check,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                        }
+                                        Text(
+                                            text = reportType.displayName,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = if (isSelected) 
+                                                MaterialTheme.colorScheme.onPrimaryContainer 
+                                            else 
+                                                MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+                                if (index < ReportType.values().size - 1) {
+                                    Divider()
+                                }
+                            }
+                        }
+                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Divider()
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Report Content
-            when (selectedReportType) {
+                // Report Content - Right Side
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp)
+                ) {
+                    when (selectedReportType) {
                 ReportType.ACTIVE_TENANTS -> {
                     val tenants by tenantViewModel.activeTenants.collectAsState()
-                    TenantReport(tenants = tenants)
+                    TenantReport(tenants = tenants, reportTitle = "Active Tenants Report")
                 }
                 ReportType.CHECKOUT_TENANTS -> {
                     val tenants by tenantViewModel.checkedOutTenants.collectAsState()
-                    TenantReport(tenants = tenants)
+                    TenantReport(tenants = tenants, reportTitle = "Checked Out Tenants Report")
                 }
                 ReportType.ALL_PAYMENTS -> {
                     val payments by paymentViewModel.allPayments.collectAsState()
-                    PaymentReport(payments = payments, currency = currency)
+                    val activeTenants by tenantViewModel.activeTenants.collectAsState()
+                    val checkedOutTenants by tenantViewModel.checkedOutTenants.collectAsState()
+                    val allTenants = remember(activeTenants, checkedOutTenants) { activeTenants + checkedOutTenants }
+                    
+                    PaymentReport(
+                        allPayments = payments,
+                        tenants = allTenants,
+                        currency = currency
+                    )
                 }
                 ReportType.PAYMENT_PENDING -> {
                     val payments by paymentViewModel.allPayments.collectAsState()
-                    val pendingPayments = payments.filter { it.paymentType == PaymentStatus.PARTIAL }
-                    PendingPaymentReport(payments = pendingPayments, currency = currency)
+                    val activeTenants by tenantViewModel.activeTenants.collectAsState()
+                    val checkedOutTenants by tenantViewModel.checkedOutTenants.collectAsState()
+                    val allTenants = remember(activeTenants, checkedOutTenants) { activeTenants + checkedOutTenants }
+                    
+                    PendingPaymentReport(
+                        allPayments = payments, 
+                        tenants = allTenants,
+                        currency = currency
+                    )
+                }
+                ReportType.INCOME_BY_BUILDING -> {
+                    val payments by paymentViewModel.allPayments.collectAsState()
+                    val buildings by buildingViewModel.buildings.collectAsState()
+                    val activeTenants by tenantViewModel.activeTenants.collectAsState()
+                    val checkedOutTenants by tenantViewModel.checkedOutTenants.collectAsState()
+                    val allTenants = remember(activeTenants, checkedOutTenants) { activeTenants + checkedOutTenants }
+                    
+                    IncomeByBuildingReport(
+                        payments = payments,
+                        buildings = buildings,
+                        tenants = allTenants,
+                        currency = currency
+                    )
+                }
+                ReportType.INCOME_BY_OWNER -> {
+                    val payments by paymentViewModel.allPayments.collectAsState()
+                    val owners by ownerViewModel.owners.collectAsState()
+                    val buildings by buildingViewModel.buildings.collectAsState()
+                    val activeTenants by tenantViewModel.activeTenants.collectAsState()
+                    val checkedOutTenants by tenantViewModel.checkedOutTenants.collectAsState()
+                    val allTenants = remember(activeTenants, checkedOutTenants) { activeTenants + checkedOutTenants }
+                    
+                    IncomeByOwnerReport(
+                        payments = payments,
+                        owners = owners,
+                        buildings = buildings,
+                        tenants = allTenants,
+                        currency = currency
+                    )
+                }
+                ReportType.RENT_ROLL -> {
+                    val activeTenants by tenantViewModel.activeTenants.collectAsState()
+                    val buildings by buildingViewModel.buildings.collectAsState()
+                    
+                    RentRollReport(
+                        tenants = activeTenants,
+                        buildings = buildings,
+                        currency = currency
+                    )
                 }
                 ReportType.ALL_EXPENSES -> {
                     Text(
@@ -87,12 +209,29 @@ fun ReportsScreen(
                     )
                 }
             }
+                }
+            }
+            
+            // Floating Action Button to toggle report list
+            FloatingActionButton(
+                onClick = { showReportList = !showReportList },
+                modifier = Modifier
+                    .align(androidx.compose.ui.Alignment.BottomStart)
+                    .padding(16.dp)
+            ) {
+                Icon(
+                    imageVector = if (showReportList) Icons.Filled.Close else Icons.Filled.Menu,
+                    contentDescription = if (showReportList) "Hide Reports" else "Show Reports"
+                )
+            }
         }
     }
 }
 
 @Composable
-fun TenantReport(tenants: List<Tenant>) {
+fun TenantReport(tenants: List<Tenant>, reportTitle: String) {
+    val context = LocalContext.current
+    
     if (tenants.isEmpty()) {
         Text(
             text = "No tenants found",
@@ -109,6 +248,35 @@ fun TenantReport(tenants: List<Tenant>) {
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+                
+                Button(
+                    onClick = {
+                        val file = PdfGenerator.generateTenantListPdf(
+                            context = context,
+                            tenants = tenants,
+                            reportTitle = reportTitle
+                        )
+                        
+                        val uri = FileProvider.getUriForFile(
+                            context,
+                            "${context.packageName}.fileprovider",
+                            file
+                        )
+                        
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "application/pdf"
+                            putExtra(Intent.EXTRA_STREAM, uri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        context.startActivity(Intent.createChooser(intent, "Share Report"))
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Filled.Share, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Export as PDF")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
             }
             items(tenants) { tenant ->
                 TenantCard(tenant = tenant, onClick = {})
@@ -117,42 +285,147 @@ fun TenantReport(tenants: List<Tenant>) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PaymentReport(payments: List<Payment>, currency: String) {
-    if (payments.isEmpty()) {
-        Text(
-            text = "No payments found",
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(vertical = 16.dp)
-        )
-    } else {
-        val totalAmount = payments.sumOf { it.amount }
-        val fullPayments = payments.count { it.paymentType == PaymentStatus.FULL }
-        val partialPayments = payments.count { it.paymentType == PaymentStatus.PARTIAL }
-        
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+fun PaymentReport(
+    allPayments: List<Payment>,
+    tenants: List<Tenant>,
+    currency: String
+) {
+    var selectedTenant by remember { mutableStateOf<Tenant?>(null) }
+    var expanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    
+    // Filter payments
+    val filteredPayments = remember(allPayments, selectedTenant) {
+        val tenantId = selectedTenant?.id
+        if (tenantId == null) {
+            allPayments
+        } else {
+            allPayments.filter { it.tenantId == tenantId }
+        }
+    }
+    
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        // Tenant Filter
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
         ) {
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Summary",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Total Payments: ${payments.size}")
-                        Text("Full Payments: $fullPayments")
-                        Text("Partial Payments: $partialPayments")
-                        Text("Total Amount: ${formatCurrency(totalAmount, currency)}")
+            OutlinedTextField(
+                value = selectedTenant?.name ?: "All Tenants",
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Filter by Tenant") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("All Tenants") },
+                    onClick = {
+                        selectedTenant = null
+                        expanded = false
                     }
+                )
+                tenants.forEach { tenant ->
+                    DropdownMenuItem(
+                        text = { Text(tenant.name) },
+                        onClick = {
+                            selectedTenant = tenant
+                            expanded = false
+                        }
+                    )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
             }
-            items(payments) { payment ->
-                PaymentCard(payment = payment, currency = currency, onClick = {})
+        }
+        
+        // Export Button
+        if (filteredPayments.isNotEmpty()) {
+            Button(
+                onClick = {
+                    val currentTenant = selectedTenant
+                    val reportTitle = if (currentTenant != null) 
+                        "All Payments - ${currentTenant.name}" 
+                    else 
+                        "All Payments Report"
+                        
+                    val file = PdfGenerator.generatePaymentReportPdf(
+                        context = context,
+                        payments = filteredPayments,
+                        tenants = tenants,
+                        reportTitle = reportTitle,
+                        currency = currency
+                    )
+                    
+                    val uri = FileProvider.getUriForFile(
+                        context,
+                        "${context.packageName}.fileprovider",
+                        file
+                    )
+                    
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        type = "application/pdf"
+                        putExtra(Intent.EXTRA_STREAM, uri)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    context.startActivity(Intent.createChooser(intent, "Share Report"))
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Filled.Share, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Export as PDF")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        
+        if (filteredPayments.isEmpty()) {
+            Text(
+                text = "No payments found",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+        } else {
+            val totalAmount = filteredPayments.sumOf { it.amount }
+            val fullPayments = filteredPayments.count { it.paymentType == PaymentStatus.FULL }
+            val partialPayments = filteredPayments.count { it.paymentType == PaymentStatus.PARTIAL }
+            
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "Summary",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Total Payments: ${filteredPayments.size}")
+                            Text("Full Payments: $fullPayments")
+                            Text("Partial Payments: $partialPayments")
+                            Text("Total Amount: ${formatCurrency(totalAmount, currency)}")
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                items(filteredPayments) { payment ->
+                    PaymentCard(payment = payment, currency = currency, onClick = {})
+                }
             }
         }
     }
@@ -163,51 +436,519 @@ enum class ReportType(val displayName: String) {
     CHECKOUT_TENANTS("Checked Out Tenants"),
     ALL_PAYMENTS("All Payments"),
     PAYMENT_PENDING("Pending Payments"),
+    INCOME_BY_BUILDING("Income by Building"),
+    INCOME_BY_OWNER("Income by Owner"),
+    RENT_ROLL("Rent Roll"),
     ALL_EXPENSES("All Expenses"),
     EXPENSES_BY_CATEGORY("Expenses by Category")
 }
 
 @Composable
-fun PendingPaymentReport(payments: List<Payment>, currency: String) {
-    if (payments.isEmpty()) {
+fun IncomeByBuildingReport(
+    payments: List<Payment>,
+    buildings: List<Building>,
+    tenants: List<Tenant>,
+    currency: String
+) {
+    val context = LocalContext.current
+    
+    if (buildings.isEmpty()) {
         Text(
-            text = "No pending payments found",
+            text = "No buildings found",
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(vertical = 16.dp)
         )
     } else {
-        val totalPendingAmount = payments.sumOf { it.pendingAmount ?: 0.0 }
-        val totalPaidAmount = payments.sumOf { it.amount }
+        val buildingIncomeMap = remember(payments, tenants) {
+            buildings.associateWith { building ->
+                val buildingTenants = tenants.filter { it.buildingId == building.id }
+                val tenantIds = buildingTenants.map { it.id }.toSet()
+                val buildingPayments = payments.filter { it.tenantId in tenantIds }
+                buildingPayments.sumOf { it.amount }
+            }
+        }
+        
+        val totalIncome = buildingIncomeMap.values.sum()
         
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item {
+                Button(
+                    onClick = {
+                        val file = PdfGenerator.generateIncomeByBuildingPdf(
+                            context = context,
+                            buildingIncomeMap = buildingIncomeMap,
+                            currency = currency
+                        )
+                        
+                        val uri = FileProvider.getUriForFile(
+                            context,
+                            "${context.packageName}.fileprovider",
+                            file
+                        )
+                        
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "application/pdf"
+                            putExtra(Intent.EXTRA_STREAM, uri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        context.startActivity(Intent.createChooser(intent, "Share Report"))
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Filled.Share, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Export as PDF")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Pending Payments Summary",
+                            text = "Total Income",
                             style = MaterialTheme.typography.titleMedium
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Total Partial Payments: ${payments.size}")
-                        Text("Total Paid Amount: ${formatCurrency(totalPaidAmount, currency)}")
                         Text(
-                            text = "Total Pending Amount: ${formatCurrency(totalPendingAmount, currency)}",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.error
+                            text = formatCurrency(totalIncome, currency),
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
             }
-            items(payments) { payment ->
-                PaymentCard(payment = payment, currency = currency, onClick = {})
+            items(buildingIncomeMap.entries.toList()) { (building, income) ->
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = building.name,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            if (building.address != null) {
+                                Text(
+                                    text = building.address,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        Text(
+                            text = formatCurrency(income, currency),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun IncomeByOwnerReport(
+    payments: List<Payment>,
+    owners: List<Owner>,
+    buildings: List<Building>,
+    tenants: List<Tenant>,
+    currency: String
+) {
+    val context = LocalContext.current
+    
+    if (owners.isEmpty()) {
+        Text(
+            text = "No owners found",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(vertical = 16.dp)
+        )
+    } else {
+        val ownerIncomeMap = remember(payments, buildings, tenants) {
+            owners.associateWith { owner ->
+                val ownerBuildings = buildings.filter { it.ownerId == owner.id }
+                val buildingIds = ownerBuildings.map { it.id }.toSet()
+                val ownerTenants = tenants.filter { it.buildingId in buildingIds }
+                val tenantIds = ownerTenants.map { it.id }.toSet()
+                val ownerPayments = payments.filter { it.tenantId in tenantIds }
+                ownerPayments.sumOf { it.amount }
+            }
+        }
+        
+        val totalIncome = ownerIncomeMap.values.sum()
+        
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+                Button(
+                    onClick = {
+                        val file = PdfGenerator.generateIncomeByOwnerPdf(
+                            context = context,
+                            ownerIncomeMap = ownerIncomeMap,
+                            currency = currency
+                        )
+                        
+                        val uri = FileProvider.getUriForFile(
+                            context,
+                            "${context.packageName}.fileprovider",
+                            file
+                        )
+                        
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "application/pdf"
+                            putExtra(Intent.EXTRA_STREAM, uri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        context.startActivity(Intent.createChooser(intent, "Share Report"))
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Filled.Share, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Export as PDF")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Total Income",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = formatCurrency(totalIncome, currency),
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            items(ownerIncomeMap.entries.toList()) { (owner, income) ->
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = owner.name,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = owner.mobile,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Text(
+                            text = formatCurrency(income, currency),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RentRollReport(
+    tenants: List<Tenant>,
+    buildings: List<Building>,
+    currency: String
+) {
+    val context = LocalContext.current
+    
+    if (tenants.isEmpty()) {
+        Text(
+            text = "No active tenants found",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(vertical = 16.dp)
+        )
+    } else {
+        val buildingMap = remember(buildings) {
+            buildings.associateBy { it.id }
+        }
+        
+        val totalRent = tenants.sumOf { it.rent ?: 0.0 }
+        
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+                Button(
+                    onClick = {
+                        val file = PdfGenerator.generateRentRollPdf(
+                            context = context,
+                            tenants = tenants,
+                            buildings = buildings,
+                            currency = currency
+                        )
+                        
+                        val uri = FileProvider.getUriForFile(
+                            context,
+                            "${context.packageName}.fileprovider",
+                            file
+                        )
+                        
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "application/pdf"
+                            putExtra(Intent.EXTRA_STREAM, uri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        context.startActivity(Intent.createChooser(intent, "Share Report"))
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Filled.Share, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Export as PDF")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Total Monthly Rent",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = formatCurrency(totalRent, currency),
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Active Tenants: ${tenants.size}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            items(tenants) { tenant ->
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = tenant.name,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                val building = buildingMap[tenant.buildingId]
+                                if (building != null) {
+                                    Text(
+                                        text = building.name,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Text(
+                                    text = tenant.mobile,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Text(
+                                text = formatCurrency(tenant.rent ?: 0.0, currency),
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PendingPaymentReport(
+    allPayments: List<Payment>,
+    tenants: List<Tenant>,
+    currency: String
+) {
+    var selectedTenant by remember { mutableStateOf<Tenant?>(null) }
+    var expanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    
+    // Filter payments
+    val filteredPayments = remember(allPayments, selectedTenant) {
+        val currentTenant = selectedTenant
+        allPayments.filter { payment ->
+            payment.paymentType == PaymentStatus.PARTIAL &&
+            (currentTenant == null || payment.tenantId == currentTenant.id)
+        }
+    }
+    
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        // Tenant Filter
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        ) {
+            OutlinedTextField(
+                value = selectedTenant?.name ?: "All Tenants",
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Filter by Tenant") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("All Tenants") },
+                    onClick = {
+                        selectedTenant = null
+                        expanded = false
+                    }
+                )
+                tenants.forEach { tenant ->
+                    DropdownMenuItem(
+                        text = { Text(tenant.name) },
+                        onClick = {
+                            selectedTenant = tenant
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+        
+        // Export Button
+        if (filteredPayments.isNotEmpty()) {
+            Button(
+                onClick = {
+                    val currentTenant = selectedTenant
+                    val reportTitle = if (currentTenant != null) 
+                        "Pending Payments - ${currentTenant.name}" 
+                    else 
+                        "Pending Payments Report"
+                        
+                    val file = PdfGenerator.generatePaymentReportPdf(
+                        context = context,
+                        payments = filteredPayments,
+                        tenants = tenants,
+                        reportTitle = reportTitle,
+                        currency = currency
+                    )
+                    
+                    val uri = FileProvider.getUriForFile(
+                        context,
+                        "${context.packageName}.fileprovider",
+                        file
+                    )
+                    
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        type = "application/pdf"
+                        putExtra(Intent.EXTRA_STREAM, uri)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    
+                    context.startActivity(Intent.createChooser(intent, "Share Report"))
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Filled.Share, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Export as PDF")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (filteredPayments.isEmpty()) {
+            Text(
+                text = "No pending payments found",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+        } else {
+            val totalPendingAmount = filteredPayments.sumOf { it.pendingAmount ?: 0.0 }
+            val totalPaidAmount = filteredPayments.sumOf { it.amount }
+            
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "Pending Payments Summary",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Total Partial Payments: ${filteredPayments.size}")
+                            Text("Total Paid Amount: ${formatCurrency(totalPaidAmount, currency)}")
+                            Text(
+                                text = "Total Pending Amount: ${formatCurrency(totalPendingAmount, currency)}",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                items(filteredPayments) { payment ->
+                    PaymentCard(payment = payment, currency = currency, onClick = {})
+                }
             }
         }
     }

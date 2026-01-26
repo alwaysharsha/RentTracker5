@@ -5,6 +5,137 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.8.21] - 2026-01-26
+
+### Improved - Collapsible Report List UI
+
+#### Enhanced Reports Screen Layout
+- **Report list now hidden by default** for cleaner, more spacious interface
+- **Floating Action Button (FAB)** added to toggle report list visibility
+- **Smooth slide-in/slide-out animation** when showing/hiding report list
+- **Auto-hide on selection** - Report list automatically closes after selecting a report
+- **More screen space** for viewing report content
+
+#### User Experience Improvements
+- Menu icon (☰) on FAB when list is hidden
+- Close icon (✕) on FAB when list is visible
+- Report list positioned on left side when visible
+- Full-width report content when list is hidden
+
+### Updated
+- Version number: 4.8.20 → 4.8.21
+- Build number: 77 → 78
+
+## [4.8.20] - 2026-01-26
+
+### Added - PDF Export for All Reports
+
+#### Universal PDF Export Functionality
+- **All report types now support PDF export**
+- Added "Export as PDF" button to every report screen
+- Consistent export experience across all report types
+
+#### New PDF Generation Methods
+- `generateTenantListPdf`: Exports tenant lists (Active/Checked Out)
+- `generateIncomeByBuildingPdf`: Exports income aggregated by building
+- `generateIncomeByOwnerPdf`: Exports income aggregated by owner
+- `generateRentRollPdf`: Exports rent roll with tenant and building details
+- Enhanced existing `generatePaymentReportPdf` for payment reports
+
+#### Report Coverage
+- ✅ Active Tenants Report
+- ✅ Checked Out Tenants Report
+- ✅ All Payments Report (with tenant filter)
+- ✅ Pending Payments Report (with tenant filter)
+- ✅ Income by Building Report
+- ✅ Income by Owner Report
+- ✅ Rent Roll Report
+
+### Updated
+- Version number: 4.8.19 → 4.8.20
+- Build number: 76 → 77
+
+## [4.8.19] - 2026-01-26
+
+### Added - New Report Types
+
+#### Income by Building Report
+- **View total income aggregated by building**
+- Shows income from all tenants in each building
+- Displays building name, address, and total income received
+- Summary card with total income across all buildings
+
+#### Income by Owner Report
+- **View total income aggregated by property owner**
+- Calculates income from all buildings owned by each owner
+- Shows owner name, contact info, and total income
+- Summary card with total income across all owners
+
+#### Rent Roll Report
+- **View all active tenants with their monthly rent**
+- Displays tenant name, building assignment, contact info, and rent amount
+- Summary card shows total monthly rent and active tenant count
+- Useful for tracking expected monthly rental income
+
+### Updated
+- Version number: 4.8.18 → 4.8.19
+- Build number: 75 → 76
+
+## [4.8.18] - 2026-01-26
+
+### Added - All Payments Tenant Filter
+
+#### Tenant Selection in All Payments Report
+- **Added tenant filter dropdown to All Payments report**
+- Users can now filter all payments by specific tenant or view all tenants
+- Consistent filtering experience across both All Payments and Pending Payments reports
+- Summary statistics update dynamically based on selected filter
+
+### Updated
+- Version number: 4.8.17 → 4.8.18
+- Build number: 74 → 75
+
+## [4.8.17] - 2026-01-26
+
+### Changed - Reports UI Improvement
+
+#### Report Type Selector Layout
+- **Converted report type selector from vertical FilterChip buttons to a compact side list**
+- Report types now displayed in a left-side navigation card (180dp width)
+- Selected report highlighted with primary container color and check icon
+- Better utilization of screen space with side-by-side layout
+- Report content displayed on the right side with more available space
+
+### Fixed
+- **PDF export now uses selected currency symbol instead of hardcoded '$'**
+- Currency parameter added to `PdfGenerator.generatePaymentReportPdf()`
+- All monetary values in PDF (amounts, pending, totals) now display correct currency symbol
+- Removed hardcoded "USD" and dollar sign stripping logic
+
+### Updated
+- Version number: 4.8.16 → 4.8.17
+- Build number: 73 → 74
+
+## [4.8.16] - 2026-01-23
+
+### Added - Pending Payments Report Improvements
+
+#### Tenant Selection Filter
+- **Added filtering capability to Pending Payments report**
+- Users can now view pending payments for a specific tenant or all tenants
+- Helper dropdown menu for tenant selection
+
+#### PDF Export
+- **Added PDF export functionality for Pending Payments report**
+- Generates a formatted PDF report with payment details
+- Summary section with total paid and pending amounts
+- Share capability to send/save the generated PDF
+- Report title reflects the selected filter (e.g., "Pending Payments - John Doe")
+
+### Updated
+- Version number: 4.8.15 → 4.8.16
+- Build number: 72 → 73
+
 ## [4.8.15] - 2025-12-29
 
 ### Fixed - Tenant Payment History Flicker

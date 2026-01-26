@@ -262,6 +262,8 @@ fun RentTrackerApp(
                 ReportsScreen(
                     tenantViewModel = tenantViewModel,
                     paymentViewModel = paymentViewModel,
+                    buildingViewModel = buildingViewModel,
+                    ownerViewModel = ownerViewModel,
                     settingsViewModel = settingsViewModel
                 )
             }
