@@ -2,6 +2,7 @@ package com.renttracker.app.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.renttracker.app.data.model.EntityType
 import com.renttracker.app.data.model.Expense
 import com.renttracker.app.data.model.ExpenseCategory
 import com.renttracker.app.data.repository.RentTrackerRepository
@@ -54,6 +55,9 @@ class ExpenseViewModel(private val repository: RentTrackerRepository) : ViewMode
 
     fun deleteExpense(expense: Expense, onComplete: () -> Unit = {}) {
         viewModelScope.launch {
+            // Delete associated documents first
+            repository.deleteDocumentsByEntity(EntityType.EXPENSE, expense.id)
+            // Then delete the expense
             repository.deleteExpense(expense)
             onComplete()
         }

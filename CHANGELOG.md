@@ -5,6 +5,50 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.0] - 2026-01-27
+
+### Added - Document Upload for Tenants and Expenses
+
+#### Document Upload Functionality
+- **Document upload in Tenant Detail Screen** - Upload and manage documents directly from tenant profiles
+- **Document upload in Expense Detail Screen** - Attach receipts and invoices to expense records
+- **File picker integration** - Select any file type from device storage
+- **Document metadata** - Add custom names and notes to uploaded documents
+- **Real-time document list** - View all uploaded documents with file size and type
+- **Inline document deletion** - Remove documents directly from detail screens
+
+#### Cascade Deletion
+- **Automatic cleanup on tenant deletion** - All tenant documents deleted when tenant is removed
+- **Automatic cleanup on expense deletion** - All expense documents deleted when expense is removed
+- **Data integrity** - Prevents orphaned documents in storage
+- **Storage optimization** - Automatically frees up space when entities are deleted
+
+#### Enhanced Entity Support
+- **EXPENSE entity type added** - Documents can now be associated with expenses
+- **Complete entity coverage** - Supports Owner, Building, Tenant, Payment, and Expense documents
+- **DocumentsScreen integration** - All tenant and expense documents visible in Documents screen
+- **Entity-based filtering** - Filter documents by entity type including expenses
+
+#### User Experience
+- **Upload button in detail screens** - Easy access to document upload for existing records
+- **Document count display** - Shows number of documents at a glance
+- **File size formatting** - Human-readable file sizes (KB, MB, GB)
+- **Document type indicators** - Shows file extension in uppercase
+- **Empty state messaging** - Clear indication when no documents are uploaded
+- **Upload dialog** - Intuitive interface for naming and annotating documents
+
+#### Technical Implementation
+- **TenantViewModel cascade deletion** - Deletes documents before tenant removal
+- **ExpenseViewModel cascade deletion** - Deletes documents before expense removal
+- **DocumentViewModel.getDocumentsByEntity()** - Retrieve documents for specific entities
+- **EntityType enum extended** - Added EXPENSE to support expense documents
+- **Navigation updates** - DocumentViewModel passed to detail screens
+- **Export/Import support** - Expense documents included in data migration
+
+### Updated
+- Version number: 4.9.9 → 5.0.0
+- Build number: 89 → 90
+
 ## [4.9.9] - 2026-01-27
 
 ### Changed - Overview Collapsed by Default

@@ -28,5 +28,6 @@ enum class EntityType {
     OWNER,
     BUILDING,
     TENANT,
-    PAYMENT
+    PAYMENT,
+    EXPENSE
 }

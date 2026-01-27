@@ -261,6 +261,7 @@ fun DocumentsScreen(
                                 EntityType.BUILDING -> "Building Document"
                                 EntityType.TENANT -> "Tenant Document"
                                 EntityType.PAYMENT -> "Payment Document"
+                                EntityType.EXPENSE -> "Expense Document"
                             }
                         },
                         modifier = Modifier.fillMaxWidth()
@@ -422,6 +423,7 @@ fun DocumentsScreen(
                                 EntityType.BUILDING -> "Building Document"
                                 EntityType.TENANT -> "Tenant Document"
                                 EntityType.PAYMENT -> "Payment Document"
+                                EntityType.EXPENSE -> "Expense Document"
                             }
                         },
                         modifier = Modifier.fillMaxWidth()

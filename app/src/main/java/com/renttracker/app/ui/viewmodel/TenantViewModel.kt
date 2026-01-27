@@ -2,6 +2,7 @@ package com.renttracker.app.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.renttracker.app.data.model.EntityType
 import com.renttracker.app.data.model.Tenant
 import com.renttracker.app.data.repository.RentTrackerRepository
 import kotlinx.coroutines.flow.Flow
@@ -37,6 +38,9 @@ class TenantViewModel(private val repository: RentTrackerRepository) : ViewModel
 
     fun deleteTenant(tenant: Tenant, onComplete: () -> Unit = {}) {
         viewModelScope.launch {
+            // Delete associated documents first
+            repository.deleteDocumentsByEntity(EntityType.TENANT, tenant.id)
+            // Then delete the tenant
             repository.deleteTenant(tenant)
             onComplete()
         }

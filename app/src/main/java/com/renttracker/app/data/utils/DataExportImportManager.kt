@@ -412,6 +412,7 @@ class DataExportImportManager(
                             EntityType.BUILDING -> buildingIdMap[oldEntityId] ?: oldEntityId
                             EntityType.TENANT -> tenantIdMap[oldEntityId] ?: oldEntityId
                             EntityType.PAYMENT -> oldEntityId // Payments are inserted without ID mapping
+                            EntityType.EXPENSE -> oldEntityId // Expenses are inserted without ID mapping
                         }
                         
                         val document = jsonToDocument(documentJson).copy(

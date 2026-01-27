@@ -19,8 +19,14 @@ import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.components.ValidationTextField
 import com.renttracker.app.ui.components.Spinner
 import com.renttracker.app.ui.viewmodel.BuildingViewModel
+import com.renttracker.app.ui.viewmodel.DocumentViewModel
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
 import com.renttracker.app.ui.viewmodel.TenantViewModel
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.renttracker.app.data.model.Document
+import com.renttracker.app.data.model.EntityType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,6 +34,7 @@ fun TenantDetailScreen(
     viewModel: TenantViewModel,
     buildingViewModel: BuildingViewModel,
     settingsViewModel: SettingsViewModel,
+    documentViewModel: DocumentViewModel,
     tenantId: Long?,
     onNavigateBack: () -> Unit
 ) {
@@ -55,6 +62,23 @@ fun TenantDetailScreen(
     var showCheckoutDialog by remember { mutableStateOf(false) }
     var existingTenant by remember { mutableStateOf<Tenant?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    
+    // Document upload states
+    var showDocumentUploadDialog by remember { mutableStateOf(false) }
+    var selectedFileUri by remember { mutableStateOf<Uri?>(null) }
+    var documentName by remember { mutableStateOf("") }
+    var documentNotes by remember { mutableStateOf("") }
+    val tenantDocuments = remember { mutableStateOf<List<Document>>(emptyList()) }
+    
+    // File picker launcher
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            selectedFileUri = it
+            showDocumentUploadDialog = true
+        }
+    }
     
     var nameError by remember { mutableStateOf(false) }
     var mobileError by remember { mutableStateOf(false) }
@@ -84,6 +108,15 @@ fun TenantDetailScreen(
                     securityDeposit = it.securityDeposit?.toString() ?: ""
                     checkoutDate = it.checkoutDate
                 }
+            }
+        }
+    }
+    
+    // Load tenant documents
+    LaunchedEffect(tenantId) {
+        if (tenantId != null) {
+            documentViewModel.getDocumentsByEntity(EntityType.TENANT, tenantId).collect { docs ->
+                tenantDocuments.value = docs
             }
         }
     }
@@ -305,6 +338,151 @@ fun TenantDetailScreen(
                 label = "Notes",
                 singleLine = false,
                 maxLines = 5
+            )
+            
+            // Documents Section (only for existing tenants)
+            if (tenantId != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Documents (${tenantDocuments.value.size})",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Button(
+                                onClick = { filePickerLauncher.launch("*/*") }
+                            ) {
+                                Icon(Icons.Filled.Upload, contentDescription = "Upload")
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Upload")
+                            }
+                        }
+                        
+                        if (tenantDocuments.value.isNotEmpty()) {
+                            Divider()
+                            tenantDocuments.value.forEach { document ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = document.documentName,
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                        Text(
+                                            text = "${document.documentType.uppercase()} • ${documentViewModel.formatFileSize(document.fileSize)}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    IconButton(
+                                        onClick = {
+                                            documentViewModel.deleteDocument(document) {
+                                                // Document deleted
+                                            }
+                                        }
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.Delete,
+                                            contentDescription = "Delete",
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            Text(
+                                text = "No documents uploaded",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Document Upload Dialog
+        if (showDocumentUploadDialog && selectedFileUri != null && tenantId != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDocumentUploadDialog = false
+                    selectedFileUri = null
+                    documentName = ""
+                    documentNotes = ""
+                },
+                title = { Text("Upload Document") },
+                text = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = documentName,
+                            onValueChange = { documentName = it },
+                            label = { Text("Document Name *") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        OutlinedTextField(
+                            value = documentNotes,
+                            onValueChange = { documentNotes = it },
+                            label = { Text("Notes") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = false,
+                            maxLines = 3
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            if (documentName.isNotBlank()) {
+                                documentViewModel.uploadDocument(
+                                    uri = selectedFileUri!!,
+                                    documentName = documentName,
+                                    entityType = EntityType.TENANT,
+                                    entityId = tenantId,
+                                    notes = documentNotes.ifBlank { null }
+                                ) { success ->
+                                    if (success) {
+                                        showDocumentUploadDialog = false
+                                        selectedFileUri = null
+                                        documentName = ""
+                                        documentNotes = ""
+                                    }
+                                }
+                            }
+                        },
+                        enabled = documentName.isNotBlank()
+                    ) {
+                        Text("Upload")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showDocumentUploadDialog = false
+                            selectedFileUri = null
+                            documentName = ""
+                            documentNotes = ""
+                        }
+                    ) {
+                        Text("Cancel")
+                    }
+                }
             )
         }
 

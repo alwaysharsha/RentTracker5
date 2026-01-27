@@ -28,6 +28,10 @@ class DocumentViewModel(
     fun getDocumentById(documentId: Long): Flow<Document?> {
         return repository.getDocumentByIdFlow(documentId)
     }
+    
+    fun getDocumentsByEntity(entityType: EntityType, entityId: Long): Flow<List<Document>> {
+        return repository.getDocumentsByEntity(entityType, entityId)
+    }
 
     fun uploadDocument(
         uri: Uri,
