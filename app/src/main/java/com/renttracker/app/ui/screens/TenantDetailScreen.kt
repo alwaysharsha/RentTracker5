@@ -18,17 +18,15 @@ import com.renttracker.app.ui.components.PhoneInputField
 import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.components.ValidationTextField
 import com.renttracker.app.ui.components.Spinner
+import com.renttracker.app.MainActivity
+import com.renttracker.app.data.model.Document
+import com.renttracker.app.data.model.EntityType
 import com.renttracker.app.ui.viewmodel.BuildingViewModel
 import com.renttracker.app.ui.viewmodel.DocumentViewModel
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
 import com.renttracker.app.ui.viewmodel.TenantViewModel
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import com.renttracker.app.data.model.Document
-import com.renttracker.app.data.model.EntityType
-import com.renttracker.app.MainActivity
 import android.Manifest
+import android.net.Uri
 import android.content.pm.PackageManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
@@ -47,7 +45,6 @@ fun TenantDetailScreen(
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val currency by settingsViewModel.currency.collectAsState()
     
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
