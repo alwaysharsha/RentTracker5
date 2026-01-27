@@ -32,7 +32,7 @@ fun DashboardScreen(
     settingsViewModel: SettingsViewModel,
     onNavigateToScreen: (String) -> Unit
 ) {
-    var isOverviewExpanded by remember { mutableStateOf(true) }
+    var isOverviewExpanded by remember { mutableStateOf(false) }
     
     val allBuildings by buildingViewModel.buildings.collectAsState()
     val activeTenants by tenantViewModel.activeTenants.collectAsState()

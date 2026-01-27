@@ -5,6 +5,35 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.9.9] - 2026-01-27
+
+### Changed - Overview Collapsed by Default
+
+#### Default State Change
+- **Overview now starts in collapsed state** - Changed default from expanded to collapsed
+- **Cleaner dashboard on load** - More focus on Quick Access menu immediately
+- **Pending Amount still visible** - Critical payment info remains accessible when collapsed
+- **One click to expand** - Easy access to full stats when needed
+
+#### User Experience
+- **Faster navigation** - Quick Access menu immediately visible without scrolling
+- **Less clutter** - Streamlined initial view
+- **Smart information hierarchy** - Most critical info (pending payments) visible, detailed stats one click away
+- **Better mobile experience** - More screen space for navigation on smaller devices
+
+#### Technical Change
+- Changed `isOverviewExpanded` initial state from `true` to `false`
+
+#### Benefits
+- **Improved focus** - Users land on action items (Quick Access) first
+- **Maintains visibility** - Pending amounts still shown in collapsed state
+- **Flexible access** - Full overview available with single tap
+- **Cleaner interface** - Reduced visual noise on dashboard load
+
+### Updated
+- Version number: 4.9.8 → 4.9.9
+- Build number: 88 → 89
+
 ## [4.9.8] - 2026-01-27
 
 ### Improved - Pending Amount Visibility in Collapsed Overview
