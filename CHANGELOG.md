@@ -5,6 +5,38 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.9.8] - 2026-01-27
+
+### Improved - Pending Amount Visibility in Collapsed Overview
+
+#### Quick Pending Amount Display
+- **Pending Amount now visible when overview is collapsed** - No need to expand to see outstanding payments
+- **Compact display next to expand/collapse icon** - Shows warning icon + amount in error color
+- **Only displays when amount > 0** - Clean interface when no pending payments
+- **Smaller icon size (16dp)** - Compact design that doesn't overwhelm the header
+
+#### User Experience Improvements
+- **At-a-glance visibility** - Critical pending payment info always accessible
+- **Smart conditional display** - Only shows when relevant (pending amount exists)
+- **Error color coding** - Red color immediately draws attention to pending payments
+- **Space efficient** - Fits neatly between Overview title and expand icon
+
+#### Technical Implementation
+- Added conditional rendering based on `!isOverviewExpanded && totalPendingAmount > 0`
+- Nested Row layout with warning icon and formatted amount
+- Uses existing currency symbol and decimal format
+- Maintains consistent styling with error color scheme
+
+#### Benefits
+- **Improved awareness** - Users always see pending payments without expanding
+- **Better UX** - Critical financial info at fingertips
+- **Cleaner collapsed state** - Only shows when there's something to show
+- **Quick decision making** - See pending amounts instantly
+
+### Updated
+- Version number: 4.9.7 → 4.9.8
+- Build number: 87 → 88
+
 ## [4.9.7] - 2026-01-27
 
 ### Improved - Dashboard Overview Enhancements

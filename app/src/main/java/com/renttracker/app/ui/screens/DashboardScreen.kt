@@ -120,11 +120,35 @@ fun DashboardScreen(
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
-                        Icon(
-                            imageVector = if (isOverviewExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                            contentDescription = if (isOverviewExpanded) "Collapse" else "Expand",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (!isOverviewExpanded && totalPendingAmount > 0) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Warning,
+                                        contentDescription = "Pending",
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                    Text(
+                                        text = "$currencySymbol${decimalFormat.format(totalPendingAmount)}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
+                            Icon(
+                                imageVector = if (isOverviewExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                contentDescription = if (isOverviewExpanded) "Collapse" else "Expand",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
                     
                     if (isOverviewExpanded) {
