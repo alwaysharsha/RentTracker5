@@ -35,6 +35,7 @@ import androidx.core.content.FileProvider
 import com.renttracker.app.MainActivity
 import com.renttracker.app.data.model.Document
 import com.renttracker.app.data.model.EntityType
+import com.renttracker.app.ui.components.Spinner
 import com.renttracker.app.ui.viewmodel.DocumentViewModel
 import java.io.File
 import java.text.SimpleDateFormat
@@ -249,56 +250,21 @@ fun DocumentsScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     
                     // Entity Type
-                    Text(
-                        text = "Entity Type",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    
-                    var expanded by remember { mutableStateOf(false) }
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = !expanded }
-                    ) {
-                        OutlinedTextField(
-                            value = when (selectedEntityType) {
+                    Spinner(
+                        label = "Entity Type",
+                        items = EntityType.values().toList(),
+                        selectedItem = selectedEntityType,
+                        onItemSelected = { selectedEntityType = it },
+                        itemToString = { entityType ->
+                            when (entityType) {
                                 EntityType.OWNER -> "Owner Document"
                                 EntityType.BUILDING -> "Building Document"
                                 EntityType.TENANT -> "Tenant Document"
                                 EntityType.PAYMENT -> "Payment Document"
-                            },
-                            onValueChange = { },
-                            readOnly = true,
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth()
-                        )
-                        
-                        ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            EntityType.values().forEach { entityType ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            when (entityType) {
-                                                EntityType.OWNER -> "Owner Document"
-                                                EntityType.BUILDING -> "Building Document"
-                                                EntityType.TENANT -> "Tenant Document"
-                                                EntityType.PAYMENT -> "Payment Document"
-                                            }
-                                        )
-                                    },
-                                    onClick = {
-                                        selectedEntityType = entityType
-                                        expanded = false
-                                    }
-                                )
                             }
-                        }
-                    }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
@@ -445,56 +411,21 @@ fun DocumentsScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     
                     // Entity Type
-                    Text(
-                        text = "Entity Type",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    
-                    var editExpanded by remember { mutableStateOf(false) }
-                    ExposedDropdownMenuBox(
-                        expanded = editExpanded,
-                        onExpandedChange = { editExpanded = !editExpanded }
-                    ) {
-                        OutlinedTextField(
-                            value = when (selectedEntityType) {
+                    Spinner(
+                        label = "Entity Type",
+                        items = EntityType.values().toList(),
+                        selectedItem = selectedEntityType,
+                        onItemSelected = { selectedEntityType = it },
+                        itemToString = { entityType ->
+                            when (entityType) {
                                 EntityType.OWNER -> "Owner Document"
                                 EntityType.BUILDING -> "Building Document"
                                 EntityType.TENANT -> "Tenant Document"
                                 EntityType.PAYMENT -> "Payment Document"
-                            },
-                            onValueChange = { },
-                            readOnly = true,
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = editExpanded) },
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth()
-                        )
-                        
-                        ExposedDropdownMenu(
-                            expanded = editExpanded,
-                            onDismissRequest = { editExpanded = false }
-                        ) {
-                            EntityType.values().forEach { entityType ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            when (entityType) {
-                                                EntityType.OWNER -> "Owner Document"
-                                                EntityType.BUILDING -> "Building Document"
-                                                EntityType.TENANT -> "Tenant Document"
-                                                EntityType.PAYMENT -> "Payment Document"
-                                            }
-                                        )
-                                    },
-                                    onClick = {
-                                        selectedEntityType = entityType
-                                        editExpanded = false
-                                    }
-                                )
                             }
-                        }
-                    }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     

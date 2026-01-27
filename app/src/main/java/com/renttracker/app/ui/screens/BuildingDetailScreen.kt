@@ -15,6 +15,7 @@ import com.renttracker.app.data.model.Owner
 import com.renttracker.app.data.model.PropertyType
 import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.components.ValidationTextField
+import com.renttracker.app.ui.components.Spinner
 import com.renttracker.app.ui.viewmodel.BuildingViewModel
 import com.renttracker.app.ui.viewmodel.OwnerViewModel
 
@@ -36,8 +37,6 @@ fun BuildingDetailScreen(
     
     var nameError by remember { mutableStateOf(false) }
     var ownerError by remember { mutableStateOf(false) }
-    var expandedPropertyType by remember { mutableStateOf(false) }
-    var expandedOwner by remember { mutableStateOf(false) }
 
     val owners by ownerViewModel.owners.collectAsState()
 
@@ -113,69 +112,47 @@ fun BuildingDetailScreen(
                 errorMessage = "Name is required"
             )
 
-            // Owner Dropdown
-            ExposedDropdownMenuBox(
-                expanded = expandedOwner,
-                onExpandedChange = { expandedOwner = !expandedOwner }
-            ) {
-                OutlinedTextField(
-                    value = owners.find { it.id == selectedOwnerId }?.name ?: "",
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Owner *") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedOwner) },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth(),
-                    isError = ownerError
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedOwner,
-                    onDismissRequest = { expandedOwner = false }
-                ) {
-                    owners.forEach { owner ->
-                        DropdownMenuItem(
-                            text = { Text(owner.name) },
-                            onClick = {
-                                selectedOwnerId = owner.id
-                                ownerError = false
-                                expandedOwner = false
-                            }
+            // Owner Selection
+            if (owners.isNotEmpty()) {
+                Column {
+                    Spinner(
+                        label = "Owner *",
+                        items = owners,
+                        selectedItem = owners.find { it.id == selectedOwnerId } ?: owners.first(),
+                        onItemSelected = { 
+                            selectedOwnerId = it.id
+                            ownerError = false
+                        },
+                        itemToString = { it.name },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (ownerError) {
+                        Text(
+                            text = "Owner is required",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
                         )
                     }
                 }
+            } else {
+                Text(
+                    text = "Please add an owner first",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(16.dp)
+                )
             }
 
-            // Property Type Dropdown
-            ExposedDropdownMenuBox(
-                expanded = expandedPropertyType,
-                onExpandedChange = { expandedPropertyType = !expandedPropertyType }
-            ) {
-                OutlinedTextField(
-                    value = selectedPropertyType.name,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Property Type *") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPropertyType) },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth()
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedPropertyType,
-                    onDismissRequest = { expandedPropertyType = false }
-                ) {
-                    PropertyType.values().forEach { type ->
-                        DropdownMenuItem(
-                            text = { Text(type.name) },
-                            onClick = {
-                                selectedPropertyType = type
-                                expandedPropertyType = false
-                            }
-                        )
-                    }
-                }
-            }
+            // Property Type Selection
+            Spinner(
+                label = "Property Type *",
+                items = PropertyType.values().toList(),
+                selectedItem = selectedPropertyType,
+                onItemSelected = { selectedPropertyType = it },
+                itemToString = { it.name },
+                modifier = Modifier.fillMaxWidth()
+            )
 
             ValidationTextField(
                 value = address,

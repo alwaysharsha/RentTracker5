@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.renttracker.app.data.model.PaymentStatus
 import com.renttracker.app.ui.viewmodel.TenantViewModel
 import com.renttracker.app.ui.viewmodel.PaymentViewModel
@@ -90,37 +91,33 @@ fun DashboardScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Stats Cards Row 1
+            // Compact Stats Grid
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                StatsCard(
+                CompactStatsCard(
                     modifier = Modifier.weight(1f),
-                    title = "Active Tenants",
+                    title = "Active",
                     value = activeTenants.size.toString(),
                     icon = Icons.Filled.Group,
                     color = MaterialTheme.colorScheme.primaryContainer
                 )
                 
-                StatsCard(
+                CompactStatsCard(
                     modifier = Modifier.weight(1f),
                     title = "This Month",
                     value = "$currencySymbol${decimalFormat.format(totalCurrentMonthPayments)}",
                     icon = Icons.Filled.Payments,
                     color = MaterialTheme.colorScheme.secondaryContainer
                 )
-            }
-            
-            
-            // Pending Payments Card
-            if (totalPendingAmount > 0) {
-                StatsCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    title = "Total Pending",
-                    value = "$currencySymbol${decimalFormat.format(totalPendingAmount)}",
+                
+                CompactStatsCard(
+                    modifier = Modifier.weight(1f),
+                    title = "Pending",
+                    value = if (totalPendingAmount > 0) "$currencySymbol${decimalFormat.format(totalPendingAmount)}" else "$currencySymbol 0",
                     icon = Icons.Filled.Warning,
-                    color = MaterialTheme.colorScheme.errorContainer
+                    color = if (totalPendingAmount > 0) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.tertiaryContainer
                 )
             }
             
@@ -149,7 +146,7 @@ fun DashboardScreen(
 }
 
 @Composable
-fun StatsCard(
+fun CompactStatsCard(
     modifier: Modifier = Modifier,
     title: String,
     value: String,
@@ -158,27 +155,47 @@ fun StatsCard(
 ) {
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = color)
+        colors = CardDefaults.cardColors(containerColor = color),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp,
+            pressedElevation = 3.dp,
+            hoveredElevation = 2.dp
+        ),
+        shape = MaterialTheme.shapes.medium
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = title,
-                modifier = Modifier.size(32.dp)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                maxLines = 1
             )
             Text(
                 text = value,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                maxLines = 2,
+                softWrap = true,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Visible,
+                lineHeight = 20.sp
             )
         }
     }
@@ -193,7 +210,15 @@ fun MenuCard(
         modifier = Modifier
             .aspectRatio(1f)
             .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp,
+            pressedElevation = 6.dp,
+            hoveredElevation = 4.dp
+        ),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
         Column(
             modifier = Modifier
@@ -205,14 +230,15 @@ fun MenuCard(
             Icon(
                 imageVector = item.icon,
                 contentDescription = item.label,
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(48.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = item.label,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

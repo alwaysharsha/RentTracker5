@@ -5,6 +5,211 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.9.4] - 2026-01-26
+
+### Completed - All Dropdowns Replaced with Spinner
+
+#### Complete UI Overhaul
+- **All ExposedDropdownMenuBox replaced** - Every dropdown in the app now uses the cleaner Spinner component
+- **9 screens updated** - Comprehensive replacement across entire application
+- **Consistent UX** - Unified dropdown experience throughout
+
+#### Screens Updated
+1. **SettingsScreen**: Currency selection
+2. **TenantDetailScreen**: Building selection
+3. **BuildingDetailScreen**: Owner and Property Type selection
+4. **AddPaymentScreen**: Payment Method and Payment Type selection
+5. **PaymentEditScreen**: Payment Method and Payment Type selection
+6. **ExpenseDetailScreen**: Category, Vendor, Building, and Payment Method selection
+7. **VendorDetailScreen**: Category selection
+8. **DocumentsScreen**: Entity Type selection (2 instances)
+9. **ReportsScreen**: Tenant filtering (2 instances)
+
+#### Total Replacements
+- **17 ExposedDropdownMenuBox instances** replaced with Spinner
+- **All state variables cleaned up** - Removed unused `expanded` variables
+- **Zero compilation warnings** - Clean build with no dropdown-related issues
+
+#### Benefits
+- **Cleaner UI**: Card-based design is more modern and less cluttered
+- **More Compact**: 30-40% less vertical space per dropdown
+- **Consistent**: Same interaction pattern across all screens
+- **Better Performance**: Simpler component with less state management
+- **Easier Maintenance**: Single reusable component instead of verbose ExposedDropdownMenuBox
+
+#### Technical Details
+- All dropdowns use the `Spinner.kt` component from `ui/components`
+- Support for nullable items with "None" option where applicable
+- Custom `itemToString` for complex types (enums, entities)
+- Proper error handling and validation maintained
+- All supporting text and hints preserved
+
+### Updated
+- Version number: 4.9.3 → 4.9.4
+- Build number: 83 → 84
+
+## [4.9.3] - 2026-01-26
+
+### Fixed - Dashboard Stats Text Overflow
+
+#### Issue Resolved
+- **Large amount values now fully visible** - Fixed text truncation in "This Month" and "Pending" widgets
+- **Text wrapping enabled** - Values can now wrap to 2 lines when needed
+- **Better readability** - Improved line height for multi-line amounts
+
+#### Technical Changes
+- Changed `maxLines` from 1 to 2 in CompactStatsCard value text
+- Added `softWrap = true` for proper text wrapping
+- Set `overflow = TextOverflow.Visible` to prevent ellipsis
+- Optimized `lineHeight = 20.sp` for compact multi-line display
+
+#### Benefits
+- **No more truncation** - All amount values display completely
+- **Responsive layout** - Adapts to different value sizes
+- **Better UX** - Users can see full amounts at a glance
+
+### Updated
+- Version number: 4.9.2 → 4.9.3
+- Build number: 82 → 83
+
+## [4.9.2] - 2026-01-26
+
+### Improved - Replaced Dropdowns with Spinners
+
+#### New Spinner Component
+- **Created reusable Spinner component** - Cleaner, more compact dropdown UI
+- **Simpler design** - Card-based selection with dropdown menu
+- **Better space efficiency** - More compact than ExposedDropdownMenuBox
+- **Consistent styling** - Unified appearance across all screens
+
+#### Updated Screens
+- **SettingsScreen**: Currency selection now uses Spinner
+- **TenantDetailScreen**: Building selection now uses Spinner
+- **BuildingDetailScreen**: Owner and Property Type selection now use Spinner
+- **Better error handling**: Improved validation messages and null safety
+
+#### Benefits
+- **Cleaner UI**: Less visual clutter with card-based design
+- **More Compact**: Takes up less vertical space
+- **Better UX**: Simpler interaction pattern
+- **Consistent**: Same component used throughout the app
+
+### Technical Details
+- Created `Spinner.kt` component in `ui/components`
+- Removed `ExposedDropdownMenuBox` from key screens
+- Improved null safety in dropdown selections
+- Better error message positioning
+
+### Updated
+- Version number: 4.9.1 → 4.9.2
+- Build number: 81 → 82
+
+## [4.9.1] - 2026-01-26
+
+### Improved - Compact Dashboard Stats
+
+#### Space-Efficient Stats Redesign
+- **Single Row Layout** - All 3 stats cards now fit in one compact row instead of taking 2+ rows
+- **60% Less Vertical Space** - Reduced from ~200dp to ~80dp height
+- **Always Visible** - Pending payments now always shown (displays $0 when none)
+- **Consistent Layout** - No conditional rendering that changes dashboard structure
+
+#### Compact Stats Cards
+- **Smaller Padding**: 20dp → 12dp for tighter layout
+- **Smaller Icons**: 36dp → 24dp for better proportion
+- **Optimized Typography**: 
+  - Title: `labelLarge` → `labelSmall` (14sp → 11sp)
+  - Value: `headlineMedium` → `titleLarge` (28sp → 22sp)
+- **Reduced Elevation**: 2dp → 1dp for subtler appearance
+- **Better Information Density**: More stats visible at once
+
+#### Layout Improvements
+- **3-Column Grid**: Equal width cards in single row
+- **Tighter Spacing**: 16dp → 12dp between cards
+- **Smart Color**: Pending card changes from error to tertiary color when $0
+- **Shortened Labels**: "Active Tenants" → "Active", "Total Pending" → "Pending"
+
+#### Benefits
+- **More Screen Space**: Significantly more room for Quick Access menu
+- **Better UX**: All key metrics visible without scrolling
+- **Cleaner Look**: More organized and professional appearance
+- **Consistent Height**: Dashboard layout no longer shifts based on pending payments
+
+### Updated
+- Version number: 4.9.0 → 4.9.1
+- Build number: 80 → 81
+
+## [4.9.0] - 2026-01-26
+
+### Major Update - Material Design 3 UI Modernization
+
+#### Complete Visual Overhaul
+- **Modern Material You Design** - Full implementation of Material Design 3 principles
+- **Enhanced Color System** - Rich, comprehensive color palette with proper contrast ratios
+- **Dynamic Color Support** - Leverages Android 12+ dynamic theming for personalized colors
+- **Improved Visual Hierarchy** - Better use of elevation, spacing, and typography
+
+#### Color Scheme Enhancements
+- **Expanded Palette**: Added Teal, Green, Orange, Red, and Amber accent colors
+- **Complete Token System**: All Material 3 color tokens properly defined
+  - Primary, Secondary, Tertiary with container variants
+  - Error states with proper containers
+  - Surface variants for depth and hierarchy
+  - Outline and inverse colors for accessibility
+- **Dark Theme Improvements**: Enhanced dark mode with proper surface colors
+- **Light Theme Refinement**: Cleaner, more modern light theme appearance
+
+#### Typography System
+- **Complete Type Scale**: All 13 Material 3 typography styles implemented
+  - Display: Large, Medium, Small (for hero content)
+  - Headline: Large, Medium, Small (for section headers)
+  - Title: Large, Medium, Small (for card titles)
+  - Body: Large, Medium, Small (for content)
+  - Label: Large, Medium, Small (for buttons and labels)
+- **Better Hierarchy**: Improved font sizes, weights, and letter spacing
+- **Enhanced Readability**: Optimized line heights for better reading experience
+
+#### Shape System
+- **Rounded Corners**: Modern rounded corner shapes throughout
+  - Small: 8dp for compact elements
+  - Medium: 16dp for cards and containers
+  - Large: 24dp for prominent surfaces
+  - Extra Large: 32dp for special components
+- **Consistent Application**: Shapes applied uniformly across all UI elements
+
+#### Dashboard Improvements
+- **Modern Card Design**: 
+  - Enhanced elevation with press/hover states
+  - Larger, more prominent icons (36dp → 48dp)
+  - Better padding and spacing (16dp → 20dp)
+  - Improved color contrast on containers
+- **Stats Cards**: 
+  - More spacious layout with 12dp internal spacing
+  - Better icon visibility with proper tinting
+  - Enhanced typography hierarchy
+  - Smooth elevation transitions
+- **Menu Cards**:
+  - Larger touch targets for better usability
+  - Surface variant backgrounds for depth
+  - Improved icon sizing (40dp → 48dp)
+  - Better text styling with SemiBold weights
+
+#### Technical Improvements
+- **Shape.kt**: New shapes configuration file
+- **Enhanced Theme.kt**: Complete color scheme definitions
+- **Improved Type.kt**: Full typography scale implementation
+- **Better Color.kt**: Expanded color palette with semantic naming
+
+#### User Experience
+- **More Modern Look**: Contemporary Material You aesthetic
+- **Better Touch Feedback**: Enhanced elevation states on interaction
+- **Improved Accessibility**: Better color contrast and text sizing
+- **Consistent Design Language**: Unified visual style across all screens
+
+### Updated
+- Version number: 4.8.22 → 4.9.0 (Major UI update)
+- Build number: 79 → 80
+
 ## [4.8.22] - 2026-01-26
 
 ### Added - Notes in PDF Exports

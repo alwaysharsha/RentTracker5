@@ -12,8 +12,8 @@ android {
         applicationId = "com.renttracker.app"
         minSdk = 21
         targetSdk = 35
-        versionCode = 79
-        versionName = "4.8.22"
+        versionCode = 84
+        versionName = "4.9.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

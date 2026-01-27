@@ -28,6 +28,7 @@ import com.renttracker.app.MainActivity
 import com.renttracker.app.data.database.RentTrackerDatabase
 import com.renttracker.app.data.preferences.PreferencesManager
 import com.renttracker.app.ui.components.RentTrackerTopBar
+import com.renttracker.app.ui.components.Spinner
 import com.renttracker.app.ui.viewmodel.ExportImportViewModel
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
 import com.renttracker.app.utils.Constants
@@ -53,7 +54,6 @@ fun SettingsScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     
-    var expandedCurrency by remember { mutableStateOf(false) }
     var showPaymentMethodsDialog by remember { mutableStateOf(false) }
     var showAddMethodDialog by remember { mutableStateOf(false) }
     var newMethodText by remember { mutableStateOf("") }
@@ -88,35 +88,13 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    ExposedDropdownMenuBox(
-                        expanded = expandedCurrency,
-                        onExpandedChange = { expandedCurrency = !expandedCurrency }
-                    ) {
-                        OutlinedTextField(
-                            value = currency,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Select Currency") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCurrency) },
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth()
-                        )
-                        ExposedDropdownMenu(
-                            expanded = expandedCurrency,
-                            onDismissRequest = { expandedCurrency = false }
-                        ) {
-                            currencies.forEach { curr ->
-                                DropdownMenuItem(
-                                    text = { Text(curr) },
-                                    onClick = {
-                                        viewModel.setCurrency(curr)
-                                        expandedCurrency = false
-                                    }
-                                )
-                            }
-                        }
-                    }
+                    Spinner(
+                        label = "Select Currency",
+                        items = currencies,
+                        selectedItem = currency,
+                        onItemSelected = { viewModel.setCurrency(it) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
 
@@ -298,8 +276,8 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version: 4.8.22")
-                    Text("Build: 79")
+                    Text("Version: 4.9.4")
+                    Text("Build: 84")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }

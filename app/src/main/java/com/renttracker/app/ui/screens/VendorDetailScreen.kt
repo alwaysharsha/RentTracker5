@@ -14,6 +14,7 @@ import com.renttracker.app.data.model.Vendor
 import com.renttracker.app.data.model.VendorCategory
 import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.components.ValidationTextField
+import com.renttracker.app.ui.components.Spinner
 import com.renttracker.app.ui.viewmodel.VendorViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,7 +34,6 @@ fun VendorDetailScreen(
     var existingVendor by remember { mutableStateOf<Vendor?>(null) }
     
     var nameError by remember { mutableStateOf(false) }
-    var expandedCategory by remember { mutableStateOf(false) }
 
     LaunchedEffect(vendorId) {
         vendorId?.let {
@@ -106,35 +106,14 @@ fun VendorDetailScreen(
                 errorMessage = "Name is required"
             )
 
-            ExposedDropdownMenuBox(
-                expanded = expandedCategory,
-                onExpandedChange = { expandedCategory = !expandedCategory }
-            ) {
-                OutlinedTextField(
-                    value = selectedCategory.name.replace("_", " "),
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Category *") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCategory) },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth()
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedCategory,
-                    onDismissRequest = { expandedCategory = false }
-                ) {
-                    VendorCategory.values().forEach { category ->
-                        DropdownMenuItem(
-                            text = { Text(category.name.replace("_", " ")) },
-                            onClick = {
-                                selectedCategory = category
-                                expandedCategory = false
-                            }
-                        )
-                    }
-                }
-            }
+            Spinner(
+                label = "Category *",
+                items = VendorCategory.values().toList(),
+                selectedItem = selectedCategory,
+                onItemSelected = { selectedCategory = it },
+                itemToString = { it.name.replace("_", " ") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
             ValidationTextField(
                 value = phone,

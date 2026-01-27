@@ -17,6 +17,7 @@ import com.renttracker.app.ui.components.EditableDateField
 import com.renttracker.app.ui.components.PhoneInputField
 import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.components.ValidationTextField
+import com.renttracker.app.ui.components.Spinner
 import com.renttracker.app.ui.viewmodel.BuildingViewModel
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
 import com.renttracker.app.ui.viewmodel.TenantViewModel
@@ -49,7 +50,6 @@ fun TenantDetailScreen(
     var checkoutDate by remember { mutableStateOf<Long?>(null) }
     
     val buildings by buildingViewModel.buildings.collectAsState()
-    var expandedBuilding by remember { mutableStateOf(false) }
     
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showCheckoutDialog by remember { mutableStateOf(false) }
@@ -196,44 +196,26 @@ fun TenantDetailScreen(
                 maxLines = 5
             )
 
-            // Building Dropdown
-            ExposedDropdownMenuBox(
-                expanded = expandedBuilding,
-                onExpandedChange = { expandedBuilding = !expandedBuilding }
-            ) {
-                OutlinedTextField(
-                    value = buildings.find { it.id == selectedBuildingId }?.name ?: "",
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Building *") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedBuilding) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(),
-                    isError = buildingError,
-                    supportingText = if (buildingError) { { Text("Building is required") } } else null
+            // Building Selection
+            Column {
+                Spinner(
+                    label = "Building *",
+                    items = listOf(null) + buildings,
+                    selectedItem = buildings.find { it.id == selectedBuildingId },
+                    onItemSelected = { 
+                        selectedBuildingId = it?.id
+                        buildingError = false
+                    },
+                    itemToString = { it?.name ?: "None" },
+                    modifier = Modifier.fillMaxWidth()
                 )
-                ExposedDropdownMenu(
-                    expanded = expandedBuilding,
-                    onDismissRequest = { expandedBuilding = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("None") },
-                        onClick = {
-                            selectedBuildingId = null
-                            expandedBuilding = false
-                        }
+                if (buildingError) {
+                    Text(
+                        text = "Building is required",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(start = 16.dp, top = 4.dp)
                     )
-                    buildings.forEach { building ->
-                        DropdownMenuItem(
-                            text = { Text(building.name) },
-                            onClick = {
-                                selectedBuildingId = building.id
-                                buildingError = false
-                                expandedBuilding = false
-                            }
-                        )
-                    }
                 }
             }
 

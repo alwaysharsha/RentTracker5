@@ -14,6 +14,7 @@ import com.renttracker.app.data.model.*
 import com.renttracker.app.ui.components.EditableDateField
 import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.components.ValidationTextField
+import com.renttracker.app.ui.components.Spinner
 import com.renttracker.app.ui.viewmodel.TenantViewModel
 import com.renttracker.app.ui.viewmodel.PaymentViewModel
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
@@ -57,8 +58,6 @@ fun AddPaymentScreen(
     var pendingAmountError by remember { mutableStateOf(false) }
     var rentMonthError by remember { mutableStateOf(false) }
     
-    var expandedPaymentMethod by remember { mutableStateOf(false) }
-    var expandedPaymentType by remember { mutableStateOf(false) }
 
     LaunchedEffect(tenantId) {
         tenantViewModel.getTenantById(tenantId).collect { t ->
@@ -146,36 +145,14 @@ fun AddPaymentScreen(
                 errorMessage = "Valid amount is required"
             )
 
-            // Payment Method Dropdown
-            ExposedDropdownMenuBox(
-                expanded = expandedPaymentMethod,
-                onExpandedChange = { expandedPaymentMethod = !expandedPaymentMethod }
-            ) {
-                OutlinedTextField(
-                    value = selectedPaymentMethod,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Payment Method *") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPaymentMethod) },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth()
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedPaymentMethod,
-                    onDismissRequest = { expandedPaymentMethod = false }
-                ) {
-                    paymentMethods.forEach { method ->
-                        DropdownMenuItem(
-                            text = { Text(method) },
-                            onClick = {
-                                selectedPaymentMethod = method
-                                expandedPaymentMethod = false
-                            }
-                        )
-                    }
-                }
-            }
+            // Payment Method Selection
+            Spinner(
+                label = "Payment Method *",
+                items = paymentMethods,
+                selectedItem = selectedPaymentMethod,
+                onItemSelected = { selectedPaymentMethod = it },
+                modifier = Modifier.fillMaxWidth()
+            )
 
             ValidationTextField(
                 value = transactionDetails,
@@ -183,37 +160,23 @@ fun AddPaymentScreen(
                 label = "Transaction Details"
             )
 
-            // Payment Type Dropdown
-            ExposedDropdownMenuBox(
-                expanded = expandedPaymentType,
-                onExpandedChange = { expandedPaymentType = !expandedPaymentType }
-            ) {
-                OutlinedTextField(
-                    value = selectedPaymentType.name,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Payment Type *") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPaymentType) },
-                    supportingText = if (selectedPaymentType == PaymentStatus.FULL) {
-                        { Text("Select PARTIAL to track pending amount", style = MaterialTheme.typography.bodySmall) }
-                    } else null,
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth()
+            // Payment Type Selection
+            Column {
+                Spinner(
+                    label = "Payment Type *",
+                    items = PaymentStatus.values().toList(),
+                    selectedItem = selectedPaymentType,
+                    onItemSelected = { selectedPaymentType = it },
+                    itemToString = { it.name },
+                    modifier = Modifier.fillMaxWidth()
                 )
-                ExposedDropdownMenu(
-                    expanded = expandedPaymentType,
-                    onDismissRequest = { expandedPaymentType = false }
-                ) {
-                    PaymentStatus.values().forEach { status ->
-                        DropdownMenuItem(
-                            text = { Text(status.name) },
-                            onClick = {
-                                selectedPaymentType = status
-                                expandedPaymentType = false
-                            }
-                        )
-                    }
+                if (selectedPaymentType == PaymentStatus.FULL) {
+                    Text(
+                        text = "Select PARTIAL to track pending amount",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                    )
                 }
             }
 

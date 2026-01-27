@@ -14,6 +14,7 @@ import com.renttracker.app.data.model.*
 import com.renttracker.app.ui.components.EditableDateField
 import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.components.ValidationTextField
+import com.renttracker.app.ui.components.Spinner
 import com.renttracker.app.ui.viewmodel.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,10 +46,6 @@ fun ExpenseDetailScreen(
     
     var descriptionError by remember { mutableStateOf(false) }
     var amountError by remember { mutableStateOf(false) }
-    var expandedCategory by remember { mutableStateOf(false) }
-    var expandedVendor by remember { mutableStateOf(false) }
-    var expandedBuilding by remember { mutableStateOf(false) }
-    var expandedPaymentMethod by remember { mutableStateOf(false) }
 
     LaunchedEffect(expenseId) {
         expenseId?.let {
@@ -148,139 +145,40 @@ fun ExpenseDetailScreen(
                 isRequired = true
             )
 
-            ExposedDropdownMenuBox(
-                expanded = expandedCategory,
-                onExpandedChange = { expandedCategory = !expandedCategory }
-            ) {
-                OutlinedTextField(
-                    value = selectedCategory.name.replace("_", " "),
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Category *") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCategory) },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth()
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedCategory,
-                    onDismissRequest = { expandedCategory = false }
-                ) {
-                    ExpenseCategory.values().forEach { category ->
-                        DropdownMenuItem(
-                            text = { Text(category.name.replace("_", " ")) },
-                            onClick = {
-                                selectedCategory = category
-                                expandedCategory = false
-                            }
-                        )
-                    }
-                }
-            }
+            Spinner(
+                label = "Category *",
+                items = ExpenseCategory.values().toList(),
+                selectedItem = selectedCategory,
+                onItemSelected = { selectedCategory = it },
+                itemToString = { it.name.replace("_", " ") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-            ExposedDropdownMenuBox(
-                expanded = expandedVendor,
-                onExpandedChange = { expandedVendor = !expandedVendor }
-            ) {
-                OutlinedTextField(
-                    value = vendors.find { it.id == selectedVendorId }?.name ?: "None",
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Vendor") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedVendor) },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth()
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedVendor,
-                    onDismissRequest = { expandedVendor = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("None") },
-                        onClick = {
-                            selectedVendorId = null
-                            expandedVendor = false
-                        }
-                    )
-                    vendors.forEach { vendor ->
-                        DropdownMenuItem(
-                            text = { Text(vendor.name) },
-                            onClick = {
-                                selectedVendorId = vendor.id
-                                expandedVendor = false
-                            }
-                        )
-                    }
-                }
-            }
+            Spinner(
+                label = "Vendor",
+                items = listOf(null) + vendors,
+                selectedItem = vendors.find { it.id == selectedVendorId },
+                onItemSelected = { selectedVendorId = it?.id },
+                itemToString = { it?.name ?: "None" },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-            ExposedDropdownMenuBox(
-                expanded = expandedBuilding,
-                onExpandedChange = { expandedBuilding = !expandedBuilding }
-            ) {
-                OutlinedTextField(
-                    value = buildings.find { it.id == selectedBuildingId }?.name ?: "None",
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Building") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedBuilding) },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth()
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedBuilding,
-                    onDismissRequest = { expandedBuilding = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("None") },
-                        onClick = {
-                            selectedBuildingId = null
-                            expandedBuilding = false
-                        }
-                    )
-                    buildings.forEach { building ->
-                        DropdownMenuItem(
-                            text = { Text(building.name) },
-                            onClick = {
-                                selectedBuildingId = building.id
-                                expandedBuilding = false
-                            }
-                        )
-                    }
-                }
-            }
+            Spinner(
+                label = "Building",
+                items = listOf(null) + buildings,
+                selectedItem = buildings.find { it.id == selectedBuildingId },
+                onItemSelected = { selectedBuildingId = it?.id },
+                itemToString = { it?.name ?: "None" },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-            ExposedDropdownMenuBox(
-                expanded = expandedPaymentMethod,
-                onExpandedChange = { expandedPaymentMethod = !expandedPaymentMethod }
-            ) {
-                OutlinedTextField(
-                    value = selectedPaymentMethod,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Payment Method") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPaymentMethod) },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth()
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedPaymentMethod,
-                    onDismissRequest = { expandedPaymentMethod = false }
-                ) {
-                    paymentMethods.forEach { method ->
-                        DropdownMenuItem(
-                            text = { Text(method) },
-                            onClick = {
-                                selectedPaymentMethod = method
-                                expandedPaymentMethod = false
-                            }
-                        )
-                    }
-                }
-            }
+            Spinner(
+                label = "Payment Method",
+                items = paymentMethods,
+                selectedItem = selectedPaymentMethod,
+                onItemSelected = { selectedPaymentMethod = it },
+                modifier = Modifier.fillMaxWidth()
+            )
 
             ValidationTextField(
                 value = notes,
