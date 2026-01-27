@@ -27,6 +27,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.renttracker.app.data.model.Document
 import com.renttracker.app.data.model.EntityType
+import com.renttracker.app.MainActivity
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Folder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,9 +42,11 @@ fun TenantDetailScreen(
     buildingViewModel: BuildingViewModel,
     settingsViewModel: SettingsViewModel,
     documentViewModel: DocumentViewModel,
+    mainActivity: MainActivity,
     tenantId: Long?,
     onNavigateBack: () -> Unit
 ) {
+    val context = LocalContext.current
     val currency by settingsViewModel.currency.collectAsState()
     
     var name by remember { mutableStateOf("") }
@@ -65,20 +74,10 @@ fun TenantDetailScreen(
     
     // Document upload states
     var showDocumentUploadDialog by remember { mutableStateOf(false) }
-    var selectedFileUri by remember { mutableStateOf<Uri?>(null) }
+    var showPermissionDialog by remember { mutableStateOf(false) }
     var documentName by remember { mutableStateOf("") }
     var documentNotes by remember { mutableStateOf("") }
     val tenantDocuments = remember { mutableStateOf<List<Document>>(emptyList()) }
-    
-    // File picker launcher
-    val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            selectedFileUri = it
-            showDocumentUploadDialog = true
-        }
-    }
     
     var nameError by remember { mutableStateOf(false) }
     var mobileError by remember { mutableStateOf(false) }
@@ -359,7 +358,7 @@ fun TenantDetailScreen(
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Button(
-                                onClick = { filePickerLauncher.launch("*/*") }
+                                onClick = { showDocumentUploadDialog = true }
                             ) {
                                 Icon(Icons.Filled.Upload, contentDescription = "Upload")
                                 Spacer(modifier = Modifier.width(4.dp))
@@ -416,11 +415,10 @@ fun TenantDetailScreen(
         }
         
         // Document Upload Dialog
-        if (showDocumentUploadDialog && selectedFileUri != null && tenantId != null) {
+        if (showDocumentUploadDialog && tenantId != null) {
             AlertDialog(
                 onDismissRequest = {
                     showDocumentUploadDialog = false
-                    selectedFileUri = null
                     documentName = ""
                     documentNotes = ""
                 },
@@ -432,54 +430,124 @@ fun TenantDetailScreen(
                         OutlinedTextField(
                             value = documentName,
                             onValueChange = { documentName = it },
-                            label = { Text("Document Name *") },
+                            label = { Text("Document Name (Optional)") },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
                         )
                         OutlinedTextField(
                             value = documentNotes,
                             onValueChange = { documentNotes = it },
-                            label = { Text("Notes") },
+                            label = { Text("Notes (Optional)") },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = false,
                             maxLines = 3
                         )
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            if (documentName.isNotBlank()) {
-                                documentViewModel.uploadDocument(
-                                    uri = selectedFileUri!!,
-                                    documentName = documentName,
-                                    entityType = EntityType.TENANT,
-                                    entityId = tenantId,
-                                    notes = documentNotes.ifBlank { null }
-                                ) { success ->
-                                    if (success) {
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Text(
+                            text = "Choose upload method:",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    try {
+                                        mainActivity.launchDocumentFilePicker(
+                                            documentName.takeIf { it.isNotBlank() },
+                                            EntityType.TENANT,
+                                            documentNotes.takeIf { it.isNotBlank() },
+                                            tenantId
+                                        )
                                         showDocumentUploadDialog = false
-                                        selectedFileUri = null
                                         documentName = ""
                                         documentNotes = ""
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
                                     }
-                                }
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.Folder, contentDescription = null)
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("File")
                             }
-                        },
-                        enabled = documentName.isNotBlank()
-                    ) {
-                        Text("Upload")
+                            
+                            OutlinedButton(
+                                onClick = {
+                                    try {
+                                        when {
+                                            ContextCompat.checkSelfPermission(
+                                                context,
+                                                Manifest.permission.CAMERA
+                                            ) == PackageManager.PERMISSION_GRANTED -> {
+                                                mainActivity.launchDocumentCamera(
+                                                    documentName.takeIf { it.isNotBlank() },
+                                                    EntityType.TENANT,
+                                                    documentNotes.takeIf { it.isNotBlank() },
+                                                    tenantId
+                                                )
+                                                showDocumentUploadDialog = false
+                                                documentName = ""
+                                                documentNotes = ""
+                                            }
+                                            else -> {
+                                                showDocumentUploadDialog = false
+                                                showPermissionDialog = true
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.CameraAlt, contentDescription = null)
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Camera")
+                            }
+                        }
                     }
                 },
+                confirmButton = {},
                 dismissButton = {
                     TextButton(
                         onClick = {
                             showDocumentUploadDialog = false
-                            selectedFileUri = null
                             documentName = ""
                             documentNotes = ""
                         }
                     ) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+        
+        // Camera Permission Dialog
+        if (showPermissionDialog) {
+            AlertDialog(
+                onDismissRequest = { showPermissionDialog = false },
+                title = { Text("Camera Permission Required") },
+                text = { Text("Camera permission is required to take photos. Please grant permission in app settings.") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showPermissionDialog = false
+                            val intent = android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            intent.data = Uri.parse("package:${context.packageName}")
+                            context.startActivity(intent)
+                        }
+                    ) {
+                        Text("Open Settings")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showPermissionDialog = false }) {
                         Text("Cancel")
                     }
                 }

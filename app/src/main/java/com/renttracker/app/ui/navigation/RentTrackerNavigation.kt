@@ -136,6 +136,7 @@ fun RentTrackerApp(
                     buildingViewModel = buildingViewModel,
                     settingsViewModel = settingsViewModel,
                     documentViewModel = documentViewModel,
+                    mainActivity = mainActivity,
                     tenantId = if (tenantId == 0L) null else tenantId,
                     onNavigateBack = { navController.popBackStack() }
                 )
@@ -255,6 +256,7 @@ fun RentTrackerApp(
                     buildingViewModel = buildingViewModel,
                     settingsViewModel = settingsViewModel,
                     documentViewModel = documentViewModel,
+                    mainActivity = mainActivity,
                     expenseId = if (expenseId == 0L) null else expenseId,
                     onNavigateBack = { navController.popBackStack() }
                 )

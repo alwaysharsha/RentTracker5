@@ -5,6 +5,33 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.1] - 2026-01-27
+
+### Fixed - Document Upload Issues
+
+#### Bug Fixes
+- **Fixed app crash on upload button click** - Added MainActivity parameter to TenantDetailScreen and ExpenseDetailScreen
+- **Fixed document upload button visibility** - Upload button now only displays for existing tenants/expenses (not during creation)
+- **Added camera option** - Implemented camera and file picker options for document upload, matching DocumentsScreen functionality
+
+#### Enhanced Upload Experience
+- **Dual upload methods** - Users can now choose between file picker or camera when uploading documents
+- **Camera permission handling** - Proper permission dialog with settings redirect for camera access
+- **Entity-specific uploads** - Documents are correctly associated with specific tenant or expense IDs
+- **Optional document names** - Document name field is now optional, auto-generates from filename if not provided
+
+#### Technical Changes
+- **MainActivity.launchDocumentFilePicker()** - Added optional entityId parameter
+- **MainActivity.launchDocumentCamera()** - Added optional entityId parameter
+- **MainActivity.handleDocumentUpload()** - Uses pendingEntityId for entity-specific document association
+- **TenantDetailScreen** - Added mainActivity parameter, camera/file picker buttons, permission dialog
+- **ExpenseDetailScreen** - Added mainActivity parameter, camera/file picker buttons, permission dialog
+- **RentTrackerNavigation** - Pass mainActivity to detail screens
+
+### Updated
+- Version number: 5.0.0 → 5.0.1
+- Build number: 90 → 91
+
 ## [5.0.0] - 2026-01-27
 
 ### Added - Document Upload for Tenants and Expenses

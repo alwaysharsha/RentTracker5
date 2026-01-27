@@ -60,13 +60,15 @@ class MainActivity : FragmentActivity() {
     // Callback functions for document upload
     private var pendingDocumentName: String? = null
     private var pendingEntityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.TENANT
+    private var pendingEntityId: Long? = null
     private var pendingNotes: String? = null
     private var pendingCameraUri: Uri? = null
     
-    fun launchDocumentFilePicker(documentName: String? = null, entityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.TENANT, notes: String? = null) {
+    fun launchDocumentFilePicker(documentName: String? = null, entityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.TENANT, notes: String? = null, entityId: Long? = null) {
         try {
             pendingDocumentName = documentName
             pendingEntityType = entityType
+            pendingEntityId = entityId
             pendingNotes = notes
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                 type = "*/*"
@@ -79,10 +81,11 @@ class MainActivity : FragmentActivity() {
         }
     }
     
-    fun launchDocumentCamera(documentName: String? = null, entityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.TENANT, notes: String? = null) {
+    fun launchDocumentCamera(documentName: String? = null, entityType: com.renttracker.app.data.model.EntityType = com.renttracker.app.data.model.EntityType.TENANT, notes: String? = null, entityId: Long? = null) {
         try {
             pendingDocumentName = documentName
             pendingEntityType = entityType
+            pendingEntityId = entityId
             pendingNotes = notes
             val photoUri = createImageUri()
             photoUri?.let { uri ->
@@ -173,7 +176,7 @@ class MainActivity : FragmentActivity() {
                 uri = uri,
                 documentName = fileName,
                 entityType = pendingEntityType,
-                entityId = 0L, // Use 0 for general documents not tied to specific entity
+                entityId = pendingEntityId ?: 0L, // Use 0 for general documents not tied to specific entity
                 notes = pendingNotes
             ) { success ->
                 if (success) {
@@ -185,6 +188,7 @@ class MainActivity : FragmentActivity() {
             
             // Clear pending values
             pendingDocumentName = null
+            pendingEntityId = null
             pendingNotes = null
             pendingCameraUri = null
         } catch (e: Exception) {
