@@ -5,6 +5,30 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.9.5] - 2026-01-27
+
+### Fixed - Dashboard Widget Decimal Display
+
+#### Currency Display Improvement
+- **Truncated decimal places in dashboard widgets** - Currency amounts now display as whole numbers
+- Changed DecimalFormat from `#,##0.00` to `#,##0` for cleaner display
+- Affects "This Month" and "Pending" payment widgets
+- More compact and easier to read at a glance
+
+#### Technical Changes
+- Updated DashboardScreen.kt decimal formatting
+- Removed `.00` decimal places from currency display
+- Maintains thousands separator for large amounts
+
+#### Benefits
+- **Cleaner UI** - Less visual clutter in dashboard stats
+- **Easier scanning** - Whole numbers are faster to read
+- **More space efficient** - Shorter text in compact widgets
+
+### Updated
+- Version number: 4.9.4 → 4.9.5
+- Build number: 84 → 85
+
 ## [4.9.4] - 2026-01-26
 
 ### Completed - All Dropdowns Replaced with Spinner

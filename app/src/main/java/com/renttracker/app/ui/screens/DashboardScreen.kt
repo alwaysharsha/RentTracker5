@@ -63,7 +63,7 @@ fun DashboardScreen(
         .filter { it.paymentType == PaymentStatus.PARTIAL }
         .sumOf { it.pendingAmount ?: 0.0 }
     
-    val decimalFormat = DecimalFormat("#,##0.00")
+    val decimalFormat = DecimalFormat("#,##0")
 
     val menuItems = listOf(
         DashboardItem("Owners", Icons.Filled.Person, "owners"),
