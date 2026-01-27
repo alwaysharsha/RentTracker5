@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.renttracker.app.data.model.PaymentStatus
+import com.renttracker.app.ui.viewmodel.BuildingViewModel
 import com.renttracker.app.ui.viewmodel.TenantViewModel
 import com.renttracker.app.ui.viewmodel.PaymentViewModel
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
@@ -25,11 +26,13 @@ import java.util.Calendar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
+    buildingViewModel: BuildingViewModel,
     tenantViewModel: TenantViewModel,
     paymentViewModel: PaymentViewModel,
     settingsViewModel: SettingsViewModel,
     onNavigateToScreen: (String) -> Unit
 ) {
+    val allBuildings by buildingViewModel.buildings.collectAsState()
     val activeTenants by tenantViewModel.activeTenants.collectAsState()
     val allPayments by paymentViewModel.allPayments.collectAsState()
     val currency by settingsViewModel.currency.collectAsState()
@@ -63,6 +66,9 @@ fun DashboardScreen(
         .filter { it.paymentType == PaymentStatus.PARTIAL }
         .sumOf { it.pendingAmount ?: 0.0 }
     
+    val totalMonthlyRent = activeTenants.sumOf { it.rent ?: 0.0 }
+    val totalBuildings = allBuildings.size
+    
     val decimalFormat = DecimalFormat("#,##0")
 
     val menuItems = listOf(
@@ -91,34 +97,58 @@ fun DashboardScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Compact Stats Grid
-            Row(
+            // Stats List
+            Card(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                CompactStatsCard(
-                    modifier = Modifier.weight(1f),
-                    title = "Active",
-                    value = activeTenants.size.toString(),
-                    icon = Icons.Filled.Group,
-                    color = MaterialTheme.colorScheme.primaryContainer
-                )
-                
-                CompactStatsCard(
-                    modifier = Modifier.weight(1f),
-                    title = "This Month",
-                    value = "$currencySymbol${decimalFormat.format(totalCurrentMonthPayments)}",
-                    icon = Icons.Filled.Payments,
-                    color = MaterialTheme.colorScheme.secondaryContainer
-                )
-                
-                CompactStatsCard(
-                    modifier = Modifier.weight(1f),
-                    title = "Pending",
-                    value = if (totalPendingAmount > 0) "$currencySymbol${decimalFormat.format(totalPendingAmount)}" else "$currencySymbol 0",
-                    icon = Icons.Filled.Warning,
-                    color = if (totalPendingAmount > 0) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.tertiaryContainer
-                )
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Overview",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    Divider(modifier = Modifier.padding(vertical = 4.dp))
+                    
+                    StatListItem(
+                        icon = Icons.Filled.Home,
+                        label = "Total Buildings",
+                        value = totalBuildings.toString(),
+                        iconTint = MaterialTheme.colorScheme.primary
+                    )
+                    
+                    StatListItem(
+                        icon = Icons.Filled.Group,
+                        label = "Active Tenants",
+                        value = activeTenants.size.toString(),
+                        iconTint = MaterialTheme.colorScheme.secondary
+                    )
+                    
+                    StatListItem(
+                        icon = Icons.Filled.AttachMoney,
+                        label = "Total Monthly Rent",
+                        value = "$currencySymbol${decimalFormat.format(totalMonthlyRent)}",
+                        iconTint = MaterialTheme.colorScheme.tertiary
+                    )
+                    
+                    StatListItem(
+                        icon = Icons.Filled.Payments,
+                        label = "Received This Month",
+                        value = "$currencySymbol${decimalFormat.format(totalCurrentMonthPayments)}",
+                        iconTint = MaterialTheme.colorScheme.primary
+                    )
+                    
+                    StatListItem(
+                        icon = Icons.Filled.Warning,
+                        label = "Pending Amount",
+                        value = if (totalPendingAmount > 0) "$currencySymbol${decimalFormat.format(totalPendingAmount)}" else "$currencySymbol 0",
+                        iconTint = if (totalPendingAmount > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline
+                    )
+                }
             }
             
             // Menu Grid
@@ -146,58 +176,42 @@ fun DashboardScreen(
 }
 
 @Composable
-fun CompactStatsCard(
-    modifier: Modifier = Modifier,
-    title: String,
-    value: String,
+fun StatListItem(
     icon: ImageVector,
-    color: androidx.compose.ui.graphics.Color
+    label: String,
+    value: String,
+    iconTint: androidx.compose.ui.graphics.Color
 ) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = color),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 1.dp,
-            pressedElevation = 3.dp,
-            hoveredElevation = 2.dp
-        ),
-        shape = MaterialTheme.shapes.medium
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
-                maxLines = 1
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                modifier = Modifier.size(24.dp),
+                tint = iconTint
             )
             Text(
-                text = value,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                maxLines = 2,
-                softWrap = true,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Visible,
-                lineHeight = 20.sp
+                text = label,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }
 

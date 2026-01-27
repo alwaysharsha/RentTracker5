@@ -5,6 +5,45 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.9.6] - 2026-01-27
+
+### Improved - Dashboard Stats Redesign
+
+#### Vertical List Layout
+- **Replaced 3 horizontal widgets with vertical list** - More scalable and organized layout
+- **5 comprehensive stat items** - Expanded from 3 to 5 key metrics
+- **Card-based overview section** - Clean, organized presentation with divider
+
+#### New Metrics Added
+- **Total Buildings** - Shows count of all buildings in the system
+- **Total Monthly Rent** - Displays expected monthly rental income from all active tenants
+- Retained existing metrics: Active Tenants, Received This Month, Pending Amount
+
+#### Layout Improvements
+- **StatListItem component** - New reusable component for consistent stat display
+- **Icon + Label + Value** - Clear three-part layout for each stat
+- **Color-coded icons** - Different colors for each metric type
+- **Better space utilization** - Vertical layout allows for easy expansion
+- **Responsive design** - Values aligned to the right, labels to the left
+
+#### Technical Changes
+- Added BuildingViewModel to DashboardScreen parameters
+- Updated navigation to pass BuildingViewModel
+- Removed CompactStatsCard component (replaced with StatListItem)
+- Calculate totalMonthlyRent from active tenants
+- Calculate totalBuildings from all buildings
+
+#### Benefits
+- **More insights** - 5 metrics instead of 3 for better overview
+- **Scalable design** - Easy to add more metrics in the future
+- **Better readability** - Vertical list is easier to scan
+- **Consistent styling** - Unified card design with proper spacing
+- **Professional appearance** - Clean, organized dashboard layout
+
+### Updated
+- Version number: 4.9.5 → 4.9.6
+- Build number: 85 → 86
+
 ## [4.9.5] - 2026-01-27
 
 ### Fixed - Dashboard Widget Decimal Display

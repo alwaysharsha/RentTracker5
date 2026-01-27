@@ -49,6 +49,7 @@ fun RentTrackerApp(
             // Dashboard screen
             composable(Screen.Dashboard.route) {
                 DashboardScreen(
+                    buildingViewModel = buildingViewModel,
                     tenantViewModel = tenantViewModel,
                     paymentViewModel = paymentViewModel,
                     settingsViewModel = settingsViewModel,
