@@ -32,6 +32,8 @@ fun DashboardScreen(
     settingsViewModel: SettingsViewModel,
     onNavigateToScreen: (String) -> Unit
 ) {
+    var isOverviewExpanded by remember { mutableStateOf(true) }
+    
     val allBuildings by buildingViewModel.buildings.collectAsState()
     val activeTenants by tenantViewModel.activeTenants.collectAsState()
     val allPayments by paymentViewModel.allPayments.collectAsState()
@@ -106,48 +108,63 @@ fun DashboardScreen(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        text = "Overview",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { isOverviewExpanded = !isOverviewExpanded },
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Overview",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Icon(
+                            imageVector = if (isOverviewExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                            contentDescription = if (isOverviewExpanded) "Collapse" else "Expand",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                     
-                    Divider(modifier = Modifier.padding(vertical = 4.dp))
-                    
-                    StatListItem(
-                        icon = Icons.Filled.Home,
-                        label = "Total Buildings",
-                        value = totalBuildings.toString(),
-                        iconTint = MaterialTheme.colorScheme.primary
-                    )
-                    
-                    StatListItem(
-                        icon = Icons.Filled.Group,
-                        label = "Active Tenants",
-                        value = activeTenants.size.toString(),
-                        iconTint = MaterialTheme.colorScheme.secondary
-                    )
-                    
-                    StatListItem(
-                        icon = Icons.Filled.AttachMoney,
-                        label = "Total Monthly Rent",
-                        value = "$currencySymbol${decimalFormat.format(totalMonthlyRent)}",
-                        iconTint = MaterialTheme.colorScheme.tertiary
-                    )
-                    
-                    StatListItem(
-                        icon = Icons.Filled.Payments,
-                        label = "Received This Month",
-                        value = "$currencySymbol${decimalFormat.format(totalCurrentMonthPayments)}",
-                        iconTint = MaterialTheme.colorScheme.primary
-                    )
-                    
-                    StatListItem(
-                        icon = Icons.Filled.Warning,
-                        label = "Pending Amount",
-                        value = if (totalPendingAmount > 0) "$currencySymbol${decimalFormat.format(totalPendingAmount)}" else "$currencySymbol 0",
-                        iconTint = if (totalPendingAmount > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline
-                    )
+                    if (isOverviewExpanded) {
+                        Divider(modifier = Modifier.padding(vertical = 4.dp))
+                        
+                        StatListItem(
+                            icon = Icons.Filled.Home,
+                            label = "Total Buildings",
+                            value = totalBuildings.toString(),
+                            iconTint = MaterialTheme.colorScheme.primary
+                        )
+                        
+                        StatListItem(
+                            icon = Icons.Filled.Group,
+                            label = "Active Tenants",
+                            value = activeTenants.size.toString(),
+                            iconTint = MaterialTheme.colorScheme.secondary
+                        )
+                        
+                        StatListItem(
+                            iconText = currencySymbol,
+                            label = "Total Monthly Rent",
+                            value = "$currencySymbol${decimalFormat.format(totalMonthlyRent)}",
+                            iconTint = MaterialTheme.colorScheme.tertiary
+                        )
+                        
+                        StatListItem(
+                            icon = Icons.Filled.Payments,
+                            label = "Received This Month",
+                            value = "$currencySymbol${decimalFormat.format(totalCurrentMonthPayments)}",
+                            iconTint = MaterialTheme.colorScheme.primary
+                        )
+                        
+                        StatListItem(
+                            icon = Icons.Filled.Warning,
+                            label = "Pending Amount",
+                            value = if (totalPendingAmount > 0) "$currencySymbol${decimalFormat.format(totalPendingAmount)}" else "$currencySymbol 0",
+                            iconTint = if (totalPendingAmount > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline
+                        )
+                    }
                 }
             }
             
@@ -177,7 +194,8 @@ fun DashboardScreen(
 
 @Composable
 fun StatListItem(
-    icon: ImageVector,
+    icon: ImageVector? = null,
+    iconText: String? = null,
     label: String,
     value: String,
     iconTint: androidx.compose.ui.graphics.Color
@@ -194,12 +212,22 @@ fun StatListItem(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.weight(1f)
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                modifier = Modifier.size(24.dp),
-                tint = iconTint
-            )
+            if (iconText != null) {
+                Text(
+                    text = iconText,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = iconTint,
+                    modifier = Modifier.size(24.dp)
+                )
+            } else if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = label,
+                    modifier = Modifier.size(24.dp),
+                    tint = iconTint
+                )
+            }
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge,

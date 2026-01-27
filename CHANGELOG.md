@@ -5,6 +5,39 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.9.7] - 2026-01-27
+
+### Improved - Dashboard Overview Enhancements
+
+#### Collapsible Overview Section
+- **Made Overview section collapsible** - Click on "Overview" header to expand/collapse stats
+- **Expand/Collapse icon** - Visual indicator (chevron up/down) shows current state
+- **Defaults to expanded** - Overview starts expanded for immediate visibility
+- **Better space management** - Users can collapse stats to focus on Quick Access menu
+
+#### Currency-Specific Icon
+- **Total Monthly Rent now uses currency symbol as icon** - Replaced generic money icon with actual currency symbol (₹, $, £, €, ¥)
+- **Dynamic currency display** - Icon changes based on selected currency in settings
+- **Better visual consistency** - Currency symbol matches the value display
+
+#### Technical Changes
+- Added `isOverviewExpanded` state variable with remember
+- Updated StatListItem component to support both icon and text-based icons
+- Added `iconText` parameter for currency symbol display
+- Made `icon` parameter optional in StatListItem
+- Added clickable modifier to Overview header row
+
+#### Benefits
+- **More control** - Users can hide/show overview as needed
+- **Space efficient** - Collapsed view provides more room for Quick Access
+- **Better UX** - Intuitive expand/collapse interaction
+- **Currency clarity** - Visual currency symbol reinforces the metric type
+- **Consistent design** - Follows Material Design collapsible patterns
+
+### Updated
+- Version number: 4.9.6 → 4.9.7
+- Build number: 86 → 87
+
 ## [4.9.6] - 2026-01-27
 
 ### Improved - Dashboard Stats Redesign
