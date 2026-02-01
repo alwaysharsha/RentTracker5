@@ -5,6 +5,41 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.2] - 2026-02-01
+
+### Added - Theme Mode Selection
+
+#### Dark/Light/System Theme Support
+- **Theme mode selector in Settings** - Choose between Dark, Light, or System theme modes
+- **System theme mode** - Automatically follows device theme settings (default)
+- **Light theme mode** - Force light theme regardless of system settings
+- **Dark theme mode** - Force dark theme regardless of system settings
+- **Persistent theme preference** - Theme mode saved and restored across app sessions
+
+#### User Experience
+- **Instant theme switching** - Theme changes apply immediately without app restart
+- **Clean UI integration** - Theme selector placed between Currency and App Lock settings
+- **Intuitive dropdown** - Simple spinner component for theme selection
+- **Default to system** - Respects user's device theme preferences by default
+
+#### Technical Implementation
+- **PreferencesManager updates** - Added theme mode preference storage with DataStore
+- **SettingsViewModel updates** - Added theme mode state flow and setter method
+- **Theme.kt enhancements** - Updated RentTrackerTheme to accept theme mode parameter
+- **MainActivity integration** - Theme mode flow collected and passed to theme composable
+- **Test coverage** - Added 5 comprehensive test cases for theme mode functionality
+
+#### Test Cases Added
+- Theme mode setter validation for system/light/dark modes
+- Theme mode flow initial value verification
+- Theme mode switching between all three modes
+- PreferencesManager integration testing
+- SettingsViewModel state management testing
+
+### Updated
+- Version number: 5.0.1 → 5.0.2
+- Build number: 91 → 92
+
 ## [5.0.1] - 2026-01-27
 
 ### Fixed - Document Upload Issues

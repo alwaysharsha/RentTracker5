@@ -45,6 +45,7 @@ class SettingsViewModelTest {
         whenever(preferencesManager.paymentMethodsFlow).thenReturn(
             MutableStateFlow(listOf("UPI", "Cash", "Bank Transfer - Personal", "Bank Transfer - HUF", "Bank Transfer - Others"))
         )
+        whenever(preferencesManager.themeModeFlow).thenReturn(MutableStateFlow(PreferencesManager.THEME_MODE_SYSTEM))
         
         viewModel = SettingsViewModel(preferencesManager)
     }
@@ -132,5 +133,50 @@ class SettingsViewModelTest {
     fun `paymentMethods flow should emit initial value`() = runTest {
         val methods = viewModel.paymentMethods.value
         assertEquals(listOf("UPI", "Cash", "Bank Transfer - Personal", "Bank Transfer - HUF", "Bank Transfer - Others"), methods)
+    }
+
+    @Test
+    fun `setThemeMode should call preferencesManager with system mode`() = runTest {
+        viewModel.setThemeMode(PreferencesManager.THEME_MODE_SYSTEM)
+        advanceUntilIdle()
+        
+        verify(preferencesManager).setThemeMode(PreferencesManager.THEME_MODE_SYSTEM)
+    }
+
+    @Test
+    fun `setThemeMode should call preferencesManager with light mode`() = runTest {
+        viewModel.setThemeMode(PreferencesManager.THEME_MODE_LIGHT)
+        advanceUntilIdle()
+        
+        verify(preferencesManager).setThemeMode(PreferencesManager.THEME_MODE_LIGHT)
+    }
+
+    @Test
+    fun `setThemeMode should call preferencesManager with dark mode`() = runTest {
+        viewModel.setThemeMode(PreferencesManager.THEME_MODE_DARK)
+        advanceUntilIdle()
+        
+        verify(preferencesManager).setThemeMode(PreferencesManager.THEME_MODE_DARK)
+    }
+
+    @Test
+    fun `themeMode flow should emit initial value`() = runTest {
+        val themeMode = viewModel.themeMode.value
+        assertEquals(PreferencesManager.THEME_MODE_SYSTEM, themeMode)
+    }
+
+    @Test
+    fun `setThemeMode should handle switching between modes`() = runTest {
+        viewModel.setThemeMode(PreferencesManager.THEME_MODE_DARK)
+        advanceUntilIdle()
+        verify(preferencesManager).setThemeMode(PreferencesManager.THEME_MODE_DARK)
+        
+        viewModel.setThemeMode(PreferencesManager.THEME_MODE_LIGHT)
+        advanceUntilIdle()
+        verify(preferencesManager).setThemeMode(PreferencesManager.THEME_MODE_LIGHT)
+        
+        viewModel.setThemeMode(PreferencesManager.THEME_MODE_SYSTEM)
+        advanceUntilIdle()
+        verify(preferencesManager).setThemeMode(PreferencesManager.THEME_MODE_SYSTEM)
     }
 }

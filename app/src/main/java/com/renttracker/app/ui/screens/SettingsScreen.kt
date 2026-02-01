@@ -98,6 +98,43 @@ fun SettingsScreen(
                 }
             }
 
+            // Theme Mode Selection
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Theme",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    val themeMode by viewModel.themeMode.collectAsState()
+                    val themeModes = listOf("System", "Light", "Dark")
+                    val themeModeValues = listOf(
+                        com.renttracker.app.data.preferences.PreferencesManager.THEME_MODE_SYSTEM,
+                        com.renttracker.app.data.preferences.PreferencesManager.THEME_MODE_LIGHT,
+                        com.renttracker.app.data.preferences.PreferencesManager.THEME_MODE_DARK
+                    )
+                    val selectedThemeDisplay = when (themeMode) {
+                        com.renttracker.app.data.preferences.PreferencesManager.THEME_MODE_LIGHT -> "Light"
+                        com.renttracker.app.data.preferences.PreferencesManager.THEME_MODE_DARK -> "Dark"
+                        else -> "System"
+                    }
+                    Spinner(
+                        label = "Select Theme",
+                        items = themeModes,
+                        selectedItem = selectedThemeDisplay,
+                        onItemSelected = { selected ->
+                            val index = themeModes.indexOf(selected)
+                            if (index >= 0) {
+                                viewModel.setThemeMode(themeModeValues[index])
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
             // App Lock
             Card(
                 modifier = Modifier.fillMaxWidth()
@@ -276,8 +313,8 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version: 5.0.1")
-                    Text("Build: 91")
+                    Text("Version: 5.0.2")
+                    Text("Build: 92")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }

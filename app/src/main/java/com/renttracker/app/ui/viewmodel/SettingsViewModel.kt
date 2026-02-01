@@ -22,6 +22,9 @@ class SettingsViewModel(private val preferencesManager: PreferencesManager) : Vi
             PreferencesManager.DEFAULT_PAYMENT_METHODS.split(",").map { it.trim() }
         )
 
+    val themeMode: StateFlow<String> = preferencesManager.themeModeFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PreferencesManager.THEME_MODE_SYSTEM)
+
     fun setCurrency(currency: String) {
         viewModelScope.launch {
             preferencesManager.setCurrency(currency)
@@ -37,6 +40,12 @@ class SettingsViewModel(private val preferencesManager: PreferencesManager) : Vi
     fun setPaymentMethods(methods: List<String>) {
         viewModelScope.launch {
             preferencesManager.setPaymentMethods(methods)
+        }
+    }
+
+    fun setThemeMode(mode: String) {
+        viewModelScope.launch {
+            preferencesManager.setThemeMode(mode)
         }
     }
 }

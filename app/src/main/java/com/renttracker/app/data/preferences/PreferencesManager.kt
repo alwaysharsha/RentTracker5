@@ -19,9 +19,15 @@ class PreferencesManager(private val context: Context) {
         private val CURRENCY_KEY = stringPreferencesKey("currency")
         private val APP_LOCK_KEY = booleanPreferencesKey("app_lock")
         private val PAYMENT_METHODS_KEY = stringPreferencesKey("payment_methods")
+        private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
         
         // Default payment methods
         const val DEFAULT_PAYMENT_METHODS = "UPI,Cash,Bank Transfer - Personal,Bank Transfer - HUF,Bank Transfer - Others"
+        
+        // Theme modes
+        const val THEME_MODE_SYSTEM = "system"
+        const val THEME_MODE_LIGHT = "light"
+        const val THEME_MODE_DARK = "dark"
     }
 
     val currencyFlow: Flow<String> = context.dataStore.data.map { preferences ->
@@ -35,6 +41,10 @@ class PreferencesManager(private val context: Context) {
     val paymentMethodsFlow: Flow<List<String>> = context.dataStore.data.map { preferences ->
         val methodsString = preferences[PAYMENT_METHODS_KEY] ?: DEFAULT_PAYMENT_METHODS
         methodsString.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+    }
+
+    val themeModeFlow: Flow<String> = context.dataStore.data.map { preferences ->
+        preferences[THEME_MODE_KEY] ?: THEME_MODE_SYSTEM
     }
 
     suspend fun setCurrency(currency: String) {
@@ -69,6 +79,17 @@ class PreferencesManager(private val context: Context) {
             android.util.Log.w("PreferencesManager", "Failed to save payment methods to DataStore, using fallback", e)
         }
     }
+
+    suspend fun setThemeMode(mode: String) {
+        try {
+            context.dataStore.edit { preferences ->
+                preferences[THEME_MODE_KEY] = mode
+            }
+        } catch (e: Exception) {
+            // Handle DataStore IOException gracefully
+            android.util.Log.w("PreferencesManager", "Failed to save theme mode to DataStore, using fallback", e)
+        }
+    }
     
     // Helper methods for test environment to get values synchronously
     fun getCurrencySync(): String {
@@ -101,6 +122,17 @@ class PreferencesManager(private val context: Context) {
         } catch (e: Exception) {
             android.util.Log.w("PreferencesManager", "Failed to get payment methods from DataStore, using default", e)
             DEFAULT_PAYMENT_METHODS.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+        }
+    }
+    
+    fun getThemeModeSync(): String {
+        return try {
+            runBlocking {
+                themeModeFlow.first()
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("PreferencesManager", "Failed to get theme mode from DataStore, using default", e)
+            THEME_MODE_SYSTEM
         }
     }
 }
