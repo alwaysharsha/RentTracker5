@@ -23,6 +23,7 @@ class RentTrackerRepository(
 
     // Building operations
     fun getAllBuildings(): Flow<List<Building>> = buildingDao.getAllBuildings()
+    fun getAllBuildingsWithOwner(): Flow<List<BuildingWithOwner>> = buildingDao.getAllBuildingsWithOwner()
     suspend fun getBuildingById(id: Long): Building? = buildingDao.getBuildingById(id)
     fun getBuildingsByOwner(ownerId: Long): Flow<List<Building>> = buildingDao.getBuildingsByOwner(ownerId)
     suspend fun insertBuilding(building: Building): Long = buildingDao.insertBuilding(building)

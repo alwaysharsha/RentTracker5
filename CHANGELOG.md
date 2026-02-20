@@ -5,6 +5,26 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.3] - 2026-02-20
+
+### Added - Owner Display in Buildings Screen
+
+#### Enhanced Building List View
+- **Owner name display** - Buildings screen now shows owner name alongside property type
+- **Improved information density** - Type and Owner displayed on same line (e.g., "Type: RESIDENTIAL | Owner: John Doe")
+- **Better context** - Users can quickly identify building ownership without navigating to details
+
+#### Technical Implementation
+- **BuildingWithOwner data class** - New model combining building and owner information
+- **BuildingDao enhancement** - Added SQL JOIN query to fetch buildings with owner names
+- **Repository update** - Added `getAllBuildingsWithOwner()` method
+- **BuildingViewModel update** - Exposed `buildingsWithOwner` StateFlow
+- **BuildingScreen update** - Modified to display owner information in building cards
+
+### Updated
+- Version number: 5.0.2 → 5.0.3
+- Build number: 92 → 93
+
 ## [5.0.2] - 2026-02-01
 
 ### Added - Theme Mode Selection

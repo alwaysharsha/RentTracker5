@@ -10,7 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.renttracker.app.data.model.Building
+import com.renttracker.app.data.model.BuildingWithOwner
 import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.viewmodel.BuildingViewModel
 
@@ -20,7 +20,7 @@ fun BuildingScreen(
     viewModel: BuildingViewModel,
     onNavigateToDetail: (Long?) -> Unit
 ) {
-    val buildings by viewModel.buildings.collectAsState()
+    val buildings by viewModel.buildingsWithOwner.collectAsState()
 
     Scaffold(
         topBar = {
@@ -51,7 +51,7 @@ fun BuildingScreen(
 
 @Composable
 fun BuildingCard(
-    building: Building,
+    building: BuildingWithOwner,
     onClick: () -> Unit
 ) {
     Card(
@@ -66,7 +66,7 @@ fun BuildingCard(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Type: ${building.propertyType.name}",
+                text = "Type: ${building.propertyType.name} | Owner: ${building.ownerName}",
                 style = MaterialTheme.typography.bodyMedium
             )
             if (building.address != null) {

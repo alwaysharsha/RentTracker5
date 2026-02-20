@@ -3,6 +3,7 @@ package com.renttracker.app.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.renttracker.app.data.model.Building
+import com.renttracker.app.data.model.BuildingWithOwner
 import com.renttracker.app.data.repository.RentTrackerRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -11,6 +12,9 @@ import kotlinx.coroutines.launch
 
 class BuildingViewModel(private val repository: RentTrackerRepository) : ViewModel() {
     val buildings: StateFlow<List<Building>> = repository.getAllBuildings()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    
+    val buildingsWithOwner: StateFlow<List<BuildingWithOwner>> = repository.getAllBuildingsWithOwner()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     suspend fun getBuildingById(id: Long): Building? {
