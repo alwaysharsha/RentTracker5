@@ -12,7 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.renttracker.app.data.model.Tenant
+import com.renttracker.app.data.model.TenantWithBuilding
 import com.renttracker.app.ui.components.RentTrackerTopBar
 import com.renttracker.app.ui.viewmodel.TenantViewModel
 
@@ -22,8 +22,8 @@ fun TenantScreen(
     viewModel: TenantViewModel,
     onNavigateToDetail: (Long?) -> Unit
 ) {
-    val activeTenants by viewModel.activeTenants.collectAsState()
-    val checkedOutTenants by viewModel.checkedOutTenants.collectAsState()
+    val activeTenants by viewModel.activeTenantsWithBuilding.collectAsState()
+    val checkedOutTenants by viewModel.checkedOutTenantsWithBuilding.collectAsState()
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     Scaffold(
@@ -64,7 +64,7 @@ fun TenantScreen(
 
 @Composable
 fun TenantList(
-    tenants: List<Tenant>,
+    tenants: List<TenantWithBuilding>,
     onTenantClick: (Long) -> Unit
 ) {
     LazyColumn(
@@ -82,7 +82,7 @@ fun TenantList(
 
 @Composable
 fun TenantCard(
-    tenant: Tenant,
+    tenant: TenantWithBuilding,
     onClick: () -> Unit
 ) {
     Card(
@@ -115,7 +115,10 @@ fun TenantCard(
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = tenant.mobile, style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = if (tenant.buildingName != null) "${tenant.mobile} | ${tenant.buildingName}" else tenant.mobile,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }

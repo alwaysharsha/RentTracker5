@@ -8,7 +8,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -292,7 +294,48 @@ fun TenantReport(tenants: List<Tenant>, reportTitle: String) {
                 Spacer(modifier = Modifier.height(8.dp))
             }
             items(tenants) { tenant ->
-                TenantCard(tenant = tenant, onClick = {})
+                ReportTenantCard(tenant = tenant, onClick = {})
+            }
+        }
+    }
+}
+
+@Composable
+fun ReportTenantCard(
+    tenant: Tenant,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = tenant.name,
+                style = MaterialTheme.typography.titleLarge
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            if (tenant.email != null) {
+                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Filled.Email,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = tenant.email, style = MaterialTheme.typography.bodyMedium)
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Icon(
+                    Icons.Filled.Phone,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = tenant.mobile, style = MaterialTheme.typography.bodyMedium)
             }
         }
     }

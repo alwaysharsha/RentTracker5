@@ -32,7 +32,9 @@ class RentTrackerRepository(
 
     // Tenant operations
     fun getActiveTenants(): Flow<List<Tenant>> = tenantDao.getActiveTenants()
+    fun getActiveTenantsWithBuilding(): Flow<List<TenantWithBuilding>> = tenantDao.getActiveTenantsWithBuilding()
     fun getCheckedOutTenants(): Flow<List<Tenant>> = tenantDao.getCheckedOutTenants()
+    fun getCheckedOutTenantsWithBuilding(): Flow<List<TenantWithBuilding>> = tenantDao.getCheckedOutTenantsWithBuilding()
     suspend fun getTenantById(id: Long): Tenant? = tenantDao.getTenantById(id)
     fun getTenantByIdFlow(id: Long): Flow<Tenant?> = tenantDao.getTenantByIdFlow(id)
     suspend fun insertTenant(tenant: Tenant): Long = tenantDao.insertTenant(tenant)

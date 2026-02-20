@@ -5,6 +5,28 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.5] - 2026-02-20
+
+### Added - Building Name Display in Tenant Screen
+
+#### Enhanced Tenant List View
+- **Building name display** - Tenant screen now shows building name alongside phone number
+- **Improved information density** - Phone and Building displayed on same line (e.g., "9876543210 | Sunrise Apartments")
+- **Better context** - Users can quickly identify tenant's building without navigating to details
+- **Conditional display** - Building name only shown if tenant is assigned to a building
+
+#### Technical Implementation
+- **TenantWithBuilding data class** - New model combining tenant and building information
+- **TenantDao enhancement** - Added SQL LEFT JOIN queries to fetch tenants with building names
+- **Repository update** - Added `getActiveTenantsWithBuilding()` and `getCheckedOutTenantsWithBuilding()` methods
+- **TenantViewModel update** - Exposed `activeTenantsWithBuilding` and `checkedOutTenantsWithBuilding` StateFlows
+- **TenantScreen update** - Modified to display building information in tenant cards
+- **ReportsScreen compatibility** - Added `ReportTenantCard` component for backward compatibility
+
+### Updated
+- Version number: 5.0.4 → 5.0.5
+- Build number: 94 → 95
+
 ## [5.0.4] - 2026-02-20
 
 ### Improved - Payment History UI
