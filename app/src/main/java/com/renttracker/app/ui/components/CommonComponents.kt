@@ -28,7 +28,8 @@ fun RentTrackerTopBar(
                 }
             }
         },
-        actions = actions
+        actions = actions,
+        windowInsets = WindowInsets(0.dp)
     )
 }
 

@@ -5,6 +5,25 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.9] - 2026-02-20
+
+### Fixed - App-Wide Top Spacing
+
+#### UI Improvements
+- **Removed extra line spacing across all screens** - Fixed excessive spacing at the top of all screens using RentTrackerTopBar
+- **Single fix for entire app** - Updated RentTrackerTopBar component to eliminate default system padding
+- **Consistent header spacing** - All screens now have uniform, clean header appearance
+- **Affected screens** - Owners, Buildings, Tenants, Payments, Reports, Settings, and all detail/edit screens
+
+#### Technical Implementation
+- Added `windowInsets = WindowInsets(0.dp)` parameter to RentTrackerTopBar component
+- Single change in CommonComponents.kt fixes 16+ screens automatically
+- Cleaner, more professional appearance throughout the app
+
+### Updated
+- Version number: 5.0.8 → 5.0.9
+- Build number: 98 → 99
+
 ## [5.0.8] - 2026-02-20
 
 ### Fixed - Dashboard Top Spacing
