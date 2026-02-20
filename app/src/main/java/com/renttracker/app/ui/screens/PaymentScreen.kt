@@ -207,11 +207,7 @@ internal fun PaymentCard(
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Method: ${payment.paymentMethod}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = "Status: ${payment.paymentType.name}",
+                text = "Method: ${payment.paymentMethod} | Status: ${payment.paymentType.name}",
                 style = MaterialTheme.typography.bodyMedium
             )
         }

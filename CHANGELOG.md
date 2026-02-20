@@ -5,6 +5,22 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.4] - 2026-02-20
+
+### Improved - Payment History UI
+
+#### Enhanced Payment Card Layout
+- **Compact information display** - Method and Status now displayed on single line
+- **Better space utilization** - Reduced vertical space usage in payment cards
+- **Improved readability** - Format: "Method: UPI | Status: PAID"
+
+#### Technical Implementation
+- **PaymentCard update** - Combined two separate Text components into one line
+
+### Updated
+- Version number: 5.0.3 → 5.0.4
+- Build number: 93 → 94
+
 ## [5.0.3] - 2026-02-20
 
 ### Added - Owner Display in Buildings Screen
