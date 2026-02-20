@@ -240,7 +240,7 @@ fun TenantPaymentHistoryScreen(
                             Text(
                                 text = dateFormatter.format(Date(rentMonth)),
                                 style = MaterialTheme.typography.titleSmall,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
                             )
                         }
                         items(

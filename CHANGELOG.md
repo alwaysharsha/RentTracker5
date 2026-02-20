@@ -5,6 +5,20 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.7] - 2026-02-20
+
+### Fixed - Payment History Spacing
+
+#### UI Improvements
+- **Reduced extra line gap** - Fixed excessive spacing after month headers in payment history
+- **Month header padding** - Reduced vertical padding from 8dp to 4dp (top and bottom)
+- **Better visual flow** - Improved spacing consistency between month headers and payment cards
+- **Cleaner appearance** - More compact and professional payment history layout
+
+### Updated
+- Version number: 5.0.6 → 5.0.7
+- Build number: 96 → 97
+
 ## [5.0.6] - 2026-02-20
 
 ### Improved - Font Size Optimization
