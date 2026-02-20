@@ -5,6 +5,20 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.8] - 2026-02-20
+
+### Fixed - Dashboard Top Spacing
+
+#### UI Improvements
+- **Removed extra line above app name** - Fixed excessive spacing at the top of dashboard screen
+- **TopAppBar optimization** - Added windowInsets parameter to eliminate default system padding
+- **Cleaner header** - App name "Rent Tracker" now displays with proper spacing
+- **Better visual alignment** - Improved overall dashboard appearance
+
+### Updated
+- Version number: 5.0.7 → 5.0.8
+- Build number: 97 → 98
+
 ## [5.0.7] - 2026-02-20
 
 ### Fixed - Payment History Spacing

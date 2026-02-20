@@ -88,7 +88,8 @@ fun DashboardScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Rent Tracker") }
+                title = { Text("Rent Tracker") },
+                windowInsets = WindowInsets(0.dp)
             )
         }
     ) { paddingValues ->
