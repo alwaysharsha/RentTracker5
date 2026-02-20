@@ -5,6 +5,31 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.6] - 2026-02-20
+
+### Improved - Font Size Optimization
+
+#### Typography Enhancements
+- **Reduced font sizes** - Optimized typography across all screens for better space utilization
+- **titleLarge** - Reduced from 22sp to 18sp (used in card titles, names)
+- **titleMedium** - Reduced from 16sp to 15sp (used in section headers)
+- **titleSmall** - Reduced from 14sp to 13sp (used in labels)
+- **bodyLarge** - Reduced from 16sp to 15sp (used in primary text)
+- **bodyMedium** - Reduced from 14sp to 13sp (used in secondary text)
+- **bodySmall** - Reduced from 12sp to 11sp (used in tertiary text)
+- **Better screen utilization** - More content visible without scrolling
+- **Improved readability** - Maintained comfortable reading experience with optimized line heights
+
+#### Benefits
+- More information density on all screens
+- Reduced need for scrolling in lists
+- Cleaner, more professional appearance
+- Consistent typography across the app
+
+### Updated
+- Version number: 5.0.5 → 5.0.6
+- Build number: 95 → 96
+
 ## [5.0.5] - 2026-02-20
 
 ### Added - Building Name Display in Tenant Screen
