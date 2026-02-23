@@ -31,14 +31,19 @@ class GoogleDriveBackupManager(private val context: Context) {
     
     private var driveService: Drive? = null
     
-    fun getSignInIntent(): Intent {
-        val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+    private fun getSignInOptions(): GoogleSignInOptions {
+        return GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
             .requestScopes(Scope(DriveScopes.DRIVE_FILE))
             .build()
-        
-        val client = GoogleSignIn.getClient(context, signInOptions)
-        return client.signInIntent
+    }
+    
+    fun getSignInClient(): GoogleSignInClient {
+        return GoogleSignIn.getClient(context, getSignInOptions())
+    }
+    
+    fun getSignInIntent(): Intent {
+        return getSignInClient().signInIntent
     }
     
     fun initializeDriveService(account: GoogleSignInAccount) {

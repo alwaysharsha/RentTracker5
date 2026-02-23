@@ -5,6 +5,34 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.3] - 2026-02-23
+
+### Fixed - Improved Google Sign-In Request Code Handling
+
+#### Enhanced Contract Implementation
+- **Improved request code handling** - Updated contract to pass GoogleDriveBackupManager instance
+- **Added synchronous result check** - Contract now checks for existing sign-in before launching intent
+- **Better error logging** - Added detailed logging for different result scenarios
+- **Consistent configuration** - Sign-in options now centralized in GoogleDriveBackupManager
+
+#### Technical Implementation
+- Updated `GoogleSignInContract` to accept `GoogleDriveBackupManager` as input instead of `Unit`
+- Added `getSynchronousResult()` override to check for existing sign-in
+- Implemented detailed result parsing with logging for OK, CANCELED, and unexpected codes
+- Refactored `GoogleDriveBackupManager` to expose `getSignInClient()` method
+- Centralized sign-in options in `getSignInOptions()` method
+- Updated button click to pass `driveBackupManager` to launcher
+
+#### Benefits
+- Avoids unnecessary sign-in flow if already signed in
+- Better error tracking with detailed logs
+- More robust handling of edge cases
+- Consistent sign-in configuration across the app
+
+### Updated
+- Version number: 5.3.2 → 5.3.3
+- Build number: 106 → 107
+
 ## [5.3.2] - 2026-02-23
 
 ### Fixed - Google Sign-In Request Code Issue

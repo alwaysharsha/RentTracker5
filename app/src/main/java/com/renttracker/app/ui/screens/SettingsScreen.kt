@@ -337,7 +337,7 @@ fun SettingsScreen(
                         Button(
                             onClick = {
                                 try {
-                                    signInLauncher.launch(Unit)
+                                    signInLauncher.launch(driveBackupManager)
                                 } catch (e: Exception) {
                                     android.util.Log.e("SettingsScreen", "Failed to launch sign-in", e)
                                     Toast.makeText(
@@ -542,8 +542,8 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version: 5.3.2")
-                    Text("Build: 106")
+                    Text("Version: 5.3.3")
+                    Text("Build: 107")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }
