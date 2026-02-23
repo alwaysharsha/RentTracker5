@@ -34,6 +34,14 @@ import com.renttracker.app.ui.viewmodel.SettingsViewModel
 import com.renttracker.app.utils.Constants
 import com.renttracker.app.utils.BackupTestUtils
 import com.renttracker.app.utils.showErrorToast
+import com.renttracker.app.utils.GoogleDriveBackupManager
+import com.renttracker.app.utils.BackupScheduler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -60,6 +68,44 @@ fun SettingsScreen(
     var showExportSuccess by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
     var exportedFileUri by remember { mutableStateOf<android.net.Uri?>(null) }
+    
+    // Google Drive backup state
+    val driveBackupManager = remember { GoogleDriveBackupManager(context) }
+    var isSignedIn by remember { mutableStateOf(driveBackupManager.isSignedIn()) }
+    var lastBackupTime by remember { mutableStateOf<Long?>(null) }
+    var backupInProgress by remember { mutableStateOf(false) }
+    var restoreInProgress by remember { mutableStateOf(false) }
+    var backupFrequency by remember { mutableStateOf(BackupScheduler.BackupFrequency.DISABLED) }
+    var showBackupFrequencyDialog by remember { mutableStateOf(false) }
+    
+    // Google Sign-In launcher
+    val signInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        try {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            val account = task.getResult(ApiException::class.java)
+            driveBackupManager.initializeDriveService(account)
+            isSignedIn = true
+            Toast.makeText(context, "Signed in to Google Drive", Toast.LENGTH_SHORT).show()
+        } catch (e: ApiException) {
+            Toast.makeText(context, "Sign-in failed: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    // Load last backup time when signed in
+    LaunchedEffect(isSignedIn) {
+        if (isSignedIn) {
+            val account = driveBackupManager.getSignedInAccount()
+            if (account != null) {
+                driveBackupManager.initializeDriveService(account)
+                val result = driveBackupManager.getLastBackupTime()
+                if (result.isSuccess) {
+                    lastBackupTime = result.getOrNull()
+                }
+            }
+        }
+    }
 
     val currencies = listOf("USD", "EUR", "GBP", "INR", "JPY", "CNY", "AUD", "CAD")
     
@@ -263,6 +309,176 @@ fun SettingsScreen(
                     }
                     
                     Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+            
+            // Google Drive Cloud Backup Section
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Google Drive Cloud Backup",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Automatically backup your data to Google Drive",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    if (!isSignedIn) {
+                        Button(
+                            onClick = {
+                                signInLauncher.launch(driveBackupManager.getSignInIntent())
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Filled.CloudUpload, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Sign in to Google Drive")
+                        }
+                    } else {
+                        // Show signed-in user info
+                        val account = driveBackupManager.getSignedInAccount()
+                        account?.let {
+                            Text(
+                                text = "Signed in as: ${it.email}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        
+                        // Last backup time
+                        lastBackupTime?.let { time ->
+                            val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
+                            Text(
+                                text = "Last backup: ${dateFormat.format(Date(time))}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+                        
+                        // Backup buttons
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    backupInProgress = true
+                                    coroutineScope.launch {
+                                        try {
+                                            val databasePath = context.getDatabasePath("rent_tracker.db").absolutePath
+                                            val result = driveBackupManager.backupDatabase(databasePath)
+                                            if (result.isSuccess) {
+                                                Toast.makeText(context, "Backup successful", Toast.LENGTH_SHORT).show()
+                                                val timeResult = driveBackupManager.getLastBackupTime()
+                                                if (timeResult.isSuccess) {
+                                                    lastBackupTime = timeResult.getOrNull()
+                                                }
+                                            } else {
+                                                Toast.makeText(context, "Backup failed: ${result.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
+                                            }
+                                        } catch (e: Exception) {
+                                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                                        } finally {
+                                            backupInProgress = false
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                enabled = !backupInProgress && !restoreInProgress
+                            ) {
+                                if (backupInProgress) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    Icon(Icons.Filled.CloudUpload, contentDescription = null)
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Backup Now")
+                            }
+                            
+                            OutlinedButton(
+                                onClick = {
+                                    restoreInProgress = true
+                                    coroutineScope.launch {
+                                        try {
+                                            val databasePath = context.getDatabasePath("rent_tracker.db").absolutePath
+                                            val result = driveBackupManager.restoreDatabase(databasePath)
+                                            if (result.isSuccess) {
+                                                Toast.makeText(context, "Restore successful. Please restart the app.", Toast.LENGTH_LONG).show()
+                                            } else {
+                                                Toast.makeText(context, "Restore failed: ${result.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
+                                            }
+                                        } catch (e: Exception) {
+                                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                                        } finally {
+                                            restoreInProgress = false
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                enabled = !backupInProgress && !restoreInProgress
+                            ) {
+                                if (restoreInProgress) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    Icon(Icons.Filled.CloudDownload, contentDescription = null)
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Restore")
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        // Scheduled backup frequency
+                        OutlinedButton(
+                            onClick = { showBackupFrequencyDialog = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Filled.Schedule, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Schedule: ${backupFrequency.name}")
+                        }
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        // Sign out button
+                        TextButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    driveBackupManager.signOut()
+                                    isSignedIn = false
+                                    lastBackupTime = null
+                                    Toast.makeText(context, "Signed out from Google Drive", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Sign Out")
+                        }
+                    }
+                }
+            }
+            
+            // Export/Import Section continued
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Spacer(modifier = Modifier.height(8.dp))
                     
                     // Backup Test Button - Feature Flag Controlled
                     if (BuildConfig.ENABLE_TEST_BACKUP_SYSTEM) {
@@ -313,8 +529,8 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version: 5.2.1")
-                    Text("Build: 103")
+                    Text("Version: 5.3.0")
+                    Text("Build: 104")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }
@@ -606,6 +822,57 @@ fun SettingsScreen(
                     exportImportViewModel.resetImportStatus()
                 }) {
                     Text("OK")
+                }
+            }
+        )
+    }
+    
+    // Backup Frequency Dialog
+    if (showBackupFrequencyDialog) {
+        AlertDialog(
+            onDismissRequest = { showBackupFrequencyDialog = false },
+            title = { Text("Backup Schedule") },
+            text = {
+                Column {
+                    Text("Choose how often to automatically backup to Google Drive:")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    BackupScheduler.BackupFrequency.values().forEach { frequency ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = backupFrequency == frequency,
+                                onClick = {
+                                    backupFrequency = frequency
+                                    BackupScheduler.scheduleBackup(context, frequency)
+                                    showBackupFrequencyDialog = false
+                                    Toast.makeText(
+                                        context,
+                                        "Backup schedule updated to ${frequency.name}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = when (frequency) {
+                                    BackupScheduler.BackupFrequency.DAILY -> "Daily"
+                                    BackupScheduler.BackupFrequency.WEEKLY -> "Weekly"
+                                    BackupScheduler.BackupFrequency.DISABLED -> "Disabled"
+                                },
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showBackupFrequencyDialog = false }) {
+                    Text("Cancel")
                 }
             }
         )

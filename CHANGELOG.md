@@ -5,6 +5,58 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.0] - 2026-02-23
+
+### Added - Google Drive Cloud Backup
+
+#### Automated Cloud Backup System
+- **Google Drive integration** - Backup your database to Google Drive cloud storage
+- **Google Sign-In** - Secure authentication with your Google account
+- **One-tap backup** - Manual backup button for instant cloud backup
+- **One-tap restore** - Restore your data from Google Drive backup
+- **Last backup time** - Display when the last backup was performed
+- **Scheduled backups** - Automatic daily or weekly backups
+- **WorkManager integration** - Background backup scheduling with smart constraints
+- **Network-aware** - Only backs up when connected to internet
+- **Battery-friendly** - Scheduled backups only run when battery is not low
+
+#### Backup Features
+- **Automatic folder creation** - Creates "RentTracker_Backups" folder in Google Drive
+- **File versioning** - Updates existing backup file instead of creating duplicates
+- **Progress indicators** - Visual feedback during backup and restore operations
+- **Error handling** - Clear error messages if backup/restore fails
+- **Sign out option** - Disconnect from Google Drive when needed
+
+#### Scheduled Backup Options
+- **Daily backups** - Automatic backup every 24 hours
+- **Weekly backups** - Automatic backup every 7 days
+- **Disabled** - Manual backups only
+- **Smart scheduling** - Uses WorkManager for reliable background execution
+- **Constraint-based** - Only runs when network is available and battery is sufficient
+
+#### Settings UI
+- **Google Drive section** - New card in Settings screen for cloud backup
+- **Sign-in button** - Easy Google account authentication
+- **Account display** - Shows signed-in email address
+- **Backup/Restore buttons** - Side-by-side buttons for quick access
+- **Schedule selector** - Dialog to choose backup frequency
+- **Status indicators** - Loading spinners during operations
+
+#### Technical Implementation
+- Added Google Play Services Auth dependency (20.7.0)
+- Added Google Drive API v3 dependency
+- Added WorkManager dependency (2.8.1) for scheduled tasks
+- Created `GoogleDriveBackupManager` class for Drive operations
+- Created `BackupWorker` for background backup execution
+- Created `BackupScheduler` utility for managing scheduled backups
+- Added Internet, Network State, and Get Accounts permissions
+- Configured packaging options to exclude duplicate META-INF files
+- Disabled DuplicatePlatformClasses lint check for Google dependencies
+
+### Updated
+- Version number: 5.2.1 → 5.3.0
+- Build number: 103 → 104
+
 ## [5.2.1] - 2026-02-23
 
 ### Fixed - Transaction History Filters

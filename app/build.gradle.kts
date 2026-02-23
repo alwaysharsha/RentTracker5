@@ -35,6 +35,10 @@ android {
         }
     }
     
+    lint {
+        disable += "DuplicatePlatformClasses"
+    }
+    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -56,6 +60,14 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/DEPENDENCIES"
+            excludes += "/META-INF/LICENSE"
+            excludes += "/META-INF/LICENSE.txt"
+            excludes += "/META-INF/license.txt"
+            excludes += "/META-INF/NOTICE"
+            excludes += "/META-INF/NOTICE.txt"
+            excludes += "/META-INF/notice.txt"
+            excludes += "/META-INF/ASL2.0"
         }
     }
 
@@ -94,6 +106,20 @@ dependencies {
     
     // Biometric
     implementation("androidx.biometric:biometric:1.1.0")
+    
+    // Google Drive API for cloud backup
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0")
+    implementation("com.google.api-client:google-api-client-android:2.2.0") {
+        exclude(group = "org.apache.httpcomponents")
+    }
+    implementation("com.google.http-client:google-http-client-gson:1.43.3") {
+        exclude(group = "org.apache.httpcomponents")
+    }
+    implementation("com.google.http-client:google-http-client-android:1.43.3")
+    
+    // WorkManager for scheduled backups
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
     
     // Testing
     testImplementation("junit:junit:4.13.2")
