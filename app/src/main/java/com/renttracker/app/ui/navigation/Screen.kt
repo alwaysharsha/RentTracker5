@@ -34,5 +34,6 @@ sealed class Screen(val route: String) {
         fun createRoute(expenseId: Long) = "expense_detail/$expenseId"
     }
     object Reports : Screen("reports")
+    object TransactionHistory : Screen("transaction_history")
     object Settings : Screen("settings")
 }

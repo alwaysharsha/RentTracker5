@@ -46,7 +46,8 @@ fun ReportsScreen(
     paymentViewModel: PaymentViewModel,
     buildingViewModel: BuildingViewModel,
     ownerViewModel: OwnerViewModel,
-    settingsViewModel: SettingsViewModel
+    settingsViewModel: SettingsViewModel,
+    onNavigateToTransactionHistory: () -> Unit = {}
 ) {
     var selectedReportType by remember { mutableStateOf(ReportType.ACTIVE_TENANTS) }
     var showReportList by remember { mutableStateOf(false) }
@@ -54,7 +55,17 @@ fun ReportsScreen(
 
     Scaffold(
         topBar = {
-            RentTrackerTopBar(title = "Reports")
+            RentTrackerTopBar(
+                title = "Reports",
+                actions = {
+                    Button(
+                        onClick = onNavigateToTransactionHistory,
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Text("Transaction History")
+                    }
+                }
+            )
         }
     ) { paddingValues ->
         Box(

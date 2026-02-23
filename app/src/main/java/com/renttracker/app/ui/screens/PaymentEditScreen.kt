@@ -1,5 +1,6 @@
 package com.renttracker.app.ui.screens
 
+import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -7,10 +8,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import com.renttracker.app.data.model.*
 import com.renttracker.app.ui.components.EditableDateField
 import com.renttracker.app.ui.components.RentTrackerTopBar
@@ -18,6 +22,9 @@ import com.renttracker.app.ui.components.ValidationTextField
 import com.renttracker.app.ui.components.Spinner
 import com.renttracker.app.ui.viewmodel.PaymentViewModel
 import com.renttracker.app.ui.viewmodel.SettingsViewModel
+import com.renttracker.app.ui.viewmodel.TenantViewModel
+import com.renttracker.app.ui.viewmodel.BuildingViewModel
+import com.renttracker.app.utils.PdfGenerator
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -27,12 +34,19 @@ import java.util.*
 fun PaymentEditScreen(
     viewModel: PaymentViewModel,
     settingsViewModel: SettingsViewModel,
+    tenantViewModel: TenantViewModel,
+    buildingViewModel: BuildingViewModel,
     paymentId: Long,
     onNavigateBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val paymentMethods by settingsViewModel.paymentMethods.collectAsState()
+    val currency by settingsViewModel.currency.collectAsState()
     
     var payment by remember { mutableStateOf<Payment?>(null) }
+    var tenant by remember { mutableStateOf<Tenant?>(null) }
+    var building by remember { mutableStateOf<Building?>(null) }
     var rentMonth by remember { mutableStateOf<Long?>(null) }
     var showMonthPicker by remember { mutableStateOf(false) }
     var date by remember { mutableStateOf<Long?>(null) }
@@ -62,6 +76,23 @@ fun PaymentEditScreen(
             selectedPaymentType = it.paymentType
             pendingAmount = it.pendingAmount?.toString() ?: ""
             notes = it.notes ?: ""
+            
+        }
+    }
+    
+    // Load tenant data
+    LaunchedEffect(payment?.tenantId) {
+        payment?.tenantId?.let { tId ->
+            tenantViewModel.getTenantById(tId).collect { t ->
+                tenant = t
+            }
+        }
+    }
+    
+    // Load building data
+    LaunchedEffect(tenant?.buildingId) {
+        tenant?.buildingId?.let { bId ->
+            building = buildingViewModel.getBuildingById(bId)
         }
     }
 
@@ -71,6 +102,55 @@ fun PaymentEditScreen(
                 title = "Edit Payment",
                 onNavigationClick = onNavigateBack,
                 actions = {
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                payment?.let { p ->
+                                    tenant?.let { t ->
+                                        try {
+                                            val receiptFile = PdfGenerator.generatePaymentReceipt(
+                                                context = context,
+                                                payment = p,
+                                                tenant = t,
+                                                building = building,
+                                                currency = currency
+                                            )
+                                            
+                                            val uri = FileProvider.getUriForFile(
+                                                context,
+                                                "${context.packageName}.fileprovider",
+                                                receiptFile
+                                            )
+                                            
+                                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                                type = "application/pdf"
+                                                putExtra(Intent.EXTRA_STREAM, uri)
+                                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                setPackage("com.whatsapp")
+                                            }
+                                            
+                                            try {
+                                                context.startActivity(shareIntent)
+                                            } catch (e: Exception) {
+                                                // WhatsApp not installed, use generic share
+                                                val genericIntent = Intent(Intent.ACTION_SEND).apply {
+                                                    type = "application/pdf"
+                                                    putExtra(Intent.EXTRA_STREAM, uri)
+                                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                }
+                                                context.startActivity(Intent.createChooser(genericIntent, "Share Receipt"))
+                                            }
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        enabled = payment != null && tenant != null
+                    ) {
+                        Icon(Icons.Filled.Share, contentDescription = "Share Receipt")
+                    }
                     IconButton(onClick = { showDeleteDialog = true }) {
                         Icon(Icons.Filled.Delete, contentDescription = "Delete")
                     }

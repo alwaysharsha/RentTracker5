@@ -194,6 +194,8 @@ fun RentTrackerApp(
                 PaymentEditScreen(
                     viewModel = paymentViewModel,
                     settingsViewModel = settingsViewModel,
+                    tenantViewModel = tenantViewModel,
+                    buildingViewModel = buildingViewModel,
                     paymentId = paymentId,
                     onNavigateBack = { navController.popBackStack() }
                 )
@@ -269,7 +271,25 @@ fun RentTrackerApp(
                     paymentViewModel = paymentViewModel,
                     buildingViewModel = buildingViewModel,
                     ownerViewModel = ownerViewModel,
-                    settingsViewModel = settingsViewModel
+                    settingsViewModel = settingsViewModel,
+                    onNavigateToTransactionHistory = {
+                        navController.navigate(Screen.TransactionHistory.route)
+                    }
+                )
+            }
+
+            // Transaction History screen
+            composable(Screen.TransactionHistory.route) {
+                TransactionHistoryScreen(
+                    paymentViewModel = paymentViewModel,
+                    tenantViewModel = tenantViewModel,
+                    buildingViewModel = buildingViewModel,
+                    ownerViewModel = ownerViewModel,
+                    settingsViewModel = settingsViewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onPaymentClick = { paymentId ->
+                        navController.navigate(Screen.PaymentEdit.createRoute(paymentId))
+                    }
                 )
             }
 

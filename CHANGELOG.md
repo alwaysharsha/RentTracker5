@@ -5,6 +5,59 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.2.0] - 2026-02-23
+
+### Added - Payment Receipts & Transaction History
+
+#### Payment Receipt Generation with WhatsApp Sharing
+- **Professional PDF receipts** - Generate detailed payment receipts with tenant and building information
+- **WhatsApp integration** - Share receipts directly via WhatsApp with one tap
+- **Fallback sharing** - Generic share option if WhatsApp is not installed
+- **Receipt details include:**
+  - Receipt number (RT-{paymentId})
+  - Payment date and rent month
+  - Tenant details (name, mobile, email, building, address)
+  - Payment amount with green highlighting
+  - Pending amount (if partial payment) in red
+  - Payment method and transaction details
+  - Payment status and notes
+  - Computer-generated footer with timestamp
+- **Share button** - Added to Payment Edit screen for instant receipt generation and sharing
+
+#### Transaction History Report with Advanced Filters
+- **New Transaction History screen** - Comprehensive payment transaction viewer
+- **Advanced filtering system:**
+  - Filter by tenant - View payments for specific tenant
+  - Filter by building - See all payments for a building
+  - Filter by owner - Track payments across owner's properties
+  - Filter by payment type - Full or Partial payments
+  - Filter by payment method - Cash, UPI, Bank Transfer, etc.
+  - Date range filtering - Custom start and end dates
+- **Summary statistics:**
+  - Total transaction count
+  - Total amount paid
+  - Total pending amount
+- **Export to PDF** - Generate and share filtered transaction reports
+- **Quick access** - Button in Reports screen to open Transaction History
+- **Interactive cards** - Tap any transaction to view/edit payment details
+- **Visual indicators:**
+  - Partial payments highlighted with red background
+  - Pending amounts shown in red
+  - Payment method and status displayed on each card
+- **Clear all filters** - One-tap button to reset all filters
+
+#### Technical Implementation
+- Created `generatePaymentReceipt()` function in `PdfGenerator.kt`
+- Added `TransactionHistoryScreen.kt` with complete filtering logic
+- Integrated FileProvider for secure PDF sharing
+- Updated navigation to pass required viewmodels
+- Added Transaction History route to navigation system
+- Updated Reports screen with navigation button
+
+### Updated
+- Version number: 5.1.1 → 5.2.0
+- Build number: 101 → 102
+
 ## [5.1.1] - 2026-02-23
 
 ### Improved - Payment Card Display

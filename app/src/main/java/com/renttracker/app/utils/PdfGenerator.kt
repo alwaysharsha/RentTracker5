@@ -19,6 +19,171 @@ import java.util.Locale
 
 object PdfGenerator {
 
+    fun generatePaymentReceipt(
+        context: Context,
+        payment: Payment,
+        tenant: Tenant,
+        building: Building?,
+        currency: String
+    ): File {
+        val pdfDocument = PdfDocument()
+        val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 size
+        val page = pdfDocument.startPage(pageInfo)
+        val canvas = page.canvas
+        val paint = Paint()
+        var yPosition = 50f
+
+        // Header - Receipt Title
+        paint.textSize = 28f
+        paint.isFakeBoldText = true
+        paint.color = Color.BLACK
+        paint.textAlign = Paint.Align.CENTER
+        canvas.drawText("PAYMENT RECEIPT", 297.5f, yPosition, paint)
+        yPosition += 40f
+
+        // Receipt Number and Date
+        paint.textSize = 12f
+        paint.isFakeBoldText = false
+        paint.textAlign = Paint.Align.LEFT
+        val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+        canvas.drawText("Receipt No: RT-${payment.id}", 50f, yPosition, paint)
+        paint.textAlign = Paint.Align.RIGHT
+        canvas.drawText("Date: ${dateFormat.format(Date(payment.date))}", 545f, yPosition, paint)
+        yPosition += 30f
+        paint.textAlign = Paint.Align.LEFT
+
+        // Divider
+        paint.strokeWidth = 2f
+        canvas.drawLine(50f, yPosition, 545f, yPosition, paint)
+        yPosition += 30f
+
+        // Tenant Details Section
+        paint.textSize = 16f
+        paint.isFakeBoldText = true
+        canvas.drawText("Tenant Details", 50f, yPosition, paint)
+        yPosition += 25f
+
+        paint.textSize = 12f
+        paint.isFakeBoldText = false
+        canvas.drawText("Name: ${tenant.name}", 50f, yPosition, paint)
+        yPosition += 18f
+        canvas.drawText("Mobile: ${tenant.mobile}", 50f, yPosition, paint)
+        yPosition += 18f
+        if (tenant.email != null) {
+            canvas.drawText("Email: ${tenant.email}", 50f, yPosition, paint)
+            yPosition += 18f
+        }
+        if (building != null) {
+            canvas.drawText("Building: ${building.name}", 50f, yPosition, paint)
+            yPosition += 18f
+            if (building.address != null) {
+                canvas.drawText("Address: ${building.address}", 50f, yPosition, paint)
+                yPosition += 18f
+            }
+        }
+        yPosition += 15f
+
+        // Divider
+        paint.strokeWidth = 1f
+        canvas.drawLine(50f, yPosition, 545f, yPosition, paint)
+        yPosition += 30f
+
+        // Payment Details Section
+        paint.textSize = 16f
+        paint.isFakeBoldText = true
+        canvas.drawText("Payment Details", 50f, yPosition, paint)
+        yPosition += 25f
+
+        paint.textSize = 12f
+        paint.isFakeBoldText = false
+        val rentMonthFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+        canvas.drawText("Rent Month: ${rentMonthFormat.format(Date(payment.rentMonth))}", 50f, yPosition, paint)
+        yPosition += 18f
+        canvas.drawText("Payment Date: ${formatDate(payment.date)}", 50f, yPosition, paint)
+        yPosition += 18f
+        canvas.drawText("Payment Method: ${payment.paymentMethod}", 50f, yPosition, paint)
+        yPosition += 18f
+        if (payment.transactionDetails != null) {
+            canvas.drawText("Transaction Details: ${payment.transactionDetails}", 50f, yPosition, paint)
+            yPosition += 18f
+        }
+        yPosition += 15f
+
+        // Amount Box
+        paint.strokeWidth = 2f
+        val boxTop = yPosition
+        val boxHeight = 80f
+        canvas.drawRect(50f, boxTop, 545f, boxTop + boxHeight, paint)
+        
+        yPosition += 25f
+        paint.textSize = 14f
+        paint.isFakeBoldText = true
+        canvas.drawText("Amount Paid:", 70f, yPosition, paint)
+        paint.textSize = 24f
+        paint.color = Color.rgb(0, 128, 0) // Green color
+        paint.textAlign = Paint.Align.RIGHT
+        canvas.drawText(formatCurrency(payment.amount, currency), 525f, yPosition, paint)
+        paint.textAlign = Paint.Align.LEFT
+        paint.color = Color.BLACK
+        
+        yPosition += 25f
+        if (payment.pendingAmount != null && payment.pendingAmount > 0) {
+            paint.textSize = 12f
+            paint.isFakeBoldText = false
+            canvas.drawText("Pending Amount:", 70f, yPosition, paint)
+            paint.color = Color.RED
+            paint.textAlign = Paint.Align.RIGHT
+            canvas.drawText(formatCurrency(payment.pendingAmount, currency), 525f, yPosition, paint)
+            paint.textAlign = Paint.Align.LEFT
+            paint.color = Color.BLACK
+        }
+        
+        yPosition = boxTop + boxHeight + 25f
+
+        // Payment Status
+        paint.textSize = 14f
+        paint.isFakeBoldText = true
+        canvas.drawText("Status: ${payment.paymentType.name}", 50f, yPosition, paint)
+        yPosition += 25f
+
+        // Notes if available
+        if (payment.notes != null) {
+            paint.textSize = 12f
+            paint.isFakeBoldText = false
+            canvas.drawText("Notes: ${payment.notes}", 50f, yPosition, paint)
+            yPosition += 20f
+        }
+
+        yPosition += 30f
+
+        // Footer
+        paint.strokeWidth = 1f
+        canvas.drawLine(50f, yPosition, 545f, yPosition, paint)
+        yPosition += 20f
+        
+        paint.textSize = 10f
+        paint.isFakeBoldText = false
+        paint.color = Color.DKGRAY
+        paint.textAlign = Paint.Align.CENTER
+        canvas.drawText("This is a computer-generated receipt and does not require a signature.", 297.5f, yPosition, paint)
+        yPosition += 15f
+        canvas.drawText("Generated by RentTracker App on ${SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault()).format(Date())}", 297.5f, yPosition, paint)
+
+        pdfDocument.finishPage(page)
+
+        // Save to file
+        val file = File(context.cacheDir, "Receipt_${tenant.name.replace(" ", "_")}_${System.currentTimeMillis()}.pdf")
+        try {
+            pdfDocument.writeTo(FileOutputStream(file))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            pdfDocument.close()
+        }
+        
+        return file
+    }
+
     fun generatePaymentReportPdf(
         context: Context,
         payments: List<Payment>,
