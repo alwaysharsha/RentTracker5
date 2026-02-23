@@ -5,6 +5,35 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.2] - 2026-02-23
+
+### Fixed - Google Sign-In Request Code Issue
+
+#### Request Code Limitation Fix
+- **Fixed "only 16 bits for requestscode" error** - Replaced generic ActivityResultContract with custom GoogleSignInContract
+- **Proper Activity Result API usage** - Created custom contract specifically for Google Sign-In
+- **Eliminated request code conflicts** - Custom contract handles result parsing internally
+- **Improved sign-in flow** - Cleaner implementation with better error handling
+
+#### Technical Implementation
+- Created `GoogleSignInContract` class extending `ActivityResultContract<Unit, GoogleSignInAccount?>`
+- Moved sign-in intent creation to contract's `createIntent()` method
+- Moved result parsing to contract's `parseResult()` method
+- Updated `SettingsScreen` to use `GoogleSignInContract` instead of `StartActivityForResult`
+- Simplified launcher usage with `signInLauncher.launch(Unit)`
+- Removed manual intent creation from button click handler
+
+#### Benefits
+- No more request code limitations (16-bit restriction)
+- Type-safe result handling with GoogleSignInAccount
+- Cleaner separation of concerns
+- Better compatibility with Activity Result API
+- Reduced boilerplate code
+
+### Updated
+- Version number: 5.3.1 → 5.3.2
+- Build number: 105 → 106
+
 ## [5.3.1] - 2026-02-23
 
 ### Fixed - Google Sign-In Crash
