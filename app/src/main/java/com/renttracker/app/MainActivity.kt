@@ -166,17 +166,32 @@ class MainActivity : FragmentActivity() {
         
         // Handle Google Sign-In result
         if (requestCode == GOOGLE_SIGN_IN_REQUEST_CODE) {
-            try {
-                val task = com.google.android.gms.auth.api.signin.GoogleSignIn.getSignedInAccountFromIntent(data)
-                val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)
-                android.util.Log.d("MainActivity", "Google Sign-In successful: ${account?.email}")
-                onGoogleSignInResult?.invoke(account)
-            } catch (e: com.google.android.gms.common.api.ApiException) {
-                android.util.Log.e("MainActivity", "Google Sign-In failed: ${e.statusCode}", e)
-                onGoogleSignInResult?.invoke(null)
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Google Sign-In error", e)
-                onGoogleSignInResult?.invoke(null)
+            android.util.Log.d("MainActivity", "Google Sign-In result: requestCode=$requestCode, resultCode=$resultCode, data=$data")
+            
+            when (resultCode) {
+                RESULT_OK -> {
+                    android.util.Log.d("MainActivity", "Result is RESULT_OK, processing sign-in")
+                    try {
+                        val task = com.google.android.gms.auth.api.signin.GoogleSignIn.getSignedInAccountFromIntent(data)
+                        val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)
+                        android.util.Log.d("MainActivity", "Google Sign-In successful: ${account?.email}")
+                        onGoogleSignInResult?.invoke(account)
+                    } catch (e: com.google.android.gms.common.api.ApiException) {
+                        android.util.Log.e("MainActivity", "Google Sign-In ApiException: statusCode=${e.statusCode}, message=${e.message}", e)
+                        onGoogleSignInResult?.invoke(null)
+                    } catch (e: Exception) {
+                        android.util.Log.e("MainActivity", "Google Sign-In Exception: ${e.message}", e)
+                        onGoogleSignInResult?.invoke(null)
+                    }
+                }
+                RESULT_CANCELED -> {
+                    android.util.Log.d("MainActivity", "Google Sign-In was cancelled by user")
+                    onGoogleSignInResult?.invoke(null)
+                }
+                else -> {
+                    android.util.Log.e("MainActivity", "Google Sign-In unexpected result code: $resultCode")
+                    onGoogleSignInResult?.invoke(null)
+                }
             }
         }
     }

@@ -81,22 +81,27 @@ fun SettingsScreen(
     
     // Setup Google Sign-In callback with MainActivity
     DisposableEffect(Unit) {
+        android.util.Log.d("SettingsScreen", "Setting up Google Sign-In callback")
         mainActivity.onGoogleSignInResult = { account ->
+            android.util.Log.d("SettingsScreen", "Sign-in callback invoked with account: ${account?.email}")
             if (account != null) {
                 try {
+                    android.util.Log.d("SettingsScreen", "Initializing Drive service for: ${account.email}")
                     driveBackupManager.initializeDriveService(account)
                     isSignedIn = true
-                    Toast.makeText(context, "Signed in to Google Drive", Toast.LENGTH_SHORT).show()
+                    android.util.Log.d("SettingsScreen", "Drive service initialized successfully")
+                    Toast.makeText(context, "Signed in as ${account.email}", Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
                     android.util.Log.e("SettingsScreen", "Failed to initialize Drive service", e)
-                    Toast.makeText(context, "Failed to initialize: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Failed to initialize Drive: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             } else {
-                android.util.Log.e("SettingsScreen", "Sign-in cancelled or failed")
-                Toast.makeText(context, "Sign-in cancelled or failed", Toast.LENGTH_SHORT).show()
+                android.util.Log.w("SettingsScreen", "Sign-in result was null - check MainActivity logs for details")
+                Toast.makeText(context, "Sign-in failed. Check logs for details.", Toast.LENGTH_LONG).show()
             }
         }
         onDispose {
+            android.util.Log.d("SettingsScreen", "Cleaning up Google Sign-In callback")
             mainActivity.onGoogleSignInResult = null
         }
     }
@@ -550,8 +555,8 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version: 5.3.4")
-                    Text("Build: 108")
+                    Text("Version: 5.3.5")
+                    Text("Build: 109")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }

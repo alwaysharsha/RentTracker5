@@ -5,6 +5,37 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.5] - 2026-02-23
+
+### Improved - Enhanced Google Sign-In Debugging
+
+#### Comprehensive Logging
+- **Detailed result logging** - MainActivity now logs requestCode, resultCode, and data for sign-in
+- **Result code handling** - Separate logging for RESULT_OK, RESULT_CANCELED, and unexpected codes
+- **ApiException details** - Logs status code and message for ApiException
+- **Callback tracking** - SettingsScreen logs callback setup, invocation, and cleanup
+- **Account information** - Logs email address when sign-in succeeds
+
+#### Improved Error Messages
+- **More informative toasts** - Shows signed-in email address on success
+- **Better failure messages** - Directs user to check logs for details
+- **Exception details** - Includes exception message in error toasts
+
+#### Debugging Instructions
+To debug sign-in issues:
+1. Open Android Studio Logcat
+2. Filter by "MainActivity" or "SettingsScreen"
+3. Click "Sign in to Google Drive" button
+4. Check logs for:
+   - "Google Sign-In result: requestCode=9001, resultCode=..."
+   - "Result is RESULT_OK" (success) or "RESULT_CANCELED" (cancelled)
+   - "Google Sign-In ApiException" (if API error)
+   - "Sign-in callback invoked with account: ..." (in SettingsScreen)
+
+### Updated
+- Version number: 5.3.4 → 5.3.5
+- Build number: 108 → 109
+
 ## [5.3.4] - 2026-02-23
 
 ### Fixed - Complete Google Sign-In Solution with MainActivity
