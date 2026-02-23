@@ -171,34 +171,39 @@ fun TenantPaymentHistoryScreen(
                                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                             )
                             Text(
-                                text = "Total Paid",
+                                text = "Received",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        
-                        // Partial Payments (only if exists)
-                        if (partialPaymentCount > 0) {
-                            Divider(
-                                modifier = Modifier
-                                    .width(1.dp)
-                                    .height(40.dp),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                    }
+                    
+                    // Pending Payment (always show, below received)
+                    if (partialPaymentCount > 0) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Divider(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Pending Payment",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.error
                             )
-                            
-                            Column(modifier = Modifier.weight(1.2f)) {
-                                Text(
-                                    text = com.renttracker.app.ui.components.formatCurrency(totalPending, currency),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                                Text(
-                                    text = "Pending",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
+                            Text(
+                                text = com.renttracker.app.ui.components.formatCurrency(totalPending, currency),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.error
+                            )
                         }
                     }
                 }

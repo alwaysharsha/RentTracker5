@@ -5,6 +5,32 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.0] - 2026-02-23
+
+### Improved - Payment Screen Enhancements
+
+#### Payment Screen Changes
+- **Last paid rent month display** - Replaced total payment amount with last paid rent month
+- **More relevant information** - Shows "Last: MMM yyyy" format (e.g., "Last: Feb 2026")
+- **Better payment tracking** - Quickly see which month was last paid for each tenant
+- **Cleaner tenant cards** - Payment count and last rent month displayed together
+
+#### Payment History Screen Changes
+- **Reorganized summary layout** - Pending payment now displays below received payment
+- **Improved visual hierarchy** - Changed "Total Paid" label to "Received" for clarity
+- **Better pending payment visibility** - Pending amount shown in separate row with red color
+- **Cleaner layout** - Horizontal divider separates received and pending amounts
+
+#### Technical Implementation
+- Updated `PaymentStats` data class to track `lastRentMonth` instead of `total`
+- Modified payment card to show last rent month using `maxByOrNull { it.rentMonth }`
+- Reorganized payment summary card layout in TenantPaymentHistoryScreen
+- Changed from side-by-side to stacked layout for better readability
+
+### Updated
+- Version number: 5.0.9 → 5.1.0
+- Build number: 99 → 100
+
 ## [5.0.9] - 2026-02-20
 
 ### Fixed - App-Wide Top Spacing

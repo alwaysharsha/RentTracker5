@@ -100,9 +100,10 @@ private fun TenantPaymentCard(
     // Use derivedStateOf to avoid unnecessary recompositions when stats don't change
     val paymentStats by remember {
         derivedStateOf {
+            val lastPayment = payments.maxByOrNull { it.rentMonth }
             PaymentStats(
                 count = payments.size,
-                total = payments.sumOf { it.amount }
+                lastRentMonth = lastPayment?.rentMonth
             )
         }
     }
@@ -150,9 +151,9 @@ private fun TenantPaymentCard(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                if (paymentStats.total > 0) {
+                paymentStats.lastRentMonth?.let { lastMonth ->
                     Text(
-                        text = com.renttracker.app.ui.components.formatCurrency(paymentStats.total, currency),
+                        text = "Last: ${SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(Date(lastMonth))}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -216,5 +217,5 @@ internal fun PaymentCard(
 
 private data class PaymentStats(
     val count: Int,
-    val total: Double
+    val lastRentMonth: Long?
 )
