@@ -5,6 +5,28 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.1] - 2026-02-23
+
+### Fixed - Google Sign-In Crash
+
+#### Error Handling Improvements
+- **Fixed app crash on Google Sign-In** - Added comprehensive error handling to prevent crashes
+- **Better error messages** - Display detailed error information including status codes
+- **Exception logging** - Added logging for debugging sign-in issues
+- **Graceful failure** - App no longer crashes if Google Play Services is unavailable
+- **User-friendly messages** - Clear instructions when sign-in fails
+
+#### Technical Implementation
+- Added try-catch block around sign-in intent launch
+- Added try-catch for ApiException with status code display
+- Added generic Exception catch for unexpected errors
+- Added logging with android.util.Log for debugging
+- Added user message suggesting Google Play Services installation if needed
+
+### Updated
+- Version number: 5.3.0 → 5.3.1
+- Build number: 104 → 105
+
 ## [5.3.0] - 2026-02-23
 
 ### Added - Google Drive Cloud Backup

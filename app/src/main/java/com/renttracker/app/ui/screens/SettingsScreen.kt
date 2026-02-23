@@ -89,7 +89,11 @@ fun SettingsScreen(
             isSignedIn = true
             Toast.makeText(context, "Signed in to Google Drive", Toast.LENGTH_SHORT).show()
         } catch (e: ApiException) {
-            Toast.makeText(context, "Sign-in failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            android.util.Log.e("SettingsScreen", "Sign-in failed with ApiException", e)
+            Toast.makeText(context, "Sign-in failed: ${e.statusCode} - ${e.message}", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsScreen", "Sign-in failed with Exception", e)
+            Toast.makeText(context, "Sign-in error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
     
@@ -332,7 +336,17 @@ fun SettingsScreen(
                     if (!isSignedIn) {
                         Button(
                             onClick = {
-                                signInLauncher.launch(driveBackupManager.getSignInIntent())
+                                try {
+                                    val intent = driveBackupManager.getSignInIntent()
+                                    signInLauncher.launch(intent)
+                                } catch (e: Exception) {
+                                    android.util.Log.e("SettingsScreen", "Failed to launch sign-in", e)
+                                    Toast.makeText(
+                                        context,
+                                        "Failed to start sign-in: ${e.message}. Please ensure Google Play Services is installed.",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -529,8 +543,8 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version: 5.3.0")
-                    Text("Build: 104")
+                    Text("Version: 5.3.1")
+                    Text("Build: 105")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }
