@@ -5,6 +5,31 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.1] - 2026-02-23
+
+### Improved - Payment Card Display
+
+#### Payment Card Changes
+- **Pending amount in payment cards** - Each payment card now shows pending amount alongside paid amount
+- **Per-month pending visibility** - Pending amount displayed directly on each partial payment card
+- **Better payment tracking** - See both paid and pending amounts for each month at a glance
+- **Red color emphasis** - Pending amount shown in red for easy identification
+
+#### Payment History Summary Reverted
+- **Horizontal layout restored** - Payment summary back to side-by-side layout (Payments | Total Paid | Pending)
+- **Original "Total Paid" label** - Changed back from "Received" to "Total Paid"
+- **Compact display** - All summary information in single row for better space utilization
+
+#### Technical Implementation
+- Modified `PaymentCard` to display pending amount below paid amount when payment is partial
+- Added conditional rendering: shows "Pending: [amount]" only for partial payments with pending amount
+- Reverted summary card layout from vertical (stacked) back to horizontal (side-by-side)
+- Pending amount displayed in right-aligned column within payment card
+
+### Updated
+- Version number: 5.1.0 → 5.1.1
+- Build number: 100 → 101
+
 ## [5.1.0] - 2026-02-23
 
 ### Improved - Payment Screen Enhancements

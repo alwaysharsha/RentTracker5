@@ -199,12 +199,21 @@ internal fun PaymentCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Text(
-                    text = formatCurrency(payment.amount, currency),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = if (payment.paymentType == PaymentStatus.PARTIAL) 
-                        Color.Red else MaterialTheme.colorScheme.onSurface
-                )
+                Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
+                    Text(
+                        text = formatCurrency(payment.amount, currency),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = if (payment.paymentType == PaymentStatus.PARTIAL) 
+                            Color.Red else MaterialTheme.colorScheme.onSurface
+                    )
+                    if (payment.paymentType == PaymentStatus.PARTIAL && payment.pendingAmount != null && payment.pendingAmount > 0) {
+                        Text(
+                            text = "Pending: ${formatCurrency(payment.pendingAmount, currency)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Red
+                        )
+                    }
+                }
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
