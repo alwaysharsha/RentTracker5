@@ -5,6 +5,44 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.4] - 2026-02-23
+
+### Fixed - Complete Google Sign-In Solution with MainActivity
+
+#### MainActivity-Based Sign-In Implementation
+- **Bypassed Activity Result API limitations** - Implemented sign-in directly through MainActivity
+- **No more request code errors** - Uses traditional startActivityForResult with high request code (9001)
+- **Proper callback handling** - MainActivity handles sign-in result and invokes callback
+- **Added test case** - Created GoogleSignInTest with manual testing instructions
+
+#### Technical Implementation
+- Added `GOOGLE_SIGN_IN_REQUEST_CODE = 9001` constant to MainActivity
+- Added `onGoogleSignInResult` callback property to MainActivity
+- Implemented Google Sign-In result handling in MainActivity's `onActivityResult()`
+- Updated SettingsScreen to use `DisposableEffect` for callback setup/cleanup
+- Changed button click to use `mainActivity.startActivityForResult()` instead of Activity Result API
+- Added comprehensive error logging for sign-in failures
+
+#### Test Case
+- Created `GoogleSignInTest.kt` with unit tests for:
+  - Sign-in client creation
+  - Sign-in intent creation
+  - Sign-in state checking
+  - Drive service initialization
+  - Account retrieval
+- Added manual testing instructions in test file
+
+#### Benefits
+- Completely avoids Activity Result API request code limitations
+- Works with FragmentActivity's 16-bit request code restriction
+- Cleaner callback-based architecture
+- Better error tracking and logging
+- Testable implementation with unit tests
+
+### Updated
+- Version number: 5.3.3 → 5.3.4
+- Build number: 107 → 108
+
 ## [5.3.3] - 2026-02-23
 
 ### Fixed - Improved Google Sign-In Request Code Handling

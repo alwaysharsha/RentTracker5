@@ -42,7 +42,11 @@ class MainActivity : FragmentActivity() {
         private const val IMPORT_FILE_PICKER_REQUEST_CODE = Constants.IMPORT_FILE_PICKER_REQUEST_CODE
         private const val DOCUMENT_FILE_PICKER_REQUEST_CODE = 1001
         private const val DOCUMENT_CAMERA_REQUEST_CODE = 1002
+        const val GOOGLE_SIGN_IN_REQUEST_CODE = 9001 // Using high number to avoid conflicts
     }
+    
+    // Google Sign-In callback
+    var onGoogleSignInResult: ((com.google.android.gms.auth.api.signin.GoogleSignInAccount?) -> Unit)? = null
     
     // Callback function to trigger import from Settings screen
     fun launchImportFilePicker() {
@@ -158,6 +162,22 @@ class MainActivity : FragmentActivity() {
         if (requestCode == DOCUMENT_CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
             android.util.Log.d("MainActivity", "Camera result received, using stored URI: $pendingCameraUri")
             handleDocumentUpload(pendingCameraUri) // Use the stored camera URI
+        }
+        
+        // Handle Google Sign-In result
+        if (requestCode == GOOGLE_SIGN_IN_REQUEST_CODE) {
+            try {
+                val task = com.google.android.gms.auth.api.signin.GoogleSignIn.getSignedInAccountFromIntent(data)
+                val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)
+                android.util.Log.d("MainActivity", "Google Sign-In successful: ${account?.email}")
+                onGoogleSignInResult?.invoke(account)
+            } catch (e: com.google.android.gms.common.api.ApiException) {
+                android.util.Log.e("MainActivity", "Google Sign-In failed: ${e.statusCode}", e)
+                onGoogleSignInResult?.invoke(null)
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Google Sign-In error", e)
+                onGoogleSignInResult?.invoke(null)
+            }
         }
     }
     

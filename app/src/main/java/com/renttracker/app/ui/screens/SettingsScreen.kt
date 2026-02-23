@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -78,22 +79,25 @@ fun SettingsScreen(
     var backupFrequency by remember { mutableStateOf(BackupScheduler.BackupFrequency.DISABLED) }
     var showBackupFrequencyDialog by remember { mutableStateOf(false) }
     
-    // Google Sign-In launcher
-    val signInLauncher = rememberLauncherForActivityResult(
-        contract = GoogleSignInContract()
-    ) { account ->
-        if (account != null) {
-            try {
-                driveBackupManager.initializeDriveService(account)
-                isSignedIn = true
-                Toast.makeText(context, "Signed in to Google Drive", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                android.util.Log.e("SettingsScreen", "Failed to initialize Drive service", e)
-                Toast.makeText(context, "Failed to initialize: ${e.message}", Toast.LENGTH_LONG).show()
+    // Setup Google Sign-In callback with MainActivity
+    DisposableEffect(Unit) {
+        mainActivity.onGoogleSignInResult = { account ->
+            if (account != null) {
+                try {
+                    driveBackupManager.initializeDriveService(account)
+                    isSignedIn = true
+                    Toast.makeText(context, "Signed in to Google Drive", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    android.util.Log.e("SettingsScreen", "Failed to initialize Drive service", e)
+                    Toast.makeText(context, "Failed to initialize: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            } else {
+                android.util.Log.e("SettingsScreen", "Sign-in cancelled or failed")
+                Toast.makeText(context, "Sign-in cancelled or failed", Toast.LENGTH_SHORT).show()
             }
-        } else {
-            android.util.Log.e("SettingsScreen", "Sign-in cancelled or failed")
-            Toast.makeText(context, "Sign-in cancelled or failed", Toast.LENGTH_SHORT).show()
+        }
+        onDispose {
+            mainActivity.onGoogleSignInResult = null
         }
     }
     
@@ -337,7 +341,11 @@ fun SettingsScreen(
                         Button(
                             onClick = {
                                 try {
-                                    signInLauncher.launch(driveBackupManager)
+                                    val signInIntent = driveBackupManager.getSignInIntent()
+                                    mainActivity.startActivityForResult(
+                                        signInIntent,
+                                        MainActivity.GOOGLE_SIGN_IN_REQUEST_CODE
+                                    )
                                 } catch (e: Exception) {
                                     android.util.Log.e("SettingsScreen", "Failed to launch sign-in", e)
                                     Toast.makeText(
@@ -542,8 +550,8 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version: 5.3.3")
-                    Text("Build: 107")
+                    Text("Version: 5.3.4")
+                    Text("Build: 108")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }
