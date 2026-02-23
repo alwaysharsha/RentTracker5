@@ -54,6 +54,10 @@ fun TransactionHistoryScreen(
     var startDate by remember { mutableStateOf<Long?>(null) }
     var endDate by remember { mutableStateOf<Long?>(null) }
     
+    var expandedTenant by remember { mutableStateOf(false) }
+    var expandedBuilding by remember { mutableStateOf(false) }
+    var expandedOwner by remember { mutableStateOf(false) }
+    
     val paymentMethods by settingsViewModel.paymentMethods.collectAsState()
     
     // Filter payments based on selected criteria
@@ -186,8 +190,8 @@ fun TransactionHistoryScreen(
                         
                         // Tenant Filter
                         ExposedDropdownMenuBox(
-                            expanded = false,
-                            onExpandedChange = {}
+                            expanded = expandedTenant,
+                            onExpandedChange = { expandedTenant = it }
                         ) {
                             OutlinedTextField(
                                 value = selectedTenant?.name ?: "All Tenants",
@@ -199,18 +203,34 @@ fun TransactionHistoryScreen(
                                         IconButton(onClick = { selectedTenant = null }) {
                                             Icon(Icons.Filled.Clear, "Clear")
                                         }
+                                    } else {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTenant)
                                     }
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .menuAnchor()
                             )
+                            ExposedDropdownMenu(
+                                expanded = expandedTenant,
+                                onDismissRequest = { expandedTenant = false }
+                            ) {
+                                allTenants.forEach { tenant ->
+                                    DropdownMenuItem(
+                                        text = { Text(tenant.name) },
+                                        onClick = {
+                                            selectedTenant = tenant
+                                            expandedTenant = false
+                                        }
+                                    )
+                                }
+                            }
                         }
                         
                         // Building Filter
                         ExposedDropdownMenuBox(
-                            expanded = false,
-                            onExpandedChange = {}
+                            expanded = expandedBuilding,
+                            onExpandedChange = { expandedBuilding = it }
                         ) {
                             OutlinedTextField(
                                 value = selectedBuilding?.name ?: "All Buildings",
@@ -222,18 +242,34 @@ fun TransactionHistoryScreen(
                                         IconButton(onClick = { selectedBuilding = null }) {
                                             Icon(Icons.Filled.Clear, "Clear")
                                         }
+                                    } else {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedBuilding)
                                     }
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .menuAnchor()
                             )
+                            ExposedDropdownMenu(
+                                expanded = expandedBuilding,
+                                onDismissRequest = { expandedBuilding = false }
+                            ) {
+                                allBuildings.forEach { building ->
+                                    DropdownMenuItem(
+                                        text = { Text(building.name) },
+                                        onClick = {
+                                            selectedBuilding = building
+                                            expandedBuilding = false
+                                        }
+                                    )
+                                }
+                            }
                         }
                         
                         // Owner Filter
                         ExposedDropdownMenuBox(
-                            expanded = false,
-                            onExpandedChange = {}
+                            expanded = expandedOwner,
+                            onExpandedChange = { expandedOwner = it }
                         ) {
                             OutlinedTextField(
                                 value = selectedOwner?.name ?: "All Owners",
@@ -245,12 +281,28 @@ fun TransactionHistoryScreen(
                                         IconButton(onClick = { selectedOwner = null }) {
                                             Icon(Icons.Filled.Clear, "Clear")
                                         }
+                                    } else {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedOwner)
                                     }
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .menuAnchor()
                             )
+                            ExposedDropdownMenu(
+                                expanded = expandedOwner,
+                                onDismissRequest = { expandedOwner = false }
+                            ) {
+                                allOwners.forEach { owner ->
+                                    DropdownMenuItem(
+                                        text = { Text(owner.name) },
+                                        onClick = {
+                                            selectedOwner = owner
+                                            expandedOwner = false
+                                        }
+                                    )
+                                }
+                            }
                         }
                         
                         // Payment Type Filter

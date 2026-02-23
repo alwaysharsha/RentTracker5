@@ -5,6 +5,30 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.2.1] - 2026-02-23
+
+### Fixed - Transaction History Filters
+
+#### Dropdown Filter Implementation
+- **Fixed Tenant filter** - Dropdown now opens and displays all tenants for selection
+- **Fixed Building filter** - Dropdown now opens and displays all buildings for selection
+- **Fixed Owner filter** - Dropdown now opens and displays all owners for selection
+- **Added dropdown icons** - Proper trailing icons for dropdown state indication
+- **Added expansion state** - Each dropdown maintains its own expanded/collapsed state
+- **Functional selection** - Clicking an item properly selects it and closes the dropdown
+- **Clear functionality** - Clear button works to reset individual filter selections
+
+#### Technical Implementation
+- Added `expandedTenant`, `expandedBuilding`, `expandedOwner` state variables
+- Implemented `ExposedDropdownMenu` with proper item lists
+- Added `DropdownMenuItem` for each selectable option
+- Connected dropdown expansion state to `onExpandedChange` handlers
+- Added `ExposedDropdownMenuDefaults.TrailingIcon` for visual feedback
+
+### Updated
+- Version number: 5.2.0 → 5.2.1
+- Build number: 102 → 103
+
 ## [5.2.0] - 2026-02-23
 
 ### Added - Payment Receipts & Transaction History
