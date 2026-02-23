@@ -97,7 +97,11 @@ fun SettingsScreen(
                 }
             } else {
                 android.util.Log.w("SettingsScreen", "Sign-in result was null - check MainActivity logs for details")
-                Toast.makeText(context, "Sign-in failed. Check logs for details.", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context, 
+                    "Sign-in failed. Google Drive requires OAuth 2.0 setup in Google Cloud Console. See GOOGLE_DRIVE_SETUP.md for instructions.",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
         onDispose {
@@ -555,8 +559,8 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Version: 5.3.5")
-                    Text("Build: 109")
+                    Text("Version: 5.3.6")
+                    Text("Build: 110")
                     Text("Author: no28.iot@gmail.com")
                     Text("License: MIT")
                 }

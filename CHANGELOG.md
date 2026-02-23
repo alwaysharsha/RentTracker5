@@ -5,6 +5,39 @@ All notable changes to the Rent Tracker project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.6] - 2026-02-23
+
+### Added - Google Drive OAuth Setup Guide
+
+#### Setup Documentation
+- **Created GOOGLE_DRIVE_SETUP.md** - Complete guide for configuring OAuth 2.0
+- **Step-by-step instructions** - How to set up Google Cloud Console project
+- **SHA-1 fingerprint guide** - Commands for getting debug and release SHA-1
+- **Troubleshooting section** - Common issues and solutions
+- **Alternative options** - Local backup instructions if OAuth setup not desired
+
+#### Root Cause Identified
+Google Drive sign-in requires OAuth 2.0 Client ID configuration in Google Cloud Console:
+1. Create Google Cloud project
+2. Enable Google Drive API
+3. Configure OAuth consent screen
+4. Create Android OAuth client ID with SHA-1 fingerprint
+5. Link to app via package name and SHA-1
+
+#### Improved Error Message
+- Sign-in failure now mentions OAuth 2.0 requirement
+- Directs user to GOOGLE_DRIVE_SETUP.md for instructions
+- Clear indication that setup is needed
+
+#### Silent Sign-In Support
+- Added `trySilentSignIn()` method to GoogleDriveBackupManager
+- Attempts to sign in with existing account without user interaction
+- Falls back to interactive sign-in if needed
+
+### Updated
+- Version number: 5.3.5 → 5.3.6
+- Build number: 109 → 110
+
 ## [5.3.5] - 2026-02-23
 
 ### Improved - Enhanced Google Sign-In Debugging

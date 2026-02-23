@@ -46,6 +46,22 @@ class GoogleDriveBackupManager(private val context: Context) {
         return getSignInClient().signInIntent
     }
     
+    suspend fun trySilentSignIn(): GoogleSignInAccount? = withContext(Dispatchers.IO) {
+        try {
+            val client = getSignInClient()
+            val task = client.silentSignIn()
+            if (task.isSuccessful) {
+                task.result
+            } else {
+                // Task is not complete, would need user interaction
+                null
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("GoogleDriveBackupManager", "Silent sign-in failed", e)
+            null
+        }
+    }
+    
     fun initializeDriveService(account: GoogleSignInAccount) {
         val credential = GoogleAccountCredential.usingOAuth2(
             context,
